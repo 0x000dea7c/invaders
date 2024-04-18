@@ -1,0 +1,8 @@
+* DONE fix alien texture/quad size of atlas
+* DONE fix edge collision detection ship
+* DONE 30min fix black background of images
+* TODO 60min Load levels and render alien textures
+* TODO 30min Setup grid system
+* TODO 30min Setup background image that moves overtime, simulating movable background
+
+* !!! ONLY ONE TRANSLATION FILE !!!
