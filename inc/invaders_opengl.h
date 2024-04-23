@@ -33,6 +33,7 @@ extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 extern PFNGLBUFFERSUBDATAPROC glBufferSubData;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
+extern PFNGLUNIFORM1FPROC glUniform1f;
 
 inline void* getGLProcAddress(const char* name)
 {

@@ -23,6 +23,13 @@ namespace Game {
         glUniform1i(glGetUniformLocation(id, name), value);
     }
 
+    inline void set_uniform_float(const u32 id,
+                                  const char* name,
+                                  const f32 value)
+    {
+        glUniform1f(glGetUniformLocation(id, name), value);
+    }
+
     inline void use_program(const u32 id)
     {
         glUseProgram(id);

@@ -15,10 +15,9 @@
 
 // !!! One translation unit !!!
 #include "invaders_shaders.cpp"
+#include "invaders_world.cpp"
 #include "invaders.cpp"
 
-#define WINDOW_WIDTH 1536
-#define WINDOW_HEIGHT 1152
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
 
@@ -54,6 +53,7 @@ PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 PFNGLBUFFERSUBDATAPROC glBufferSubData;
 PFNGLDELETEPROGRAMPROC glDeleteProgram;
+PFNGLUNIFORM1FPROC glUniform1f;
 
 void Game::init_OpenGL_fptrs()
 {
@@ -87,11 +87,16 @@ void Game::init_OpenGL_fptrs()
     glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLProcAddress("glVertexAttribDivisor");
     glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLProcAddress("glBufferSubData");
     glDeleteProgram = (PFNGLDELETEPROGRAMPROC)getGLProcAddress("glDeleteProgram");
+    glUniform1f = (PFNGLUNIFORM1FPROC)getGLProcAddress("glUniform1f");
 }
 
 // definitions of invaders.h
 namespace Game {
-    Texture_Info load_texture(char const* filepath, const bool alpha, const bool flip)
+    Texture_Info load_texture(char const* filepath,
+                              const bool alpha,
+                              const bool flip,
+                              const i32 wrap_s,
+                              const i32 wrap_t)
     {
         if(flip) {
             stbi_set_flip_vertically_on_load(true);
@@ -105,7 +110,7 @@ namespace Game {
         }
 
         // don't assume dimensions are multiple of 4
-        // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         u32 id;
 
@@ -116,8 +121,8 @@ namespace Game {
 
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -284,8 +289,10 @@ int main()
     //
     Game::Invaders game;
 
-    game.sceneWidth = WINDOW_WIDTH;
-    game.sceneHeight = WINDOW_HEIGHT;
+    game.scene_width_m   = WINDOW_WIDTH / Game::Meters_per_pixel;
+    game.scene_height_m  = WINDOW_HEIGHT / Game::Meters_per_pixel;
+    game.scene_width_px  = WINDOW_WIDTH;
+    game.scene_height_px = WINDOW_HEIGHT;
 
     Game::init(game);
 

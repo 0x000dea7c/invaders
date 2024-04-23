@@ -1,8 +1,25 @@
 * DONE fix alien texture/quad size of atlas
 * DONE fix edge collision detection ship
 * DONE 30min fix black background of images
-* TODO 60min Load levels and render alien textures
-* TODO 30min Setup grid system
-* TODO 30min Setup background image that moves overtime, simulating movable background
-
-* !!! ONLY ONE TRANSLATION FILE !!!
+* DONE 60min Load levels and render alien textures
+* DONE Fix mess with meters per pixel
+* DONE 10min Fix sizes
+* DONE 30min Setup grid system
+* DONE 30min Setup background image that moves overtime, simulating movable background
+* TODO Spawn missiles
+* TODO Missiles collision detection with aliens
+* TODO Remove aliens when they get hit
+* TODO Only draw alive aliens
+* TODO Limit player movement to 1/4 of the screen
+* TODO Spawn enemy missiles
+* TODO Do collision detection between enemy missiles and player
+* TODO Menu system, states, shader, half quad with bg
+* TODO Audio, missile hits, bg music, die music, win round and win game
+* TODO Level win condition, game win condition, reset level and game
+* TODO Decrease size of entities
+* TODO Bottom left, lives, bottom right, current level
+* TODO Power-ups?
+* TODO Points?
+* TODO Code cleanup
+* TODO Profile (REALLY!)
+* TODO Code it on windows, too, to prove the portability point
