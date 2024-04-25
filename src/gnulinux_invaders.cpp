@@ -16,6 +16,7 @@
 // !!! One translation unit !!!
 #include "invaders_shaders.cpp"
 #include "invaders_world.cpp"
+#include "invaders_physics.cpp"
 #include "invaders.cpp"
 
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091

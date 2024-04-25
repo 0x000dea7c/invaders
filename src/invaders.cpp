@@ -1,6 +1,7 @@
 #include "invaders.h"
 #include "invaders_types.h"
 #include "invaders_math.h"
+#include "invaders_physics.h"
 
 #include <array>
 #include <vector>
@@ -490,7 +491,16 @@ namespace Game {
     static void update_aliens(Aliens& aliens, const f32 dt)
     {
         for(u32 i{ 0 }; i < aliens.data.size(); ++i) {
-            // aliens.data[i].pos.x += std::sin(time()) * dt;
+            if(aliens.data[i].destroyed) {
+                std::swap(aliens.data[i], aliens.data.back());
+                std::swap(aliens.instance_data[i], aliens.instance_data.back());
+                aliens.data.pop_back();
+                aliens.instance_data.pop_back();
+                --i;
+                continue;
+            }
+
+            // aliens.data[i].pos.x += (std::sin(time()) * 8.f) * dt;
 
             // transforms
             aliens.instance_data[i].model = identity();
@@ -530,8 +540,8 @@ namespace Game {
         static const auto missile_texture = texture_manager.data.at("missile");
         static const auto missile_width   = missile_texture.width;
         static const auto missile_height  = missile_texture.height;
-        static const auto missile_size_x  = missile_width / Meters_per_pixel;
-        static const auto missile_size_y  = missile_height / Meters_per_pixel;
+        static const auto missile_size_x  = missile_width * 0.3f / Meters_per_pixel;
+        static const auto missile_size_y  = missile_height * 0.3f / Meters_per_pixel;
 
         // spawn a pair
         v2 left = v2{ .x = p.pos.x + 0.1f,
@@ -543,7 +553,7 @@ namespace Game {
         m.data.emplace_back(Missile
                             {
                                 .pos = v3{ left.x , left.y, 0.f },
-                                .size = v2{ missile_size_x * 0.3f, missile_size_y * 0.3f },
+                                .size = v2{ missile_size_x, missile_size_y },
                                 .width = missile_width,
                                 .height = missile_height,
                             });
@@ -551,7 +561,7 @@ namespace Game {
         m.data.emplace_back(Missile
                             {
                                 .pos = v3{ right.x , right.y, 0.f },
-                                .size = v2{ missile_size_x * 0.3f, missile_size_y * 0.3f },
+                                .size = v2{ missile_size_x, missile_size_y },
                                 .width = missile_width,
                                 .height = missile_height,
                             });
@@ -563,18 +573,48 @@ namespace Game {
 
     static void update_missiles(Invaders& g, const f32 dt)
     {
-        if(g.player.shooting && g.player.shooting_cd <= 0.f) {
+        if(g.player.shooting && g.player.shooting_cd <= 0) {
             spawn_missiles(g.missiles, g.player);
-            g.player.shooting_cd = 20.f;
+            g.player.shooting_cd = 20;
         }
 
         --g.player.shooting_cd;
 
+        std::set<Entity_Grid_Data, Entity_Grid_Data_Comp> nearby;
         for(u32 i = 0; i < g.missiles.data.size(); ++i) {
-            g.missiles.data[i].pos.y += 5.f * dt;
+            g.missiles.data[i].pos.y += 15.f * dt;
 
-            if(g.missiles.data[i].pos.y > g.scene_height_m /* TODO || collided() */ ) {
+            if(g.missiles.data[i].pos.y >= g.scene_height_m) {
                 g.missiles.data[i].destroyed = true;
+            }
+
+            if(!g.missiles.data[i].destroyed) {
+                const v2 missile_pos_px{
+                    .x = g.missiles.data[i].pos.x * Meters_per_pixel,
+                    .y = g.missiles.data[i].pos.y * Meters_per_pixel,
+                };
+
+                get_nearby_alive_aliens(g.grid, missile_pos_px, nearby);
+
+                for(const auto& e : nearby) {
+                    Alien* a = (Alien*)e.data;
+
+                    const auto missile_AABB = AABB{
+                        .min = v2{ g.missiles.data[i].pos.x - g.missiles.data[i].size.x, g.missiles.data[i].pos.y - g.missiles.data[i].size.y },
+                        .max = v2{ g.missiles.data[i].pos.x + g.missiles.data[i].size.x, g.missiles.data[i].pos.y + g.missiles.data[i].size.y }
+                    };
+
+                    const auto alien_AABB = AABB{
+                        .min = v2{ a->pos.x - a->size.x, a->pos.y - a->size.y },
+                        .max = v2{ a->pos.x + a->size.x, a->pos.y + a->size.y }
+                    };
+
+                    if(aabb_aabb_test(missile_AABB, alien_AABB)) {
+                        g.missiles.data[i].destroyed = true;
+                        a->destroyed = true;
+                        // TODO: apply explosion, maybe with a global variable
+                    }
+                }
             }
 
             if(g.missiles.data[i].destroyed) {
@@ -616,24 +656,12 @@ namespace Game {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Instance_Data) * g.missiles.instance_data.size(), g.missiles.instance_data.data());
     }
 
-    static void do_collisions(Invaders& g)
-    {
-        v2 px{ g.player.pos.x * Meters_per_pixel,
-               g.player.pos.y * Meters_per_pixel };
-
-        // detect collisions only with missiles -> aliens
-        // std::set<Entity_Grid_Data, Entity_Grid_Data_Comp> ents;
-        // get_nearby(g.grid, px, &g.player, ents);
-    }
-
     void update(Invaders& g, const f32 dt)
     {
         update_player(g, dt);
-        update_aliens(g.aliens, dt);
-        update_grid(g.grid, g.player, g.aliens);
         update_missiles(g, dt);
-
-        // do_collisions(g);
+        update_aliens(g.aliens, dt);
+        update_grid(g.grid, g.aliens);
     }
 
     void render(Invaders& g, const f32 dt)

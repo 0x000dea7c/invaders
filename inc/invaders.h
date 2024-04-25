@@ -74,6 +74,7 @@ namespace Game {
         f32 height{ 0.f };
         i32 idx_x{ 0 };
         i32 idx_y{ 0 };
+        bool destroyed{ false };
     };
 
     struct Aliens final {
@@ -95,7 +96,7 @@ namespace Game {
         v3 vel{ 0.f, 0.f, 0.f };
         v2 size{ 0.f, 0.f };
         u32 row{ 0 }, col{ 0 }, end_row{ 0 }, end_col{ 0 };
-        f32 shooting_cd{ 0.f };
+        i32 shooting_cd{ 0 };
         bool shooting{ false };
     };
 

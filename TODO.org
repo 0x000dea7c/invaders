@@ -6,7 +6,7 @@
 * DONE 10min Fix sizes
 * DONE 30min Setup grid system
 * DONE 30min Setup background image that moves overtime, simulating movable background
-* TODO Spawn missiles
+* DONE Spawn missiles
 * TODO Missiles collision detection with aliens
 * TODO Remove aliens when they get hit
 * TODO Only draw alive aliens
