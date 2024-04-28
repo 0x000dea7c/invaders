@@ -670,7 +670,6 @@ namespace Game {
       g.is_running = false;
       return;
     }
-
     if(g.state == Game_State::PLAYING) {
       g.player.ms = Movement_Spec{};
       if(g.keys[Game::KEY_W] || g.keys[Game::KEY_UP]) {
@@ -693,7 +692,7 @@ namespace Game {
       } else {
         g.player.shooting = false;
       }
-      if(g.keys[Game::KEY_ESCAPE]) {
+      if(g.keys[Game::KEY_ESCAPE] && !g.prev_keys[Game::KEY_ESCAPE]) {
         g.state = Game_State::MENU;
       }
     } else if(g.state == Game_State::PAUSED) {
@@ -701,9 +700,12 @@ namespace Game {
         g.state = Game_State::PLAYING;
       }
     } else if(g.state == Game_State::MENU) {
-      if(g.keys[Game::KEY_ESCAPE]) {
+      if(g.keys[Game::KEY_ESCAPE] && !g.prev_keys[Game::KEY_ESCAPE]) {
         g.state = Game_State::PLAYING;
       }
+    }
+    for (auto& key : g.keys) {
+      g.prev_keys[key.first] = key.second;
     }
   }
 
@@ -1250,7 +1252,9 @@ namespace Game {
       use_program(text_renderer_shader.id);
       glBindVertexArray(text_renderer_shader.VAO);
       set_uniform_vec4(text_renderer_shader.id, "textColour", v4{ 1.f, 1.f, 1.f, 1.f });
-      render_text(g.text_renderer, "LAIN", 640.f, 480.f, 1.f, text_renderer_shader.VBO);
+      render_text(g.text_renderer, "PLAY",  600.f, 550.f, 1.f, text_renderer_shader.VBO);
+      render_text(g.text_renderer, "SOUND", 600.f, 500.f, 1.f, text_renderer_shader.VBO);
+      render_text(g.text_renderer, "EXIT",  600.f, 450.f, 1.f, text_renderer_shader.VBO);
     }
   }
 };

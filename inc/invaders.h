@@ -160,6 +160,7 @@ namespace Game {
     Grid grid;
     Text_Renderer text_renderer;
     std::unordered_map<Key, bool> keys;
+    std::unordered_map<Key, bool> prev_keys;
     u32 current_level{ 0 };
     u32 max_levels{ 4 };
     f32 scene_width_px{ 0.f };

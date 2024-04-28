@@ -288,12 +288,10 @@ int main()
     // game stuff starts here
     //
     Game::Invaders game;
-
     game.scene_width_m   = WINDOW_WIDTH / Game::Meters_per_pixel;
     game.scene_height_m  = WINDOW_HEIGHT / Game::Meters_per_pixel;
     game.scene_width_px  = WINDOW_WIDTH;
     game.scene_height_px = WINDOW_HEIGHT;
-
     Game::init(game);
 
     f32 last_frame{ 0.f };
@@ -301,12 +299,9 @@ int main()
         f32 current_frame{ Game::time() };
         f32 dt{ current_frame - last_frame };
         last_frame = current_frame;
-
         glViewport(0, 0, gwa.width, gwa.height);
-
         while(XPending(display)) {
             XNextEvent(display, &xev);
-
             if(xev.type == KeyPress || xev.type == KeyRelease) {
                 const bool is_pressed{ xev.type == KeyPress };
                 const KeySym x_key{ XLookupKeysym(&xev.xkey, 0) };
@@ -314,13 +309,10 @@ int main()
                 game.keys[key] = is_pressed;
             }
         }
-
         Game::process_input(game);
         Game::update(game, dt);
         Game::render(game);
-
         XGetWindowAttributes(display, window, &gwa);
-
         glXSwapBuffers(display, window);
     }
 
