@@ -7,19 +7,24 @@
 * DONE 30min Setup grid system
 * DONE 30min Setup background image that moves overtime, simulating movable background
 * DONE Spawn missiles
-* TODO Missiles collision detection with aliens
-* TODO Remove aliens when they get hit
-* TODO Only draw alive aliens
-* TODO Limit player movement to 1/4 of the screen
-* TODO Spawn enemy missiles
-* TODO Do collision detection between enemy missiles and player
+* DONE Missiles collision detection with aliens
+* DONE Remove aliens when they get hit
+* DONE Only draw alive aliens
+* DONE Limit player movement to 1/4 of the screen
+* DONE Explosion shader
+* DONE 60 min Spawn enemy missiles
+* DONE Do collision detection between enemy missiles and player
+* DONE Level win condition, game win condition, reset level and game
+* DONE Make each alien "unique", low cd's for some.
+* DONE Bottom left, lives
 * TODO Menu system, states, shader, half quad with bg
 * TODO Audio, missile hits, bg music, die music, win round and win game
-* TODO Level win condition, game win condition, reset level and game
-* TODO Decrease size of entities
-* TODO Bottom left, lives, bottom right, current level
+* DONE Decrease size of entities
 * TODO Power-ups?
 * TODO Points?
 * TODO Code cleanup
 * TODO Profile (REALLY!)
 * TODO Code it on windows, too, to prove the portability point
+* TODO Get rid of meters_per_pixel? DOn't know how they're being useful
+* TODO Change window to no resizable
+* TODO Improve all visuals!!!!!!!!!!!!!!!!!

@@ -12,6 +12,5 @@ namespace Game {
         v2 dir;
     };
 
-    // bool ray_aabb_test(const Ray a, const AABB b);
-    bool aabb_aabb_test(const AABB& a, const AABB& b);
+    bool aabb_aabb_test(const AABB a, const AABB b, const v2 vel, const i32 steps);
 };

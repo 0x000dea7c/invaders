@@ -3,6 +3,8 @@
 #include "invaders_types.h"
 
 #include <initializer_list>
+#include <algorithm>
+#include <math.h>
 
 namespace Game {
 

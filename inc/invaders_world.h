@@ -1,9 +1,16 @@
 #pragma once
 
+#include "invaders_types.h"
+#include "invaders_math.h"
+
 #include <unordered_map>
 #include <set>
 
 namespace Game {
+
+    struct Invaders;
+    struct Aliens;
+    struct Player;
 
     enum class Entity_Type { ALIEN, PLAYER };
 
@@ -29,4 +36,8 @@ namespace Game {
         std::unordered_map<i32, std::set<Entity_Grid_Data, Entity_Grid_Data_Comp>> buckets;
     };
 
+    void load_levels(Invaders& g);
+    void init_grid(Grid& gr, const i32 scene_width, const i32 scene_height);
+    void get_nearby_ent_type(Grid& gr, const v2 pos, Entity_Type type, std::set<Entity_Grid_Data, Entity_Grid_Data_Comp>& out);
+    void update_grid(Grid& gr, const Aliens& a, const Player& p);
 };

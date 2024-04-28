@@ -1,5 +1,10 @@
 #include "invaders_shaders.h"
 
+#include <array>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 namespace Game {
 
     static bool
@@ -13,8 +18,10 @@ namespace Game {
         switch(type) {
         case ShaderType::VERTEX:
             shader = "VERTEX";
+            // fall through
         case ShaderType::FRAGMENT:
             shader = "FRAGMENT";
+            // fall through
         case ShaderType::GEOMETRY:
             shader = "GEOMETRY";
             glGetShaderiv(object, GL_COMPILE_STATUS, &success);

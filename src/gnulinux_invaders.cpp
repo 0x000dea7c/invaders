@@ -1,10 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <array>
-#include <fstream>
-#include <sstream>
-#include <chrono>
-#include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -17,6 +12,7 @@
 #include "invaders_shaders.cpp"
 #include "invaders_world.cpp"
 #include "invaders_physics.cpp"
+#include "invaders_text_renderer.cpp"
 #include "invaders.cpp"
 
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
@@ -55,6 +51,7 @@ PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 PFNGLBUFFERSUBDATAPROC glBufferSubData;
 PFNGLDELETEPROGRAMPROC glDeleteProgram;
 PFNGLUNIFORM1FPROC glUniform1f;
+PFNGLUNIFORM4FPROC glUniform4f;
 
 void Game::init_OpenGL_fptrs()
 {
@@ -89,6 +86,7 @@ void Game::init_OpenGL_fptrs()
     glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLProcAddress("glBufferSubData");
     glDeleteProgram = (PFNGLDELETEPROGRAMPROC)getGLProcAddress("glDeleteProgram");
     glUniform1f = (PFNGLUNIFORM1FPROC)getGLProcAddress("glUniform1f");
+    glUniform4f = (PFNGLUNIFORM4FPROC)getGLProcAddress("glUniform4f");
 }
 
 // definitions of invaders.h
@@ -161,6 +159,7 @@ map_x11_key_to_game(const KeySym& key)
     case XK_Down: return Game::KEY_DOWN;
     case XK_w: return Game::KEY_W;
     case XK_s: return Game::KEY_S;
+    case XK_p: return Game::KEY_P;
     default: return Game::KEY_UNHANDLED;
     }
 }
@@ -318,7 +317,7 @@ int main()
 
         Game::process_input(game);
         Game::update(game, dt);
-        Game::render(game, dt);
+        Game::render(game);
 
         XGetWindowAttributes(display, window, &gwa);
 
