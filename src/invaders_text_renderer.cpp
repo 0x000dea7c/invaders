@@ -1,6 +1,7 @@
 #include "invaders_text_renderer.h"
 #include "invaders_math.h"
 #include "invaders_types.h"
+#include "invaders_shaders.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -68,7 +69,8 @@ bool init_text_renderer(Text_Renderer &t, char const *fontpath,
 }
 
 void render_text(Text_Renderer &t, const std::string &text, f32 x, const f32 y,
-                 const f32 scale, const u32 VBO) {
+                 const f32 scale, const u32 VBO, const u32 id, const v4 colour) {
+  set_uniform_vec4(id, "textColour", colour);
   for (auto c = text.cbegin(); c != text.cend(); ++c) {
     const auto ch = t.characters.at(*c);
 

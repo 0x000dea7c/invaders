@@ -8,7 +8,7 @@
 # things differently
 #
 all:
-	find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' -type f | xargs etags && g++ -ggdb -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -o invaders
+	g++ -ggdb -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -lpulse-simple -o invaders
 
 clean:
 	rm invaders

@@ -20,6 +20,6 @@ namespace Game {
   };
 
   bool init_text_renderer(Text_Renderer& t, char const* fontpath, const u32 fontsize);
-  void render_text(Text_Renderer& t, const std::string& text, f32 x, const f32 y, const f32 scale, const u32 VBO);
+  void render_text(Text_Renderer& t, const std::string& text, f32 x, const f32 y, const f32 scale, const u32 VBO, const u32 id, const v4 colour);
 
 };

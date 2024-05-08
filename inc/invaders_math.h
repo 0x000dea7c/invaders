@@ -1,36 +1,34 @@
 #pragma once
 
-#include "invaders_types.h"
-
 #include <initializer_list>
 #include <algorithm>
 #include <math.h>
 
-namespace Game {
+namespace Math {
 
     struct v2 final {
-        f32 x{0.f};
-        f32 y{0.f};
+        float x{0.f};
+        float y{0.f};
     };
 
     struct v3 final {
-        f32 x{ 0.f };
-        f32 y{ 0.f };
-        f32 z{ 0.f };
+        float x{ 0.f };
+        float y{ 0.f };
+        float z{ 0.f };
     };
 
     struct v4 final {
-        f32 x{ 0.f };
-        f32 y{ 0.f };
-        f32 z{ 0.f };
-        f32 w{ 0.f };
+        float x{ 0.f };
+        float y{ 0.f };
+        float z{ 0.f };
+        float w{ 0.f };
     };
 
     // column major mode accessing
     struct m4 final {
-        f32 elements[16];
+        float elements[16];
 
-        m4(std::initializer_list<f32> a)
+        m4(std::initializer_list<float> a)
         {
             std::copy(a.begin(), a.end(), elements);
         }
@@ -45,12 +43,12 @@ namespace Game {
             std::copy(a.elements, a.elements + 16, elements);
         }
 
-        f32& operator()(i32 row, i32 col)
+        float& operator()(int row, int col)
         {
             return elements[col * 4 + row];
         }
 
-        const f32& operator()(i32 row, i32 col) const
+        const float& operator()(int row, int col) const
         {
             return elements[col * 4 + row];
         }
@@ -83,12 +81,12 @@ namespace Game {
     //              if the plane is behind the viewer
     //
     struct Orthographic_args {
-        f32 left;
-        f32 right;
-        f32 bottom;
-        f32 top;
-        f32 zNear;
-        f32 zFar;
+        float left;
+        float right;
+        float bottom;
+        float top;
+        float zNear;
+        float zFar;
     };
 
     inline m4 orthographic(const Orthographic_args a)
@@ -145,7 +143,7 @@ namespace Game {
 
         v2 res{ .x = v.x, .y = v.y };
 
-        const f32 sq{ sqrtf(res.x * res.x + res.y * res.y) };
+        const float sq{ sqrtf(res.x * res.x + res.y * res.y) };
 
         res.x = res.x / sq;
         res.y = res.y / sq;
@@ -161,7 +159,7 @@ namespace Game {
 
         v3 res{ .x = v.x, .y = v.y, .z = v.z };
 
-        const f32 sq{ sqrtf(res.x * res.x + res.y * res.y + res.z * res.z) };
+        const float sq{ sqrtf(res.x * res.x + res.y * res.y + res.z * res.z) };
 
         res.x = res.x / sq;
         res.y = res.y / sq;
@@ -170,7 +168,7 @@ namespace Game {
         return res;
     }
 
-    inline v2 scale(const v2& v, const f32 n)
+    inline v2 scale(const v2& v, const float n)
     {
         v2 res {.x = v.x, .y = v.y };
 
@@ -180,7 +178,7 @@ namespace Game {
         return res;
     }
 
-    inline v3 scale(const v3& v, const f32 n)
+    inline v3 scale(const v3& v, const float n)
     {
         v3 res { .x = v.x, .y = v.y, .z = v.z };
 
@@ -212,7 +210,19 @@ namespace Game {
         return res;
     }
 
-    inline f32 square(const f32 v)
+    // assume vB's Z is 0
+    inline v3 add(const v3& vA, const v2& vB)
+    {
+        v3 res;
+
+        res.x = vA.x + vB.x;
+        res.y = vA.y + vB.y;
+        res.z = vA.z;
+
+        return res;
+    }
+
+    inline float square(const float v)
     {
         return v * v;
     }

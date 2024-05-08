@@ -17,14 +17,18 @@
 * DONE Level win condition, game win condition, reset level and game
 * DONE Make each alien "unique", low cd's for some.
 * DONE Bottom left, lives
-* TODO Menu system, states, shader, half quad with bg
-* TODO Audio, missile hits, bg music, die music, win round and win game
+* DONE Game states and simple menu text rendering
 * DONE Decrease size of entities
+* DONE Menu option selection, highlight, smooth edges
+* DONE Make window no resizable
+* TODO Audio, missile hits, bg music, die music, win round and win game
 * TODO Power-ups?
 * TODO Points?
-* TODO Code cleanup
-* TODO Profile (REALLY!)
+* TODO Code cleanup, to do this, first you need to read a bit more about game architecture
+* TODO Profile (REALLY!), main problem is the grid
 * TODO Code it on windows, too, to prove the portability point
-* TODO Get rid of meters_per_pixel? DOn't know how they're being useful
+* TODO Get rid of meters_per_pixel? Don't know how they're being useful
 * TODO Change window to no resizable
 * TODO Improve all visuals!!!!!!!!!!!!!!!!!
+* TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points
+* TODO When finished, add frame rate governing to avoid problems if there's (an unlikely) frame rate drop.
