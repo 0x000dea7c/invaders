@@ -36,7 +36,7 @@ namespace Renderer {
   // renders all given data, no ifs, no updates, just render. This class is omoiiiiiiiiiiiiii
   class RendererManager final {
   public:
-    RendererManager(const Res::ResourceManager& resourceManager);
+    RendererManager(Res::ResourceManager& resourceManager);
     ~RendererManager();
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
@@ -56,7 +56,7 @@ namespace Renderer {
     Res::Texture2D* m_missilePlayerTex;
     Res::Shader* m_missileAlienShader;
     Res::Texture2D* m_missileAlienTex;
-    const Res::ResourceManager& m_resourceManager;
+    Res::ResourceManager& m_resourceManager;
   };
 
 };

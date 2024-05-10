@@ -209,6 +209,7 @@ namespace Res {
     // -----------------------------------------------
     // TODO fonts
     // -----------------------------------------------
+    m_uniforms.reserve(8);
   }
 
   ResourceManager::~ResourceManager()

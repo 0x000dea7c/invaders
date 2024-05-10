@@ -6,7 +6,7 @@
 namespace Renderer {
   using namespace Math;
 
-  RendererManager::RendererManager(const Res::ResourceManager& resourceManager)
+  RendererManager::RendererManager(Res::ResourceManager& resourceManager)
     : m_resourceManager{ resourceManager }
   {
     m_backgroundShader    = m_resourceManager.getShader(IDs::SID_SHADER_MAIN_BACKGROUND);
