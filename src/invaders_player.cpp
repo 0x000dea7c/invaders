@@ -1,22 +1,43 @@
 #include "invaders_player.h"
 #include "common.h"
 #include "invaders_math.h"
-#include "invaders_missile.h"
-#include "invaders_resources.h"
 #include "invaders_opengl.h"
-#include "invaders_input.h"
-
-extern Res::ResourceManager gResourceManager;
-extern Input::InputManager gInputManager;
-extern Game::MissileManager gMissileManager;
 
 namespace Game {
   using namespace Math;
   using namespace Renderer;
+  using namespace Input;
+  using namespace Res;
+  using namespace Ev;
 
-  PlayerManager::PlayerManager()
+  PlayerManager::PlayerManager(const ResourceManager& resourceManager,
+                               const InputManager& inputManager,
+                               MissileManager& missileManager,
+                               GridManager& gridManager,
+                               EventManager& eventManager)
+    : m_player{ Player{} },
+      m_resourceManager{ resourceManager },
+      m_inputManager{ inputManager },
+      m_missileManager{ missileManager },
+      m_gridManager{ gridManager },
+      m_eventManager{ eventManager }
   {
-
+    // init player position and other settings
+    m_player.m_pos = v3{ 0.0f, 0.0f, 0.0f };
+    m_player.m_vel = v2{ 0.0f, 0.0f };
+    const auto* playerTex = m_resourceManager.getTex(IDs::SID_TEX_PLAYER);
+    m_player.m_size = v2{ static_cast<float>(playerTex->m_width)  * 0.4f,
+                          static_cast<float>(playerTex->m_height) * 0.4f };
+    m_player.m_shootcd = 30;
+    m_player.m_currcd = 0;
+    m_player.m_currlives = MAX_PLAYER_LIVES;
+    m_player.m_shooting = false;
+    m_player.m_destroyed = false;
+    m_playerLivesInstanceData.reserve(MAX_PLAYER_LIVES);
+    m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event&){
+      destroyPlayer();
+    });
+    updatePlayerLivesInstanceData();
   }
 
   PlayerManager::~PlayerManager()
@@ -24,43 +45,19 @@ namespace Game {
 
   }
 
-  void PlayerManager::init()
-  {
-    // init player movement parameters
-    m_player.m_ms.m_dir = v2{ 0.0f, 0.0f };
-    m_player.m_ms.m_dirScale = 80.0f;
-    m_player.m_ms.m_drag = 8.0f;
-    m_player.m_ms.m_unit = true;
-    // init player position and other settings
-    m_player.m_pos = v3{ 0.0f, 0.0f, 0.0f };
-    m_player.m_vel = v2{ 0.0f, 0.0f };
-    const auto* playerTex = gResourceManager.getTex(IDs::SID_TEX_PLAYER);
-    m_player.m_size = v2{ static_cast<float>(playerTex->m_width), static_cast<float>(playerTex->m_height) };
-    m_player.m_shootcd = 50;
-    m_player.m_currcd = 0;
-    m_player.m_currlives = MAX_PLAYER_LIVES;
-    m_player.m_shooting = false;
-    m_player.m_destroyed = false;
-    m_playerLivesInstanceData.reserve(MAX_PLAYER_LIVES);
-  }
-
-  void PlayerManager::close()
-  {
-
-  }
-
   void PlayerManager::update(const float delta, const int rightLimit, const int topLimit)
   {
+    handleInput();
     if(m_player.m_shooting && m_player.m_currcd > m_player.m_shootcd) {
-      gMissileManager.spawnPlayerMissiles(m_player.m_pos, m_player.m_size);
+      m_missileManager.spawnPlayerMissiles(m_player.m_pos, m_player.m_size);
       m_player.m_currcd = 0;
     } else {
       ++m_player.m_currcd;
     }
     if(m_player.m_destroyed) {
       // reset player's on the screen
-      m_player.m_pos.x = 0.f;
-      m_player.m_pos.y = 0.f;
+      m_player.m_pos.x = 0.0f;
+      m_player.m_pos.y = 0.0f;
       m_player.m_destroyed = false;
       --m_player.m_currlives;
       updatePlayerLivesInstanceData();
@@ -115,7 +112,10 @@ namespace Game {
         .y = m_player.m_pos.y,
         .z = m_player.m_pos.z
       });
+      glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER)->m_VBO);
+      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);
     }
+    m_gridManager.update(m_player.m_pos, &m_player, EntityType::PLAYER);
   }
 
   void PlayerManager::updatePlayerLivesInstanceData()
@@ -137,32 +137,41 @@ namespace Game {
         }}
       });
     }
-    glBindBuffer(GL_ARRAY_BUFFER, gResourceManager.getShader(IDs::SID_SHADER_PLAYER_LIVES)->m_VBO);
-    glBufferSubData(GL_ARRAY_BUFFER,
-                    0,
-                    sizeof(InstanceData) * m_playerLivesInstanceData.size(),
-                    m_playerLivesInstanceData.data());
+    glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER_LIVES)->m_VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData) * m_playerLivesInstanceData.size(), m_playerLivesInstanceData.data());
   }
 
   void PlayerManager::handleInput()
   {
-    m_player.m_ms = MovSpec{};
-    if(gInputManager.isKeyPressed(Input::Key::KEY_A) || gInputManager.isKeyPressed(Input::Key::KEY_LEFT)) {
+    // init player movement parameters
+    m_player.m_ms = MovSpec{
+      .m_dir      = v2{ 0.0f, 0.0f },
+      .m_dirScale = 10000.0f,
+      .m_drag     = 1.5f,
+      .m_unit     = true
+    };
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_A) || m_inputManager.isKeyHeld(Input::Key::KEY_LEFT)) {
       m_player.m_ms.m_dir.x = -1.0f;
     }
-    if(gInputManager.isKeyPressed(Input::Key::KEY_D) || gInputManager.isKeyPressed(Input::Key::KEY_RIGHT)) {
-      m_player.m_ms.m_dir.x = 1.0f;
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_D) || m_inputManager.isKeyHeld(Input::Key::KEY_RIGHT)) {
+      m_player.m_ms.m_dir.x =  1.0f;
     }
-    if(gInputManager.isKeyPressed(Input::Key::KEY_W) || gInputManager.isKeyPressed(Input::Key::KEY_UP)) {
-      m_player.m_ms.m_dir.y = 1.0f;
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_W) || m_inputManager.isKeyHeld(Input::Key::KEY_UP)) {
+      m_player.m_ms.m_dir.y =  1.0f;
     }
-    if(gInputManager.isKeyPressed(Input::Key::KEY_S) || gInputManager.isKeyPressed(Input::Key::KEY_DOWN)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_S) || m_inputManager.isKeyHeld(Input::Key::KEY_DOWN)) {
       m_player.m_ms.m_dir.y = -1.0f;
     }
-    if(gInputManager.isKeyPressed(Input::Key::KEY_SPACE)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_SPACE)) {
       m_player.m_shooting = true;
     } else {
-      m_player.m_shooting = true;
+      m_player.m_shooting = false;
     }
   }
+
+  void PlayerManager::destroyPlayer()
+  {
+    m_player.m_destroyed = true;
+  }
+
 };

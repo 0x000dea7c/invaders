@@ -2,12 +2,14 @@
 
 #include "invaders_math.h"
 #include "invaders_renderer.h"
+#include "invaders_resources.h"
 
 #include <vector>
 
 namespace Game {
 
-  struct Explosion final {
+  class Explosion final {
+  public:
     Math::v3 m_pos;
     Math::v2 m_size;
     float m_life;
@@ -15,16 +17,15 @@ namespace Game {
 
   class ExplosionManager final {
   public:
-    ExplosionManager();
+    ExplosionManager(const Res::ResourceManager& resourceManager);
     ~ExplosionManager();
-    void init();
-    void close();
     void update(const float delta);
-    void spawnExplosion(const Math::v3 refPos);
+    void spawnExplosion(const Math::v3& refPos);
     inline auto numActiveExplosions() const { return m_explosions.size(); }
   private:
     std::vector<Explosion> m_explosions;
     std::vector<Renderer::ExplosionInstanceData> m_explosionsInstanceData;
+    const Res::ResourceManager& m_resourceManager;
     int m_explosionWidth;
   };
 

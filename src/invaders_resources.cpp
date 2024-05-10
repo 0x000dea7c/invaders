@@ -1,8 +1,7 @@
 #include "invaders_resources.h"
 #include "common.h"
-#include "invaders.h"
-#include "invaders_opengl.h"
 #include "invaders_math.h"
+#include "invaders.h"
 // NOTE: HEADS UP! need to include renderer to use InstanceData classes, 99.9% it's wrong
 #include "invaders_renderer.h"
 
@@ -14,6 +13,7 @@
 #define TEX_FILE_MISSILE_PLAYER  "./res/textures/missile_player.png"
 #define TEX_FILE_MISSILE_ALIEN   "./res/textures/missile_alien.png"
 #define TEX_FILE_EXPLOSION       "./res/textures/explosion.png"
+#define TEX_FILE_PLAYER_LIVES    "./res/textures/heart.png"
 // shaders
 #define VERT_SHADER_FILE_MAIN_BACKGROUND "./res/shaders/bg.vert"
 #define FRAG_SHADER_FILE_MAIN_BACKGROUND "./res/shaders/bg.frag"
@@ -21,8 +21,8 @@
 #define FRAG_SHADER_FILE_ALIEN           "./res/shaders/aliens.frag"
 #define VERT_SHADER_FILE_PLAYER_LIVES    "./res/shaders/playerLives.vert"
 #define FRAG_SHADER_FILE_PLAYER_LIVES    "./res/shaders/playerLives.frag"
-#define VERT_SHADER_FILE_PLAYER          "./res/shaders/shader.vert"
-#define FRAG_SHADER_FILE_PLAYER          "./res/shaders/shader.frag"
+#define VERT_SHADER_FILE_PLAYER          "./res/shaders/player.vert"
+#define FRAG_SHADER_FILE_PLAYER          "./res/shaders/player.frag"
 #define VERT_SHADER_FILE_EXPLOSION       "./res/shaders/explosion.vert"
 #define FRAG_SHADER_FILE_EXPLOSION       "./res/shaders/explosion.frag"
 #define VERT_SHADER_FILE_MISSILE_PLAYER  "./res/shaders/missiles.vert"
@@ -37,108 +37,115 @@
 #include <array>
 #include <string>
 
+namespace IDs {
+  // texture ids
+  int SID_TEX_PLAYER;
+  int SID_TEX_ALIEN_ATLAS;
+  int SID_TEX_MAIN_BACKGROUND;
+  int SID_TEX_MISSILE_PLAYER;
+  int SID_TEX_MISSILE_ALIEN;
+  int SID_TEX_EXPLOSION;
+  int SID_TEX_PLAYER_LIVES;
+  // shader ids
+  int SID_SHADER_MAIN_BACKGROUND;
+  int SID_SHADER_ALIEN;
+  int SID_SHADER_PLAYER_LIVES;
+  int SID_SHADER_PLAYER;
+  int SID_SHADER_EXPLOSION;
+  int SID_SHADER_MISSILE_PLAYER;
+  int SID_SHADER_MISSILE_ALIEN;
+};
+
 namespace Res {
   using namespace Game;
   using namespace Math;
   using namespace Renderer;
 
-  Texture2D::Texture2D(const int w, const int h, const int id)
-    : m_width(w), m_height(h), m_id(id)
+  Texture2D::Texture2D(const int w, const int h, const unsigned int id)
+    : m_width{ w }, m_height{ h }, m_id{ id }
   {
 
-  }
-
-  Texture2D::~Texture2D()
-  {
-    glDeleteTextures(1, &m_id);
   }
 
   Shader::Shader(unsigned int id, unsigned int VAO, unsigned int VBO)
-    : m_id(id), m_VAO(VAO), m_VBO(VBO)
-  {
-
-  }
-
-  Shader::~Shader()
-  {
-    glDeleteProgram(m_id);
-  }
+    : m_id{ id }, m_VAO{ VAO }, m_VBO{ VBO }
+  {}
 
   ResourceManager::ResourceManager()
-  {
-
-  }
-
-  ResourceManager::~ResourceManager()
-  {
-
-  }
-
-  void ResourceManager::init()
   {
     // -----------------------------------------------
     // textures
     // -----------------------------------------------
-    // this is all manual, perhaps not the best idea
+    // this is all manual, not the best idea
     // player
-    TexInfo t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_PLAYER,
-      .alpha    = true,
-      .flip     = false,
-      .wrapS    = GL_CLAMP_TO_EDGE,
-      .wrapT    = GL_CLAMP_TO_EDGE
+    auto t = loadTexFromFile(LoadTexFromFileArgs{
+      .m_filepath = TEX_FILE_PLAYER,
+      .m_alpha    = true,
+      .m_flip     = false,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
     });
     IDs::SID_TEX_PLAYER = fnv1a(TEX_FILE_PLAYER);
-    m_textures[IDs::SID_TEX_PLAYER] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_PLAYER] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // aliens (atlas)
     t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_ALIEN_ATLAS,
-      .alpha    = true,
-      .flip     = false,
-      .wrapS    = GL_CLAMP_TO_EDGE,
-      .wrapT    = GL_CLAMP_TO_EDGE
+      .m_filepath = TEX_FILE_ALIEN_ATLAS,
+      .m_alpha    = true,
+      .m_flip     = false,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
     });
     IDs::SID_TEX_ALIEN_ATLAS = fnv1a(TEX_FILE_ALIEN_ATLAS);
-    m_textures[IDs::SID_TEX_ALIEN_ATLAS] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_ALIEN_ATLAS] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // background
     t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_MAIN_BACKGROUND,
-      .alpha    = false,
-      .flip     = false,
-      .wrapS    = GL_REPEAT,
-      .wrapT    = GL_REPEAT
+      .m_filepath = TEX_FILE_MAIN_BACKGROUND,
+      .m_alpha    = false,
+      .m_flip     = false,
+      .m_wrapS    = GL_REPEAT,
+      .m_wrapT    = GL_REPEAT
     });
     IDs::SID_TEX_MAIN_BACKGROUND = fnv1a(TEX_FILE_MAIN_BACKGROUND);
-    m_textures[IDs::SID_TEX_MAIN_BACKGROUND] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_MAIN_BACKGROUND] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // missiles: player's and aliens'
     t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_MISSILE_PLAYER,
-      .alpha    = true,
-      .flip     = false,
-      .wrapS    = GL_CLAMP_TO_EDGE,
-      .wrapT    = GL_CLAMP_TO_EDGE
+      .m_filepath = TEX_FILE_MISSILE_PLAYER,
+      .m_alpha    = true,
+      .m_flip     = true,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
     });
     IDs::SID_TEX_MISSILE_PLAYER = fnv1a(TEX_FILE_MISSILE_PLAYER);
-    m_textures[IDs::SID_TEX_MISSILE_PLAYER] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_MISSILE_PLAYER] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_MISSILE_ALIEN,
-      .alpha    = true,
-      .flip     = false,
-      .wrapS    = GL_CLAMP_TO_EDGE,
-      .wrapT    = GL_CLAMP_TO_EDGE
+      .m_filepath = TEX_FILE_MISSILE_ALIEN,
+      .m_alpha    = true,
+      .m_flip     = false,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
     });
     IDs::SID_TEX_MISSILE_ALIEN = fnv1a(TEX_FILE_MISSILE_ALIEN);
-    m_textures[IDs::SID_TEX_MISSILE_ALIEN] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_MISSILE_ALIEN] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // explosion
     t = loadTexFromFile(LoadTexFromFileArgs{
-      .filepath = TEX_FILE_EXPLOSION,
-      .alpha    = true,
-      .flip     = false,
-      .wrapS    = GL_CLAMP_TO_EDGE,
-      .wrapT    = GL_CLAMP_TO_EDGE
+      .m_filepath = TEX_FILE_EXPLOSION,
+      .m_alpha    = true,
+      .m_flip     = false,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
     });
     IDs::SID_TEX_EXPLOSION = fnv1a(TEX_FILE_EXPLOSION);
-    m_textures[IDs::SID_TEX_EXPLOSION] = std::make_unique<Texture2D>(t.width, t.height, t.id);
+    m_textures[IDs::SID_TEX_EXPLOSION] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
+    // player lives
+    t = loadTexFromFile(LoadTexFromFileArgs{
+      .m_filepath = TEX_FILE_PLAYER_LIVES,
+      .m_alpha    = true,
+      .m_flip     = true,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
+    });
+    IDs::SID_TEX_PLAYER_LIVES = fnv1a(TEX_FILE_PLAYER_LIVES);
+    m_textures[IDs::SID_TEX_PLAYER_LIVES] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // -----------------------------------------------
     // shaders, since every shader is different, call different functions...
     // -----------------------------------------------
@@ -146,7 +153,7 @@ namespace Res {
     // for the id of the shader, what matters is if it's unique
     // define common proj matrix
     //
-    const m4 m = orthographic({
+    const auto m = orthographic({
       .left   =  0.f,
       .right  = WINDOW_WIDTH,
       .bottom =  0.f,
@@ -157,8 +164,7 @@ namespace Res {
     IDs::SID_SHADER_MAIN_BACKGROUND = fnv1a(VERT_SHADER_FILE_MAIN_BACKGROUND);
     m_shaders[IDs::SID_SHADER_MAIN_BACKGROUND] = std::make_unique<Shader>(
       loadBackgroundShader(VERT_SHADER_FILE_MAIN_BACKGROUND,
-                           FRAG_SHADER_FILE_MAIN_BACKGROUND,
-                           m)
+                           FRAG_SHADER_FILE_MAIN_BACKGROUND)
     );
     IDs::SID_SHADER_ALIEN = fnv1a(VERT_SHADER_FILE_ALIEN);
     m_shaders[IDs::SID_SHADER_ALIEN] = std::make_unique<Shader>(
@@ -167,7 +173,7 @@ namespace Res {
                       m)
     );
     IDs::SID_SHADER_PLAYER_LIVES = fnv1a(VERT_SHADER_FILE_PLAYER_LIVES);
-    m_shaders[IDs::SID_SHADER_ALIEN] = std::make_unique<Shader>(
+    m_shaders[IDs::SID_SHADER_PLAYER_LIVES] = std::make_unique<Shader>(
       loadPlayerLivesShader(VERT_SHADER_FILE_PLAYER_LIVES,
                             FRAG_SHADER_FILE_PLAYER_LIVES,
                             m)
@@ -190,53 +196,32 @@ namespace Res {
                         FRAG_SHADER_FILE_MISSILE_PLAYER,
                         m)
     );
-    IDs::SID_SHADER_MISSILE_ALIEN = fnv1a(VERT_SHADER_FILE_MISSILE_ALIEN);
+    // NOTE: AAAAA!!!!!!!!!!!!!!!!!!!!!!!! since missile and alien shaders are the same,
+    // you need to use different names for the hash to work, otherwise you'll be overriding
+    // them! You're currently using the vertex shader filename for the player's missiles and
+    // the fragment shader for the aliens missiles.
+    IDs::SID_SHADER_MISSILE_ALIEN = fnv1a(FRAG_SHADER_FILE_MISSILE_ALIEN);
     m_shaders[IDs::SID_SHADER_MISSILE_ALIEN] = std::make_unique<Shader>(
       loadMissileShader(VERT_SHADER_FILE_MISSILE_ALIEN,
                         FRAG_SHADER_FILE_MISSILE_ALIEN,
                         m)
     );
     // -----------------------------------------------
-    // fonts
+    // TODO fonts
     // -----------------------------------------------
-
   }
 
-  void ResourceManager::close()
+  ResourceManager::~ResourceManager()
   {
+    for(auto& t : m_textures) {
+      glDeleteTextures(1, &t.second->m_id);
+    }
+    for(auto& s : m_shaders) {
+      glDeleteProgram(s.second->m_id);
+    }
   }
 
-  Texture2D* ResourceManager::getTex(const int sid)
-  {
-    return m_textures.at(sid).get();
-  }
-
-  Shader* ResourceManager::getShader(const int sid)
-  {
-    return m_shaders.at(sid).get();
-  }
-
-  void ResourceManager::useShaderProgram(const unsigned int id)
-  {
-    glUseProgram(id);
-  }
-
-  void ResourceManager::setUniformFloat(const int id, const char* uniname, const float v)
-  {
-    glUniform1f(glGetUniformLocation(id, uniname), v);
-  }
-
-  void ResourceManager::setUniformMat4(const int id, const char* uniname, const Math::m4& m)
-  {
-    glUniformMatrix4fv(glGetUniformLocation(id, uniname), 1, false, m.elements);
-  }
-
-  void ResourceManager::setUniformInt(const int id, const char* uniname, const int value)
-  {
-    glUniform1i(glGetUniformLocation(id, uniname), value);
-  }
-
-  bool compile_errors(const unsigned int object, const ShaderType type)
+  bool ResourceManager::checkCompileErrors(const unsigned int object, const ShaderType type)
   {
     int success{ 0 };
     std::array<char, 512> log{ '\0' };
@@ -244,14 +229,26 @@ namespace Res {
     switch(type) {
       case ShaderType::VERTEX:
         shader = "VERTEX";
-        // fall through
+        glGetShaderiv(object, GL_COMPILE_STATUS, &success);
+        if(success != GL_TRUE) {
+          glGetShaderInfoLog(object, log.size(), nullptr, &log[0]);
+          std::cerr << "Couldn't compile shader type " << shader << " : " << log.data() << '\n';
+          return true;
+        }
+        break;
       case ShaderType::FRAGMENT:
         shader = "FRAGMENT";
-        // fall through
+        glGetShaderiv(object, GL_COMPILE_STATUS, &success);
+        if(success != GL_TRUE) {
+          glGetShaderInfoLog(object, log.size(), nullptr, &log[0]);
+          std::cerr << "Couldn't compile shader type " << shader << " : " << log.data() << '\n';
+          return true;
+        }
+        break;
       case ShaderType::GEOMETRY:
         shader = "GEOMETRY";
         glGetShaderiv(object, GL_COMPILE_STATUS, &success);
-        if(!success) {
+        if(success != GL_TRUE) {
           glGetShaderInfoLog(object, log.size(), nullptr, &log[0]);
           std::cerr << "Couldn't compile shader type " << shader << " : " << log.data() << '\n';
           return true;
@@ -259,7 +256,7 @@ namespace Res {
         break;
       case ShaderType::PROGRAM:
         glGetProgramiv(object, GL_LINK_STATUS, &success);
-        if(!success) {
+        if(success != GL_TRUE) {
           glGetProgramInfoLog(object, log.size(), nullptr, &log[0]);
           std::cerr << "Couldn't link program: " << log.data() << '\n';
           return true;
@@ -293,7 +290,7 @@ namespace Res {
     vertId = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertId, 1, &vertCodeC, nullptr);
     glCompileShader(vertId);
-    bool errors = compile_errors(vertId, ShaderType::VERTEX);
+    bool errors = checkCompileErrors(vertId, ShaderType::VERTEX);
     if(errors) {
       glDeleteShader(vertId);
       std::exit(EXIT_FAILURE);
@@ -301,7 +298,7 @@ namespace Res {
     fragId = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragId, 1, &fragCodeC, nullptr);
     glCompileShader(fragId);
-    errors = compile_errors(fragId, ShaderType::FRAGMENT);
+    errors = checkCompileErrors(fragId, ShaderType::FRAGMENT);
     if(errors) {
       glDeleteShader(vertId);
       glDeleteShader(fragId);
@@ -311,7 +308,7 @@ namespace Res {
     glAttachShader(programId, vertId);
     glAttachShader(programId, fragId);
     glLinkProgram(programId);
-    errors = compile_errors(programId, ShaderType::PROGRAM);
+    errors = checkCompileErrors(programId, ShaderType::PROGRAM);
     if(errors) {
       glDeleteShader(vertId);
       glDeleteShader(fragId);
@@ -323,23 +320,22 @@ namespace Res {
   }
 
   Shader ResourceManager::loadBackgroundShader(const char* vertpath,
-                                               const char* fragpath,
-                                               const m4& m)
+                                               const char* fragpath)
   {
-    const unsigned int id = loadCompileShaders(vertpath, fragpath);
+    const auto id = loadCompileShaders(vertpath, fragpath);
     if(!id) {
       std::cerr << __FUNCTION__ << " Error creating shader\n";
       exit(EXIT_FAILURE);
     }
     constexpr float vertices[] {
-      // pos      -- tex
-      -1.f, -1.f, 0.f, 0.f,  // bottom left
-       1.f, -1.f, 1.f, 0.f,  // bottom right
-      -1.f,  1.f, 0.f, 1.f,  // top left
+      // pos        -- tex
+      -1.0f, -1.0f, 0.0f, 0.0f,  // bottom left
+       1.0f, -1.0f, 1.0f, 0.0f,  // bottom right
+      -1.0f,  1.0f, 0.0f, 1.0f,  // top left
 
-      -1.f,  1.f, 0.f, 1.f,  // top left
-       1.f,  1.f, 1.f, 1.f,  // top right
-       1.f, -1.f, 1.f, 0.f,  // bottom right
+      -1.0f,  1.0f, 0.0f, 1.0f,  // top left
+       1.0f,  1.0f, 1.0f, 1.0f,  // top right
+       1.0f, -1.0f, 1.0f, 0.0f,  // bottom right
     };
     unsigned int VBO, VAO;
     glGenBuffers(1, &VBO);
@@ -347,19 +343,18 @@ namespace Res {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     useShaderProgram(id);
     setUniformInt(id, "image", 0);
-    setUniformMat4(id, "projection", m);
     return Shader(id, VAO, VBO);
   }
 
   Shader ResourceManager::loadAlienShader(const char* vertpath, const char* fragpath, const Math::m4& m)
   {
-    const unsigned int id = loadCompileShaders(vertpath, fragpath);
+    const auto id = loadCompileShaders(vertpath, fragpath);
     if(!id) {
       std::cerr << __FUNCTION__ << " Error creating shader\n";
       exit(EXIT_FAILURE);
@@ -411,7 +406,7 @@ namespace Res {
 
   Shader ResourceManager::loadPlayerLivesShader(const char* vertpath, const char* fragpath, const Math::m4& m)
   {
-    const unsigned int id = loadCompileShaders(vertpath, fragpath);
+    const auto id = loadCompileShaders(vertpath, fragpath);
     if(!id) {
       std::cerr << __FUNCTION__ << " Error creating shader\n";
       exit(EXIT_FAILURE);
@@ -517,7 +512,7 @@ namespace Res {
 
   Shader ResourceManager::loadExplosionShader(const char* vertpath, const char* fragpath, const m4& m)
   {
-    const unsigned int id = loadCompileShaders(vertpath, fragpath);
+    const auto id = loadCompileShaders(vertpath, fragpath);
     if(!id) {
       std::cerr << __FUNCTION__ << " Error creating shader\n";
       exit(EXIT_FAILURE);
@@ -572,7 +567,7 @@ namespace Res {
 
   Shader ResourceManager::loadMissileShader(const char* vertpath, const char* fragpath, const Math::m4& m)
   {
-    const unsigned int id = loadCompileShaders(vertpath, fragpath);
+    const auto id = loadCompileShaders(vertpath, fragpath);
     if(!id) {
       std::cerr << "Error creating missile shader\n";
       exit(EXIT_FAILURE);

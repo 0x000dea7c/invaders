@@ -1,24 +1,42 @@
 #include "invaders_sim.h"
-#include "common.h"
 #include "invaders_enemy.h"
+#include "invaders_input.h"
 #include "invaders_missile.h"
 #include "invaders_resources.h"
 #include "invaders_renderer.h"
 #include "invaders_player.h"
 #include "invaders_explosion.h"
+#include "invaders_grid.h"
 
-extern Res::ResourceManager gResourceManager;
-extern Renderer::RendererManager gRendererManager;
-extern Game::PlayerManager gPlayerManager;
-extern Game::EnemyManager gEnemyManager;
-extern Game::MissileManager gMissileManager;
-extern Game::ExplosionManager gExplosionManager;
+#include <iostream>
 
 namespace Sim {
   using namespace Renderer;
 
-  SimulationManager::SimulationManager()
+  SimulationManager::SimulationManager(const Res::ResourceManager& resourceManager,
+                                       Input::InputManager& inputManager,
+                                       Game::PlayerManager& playerManager,
+                                       Game::EnemyManager& enemyManager,
+                                       Game::MissileManager& missileManager,
+                                       Game::ExplosionManager& explosionManager,
+                                       Game::GridManager& gridManager,
+                                       Renderer::RendererManager& renderManager,
+                                       const int sceneWidth,
+                                       const int sceneHeight)
+    : m_resourceManager{ resourceManager },
+      m_inputManager{ inputManager },
+      m_playerManager{ playerManager },
+      m_enemyManager{ enemyManager },
+      m_missileManager{ missileManager },
+      m_explosionManager{ explosionManager },
+      m_gridManager{ gridManager },
+      m_renderManager{ renderManager },
+      m_sceneWidth{ sceneWidth },
+      m_sceneHeight{ sceneHeight },
+      m_state{ State::PLAY },
+      m_end{ false }
   {
+
   }
 
   SimulationManager::~SimulationManager()
@@ -26,37 +44,27 @@ namespace Sim {
 
   }
 
-  void SimulationManager::init()
-  {
-    m_state = State::PLAY;
-    m_end = false;
-    // init scene's settings
-    m_sceneWidth  = WINDOW_WIDTH;
-    m_sceneHeight = WINDOW_HEIGHT;
-  }
-
-  void SimulationManager::close()
-  {
-
-  }
-
   void SimulationManager::update(const float delta)
   {
+    if(m_inputManager.isKeyPressed(Input::Key::KEY_ESCAPE)) {
+      m_end = true;
+      return;
+    }
     if(m_state == State::PLAY) {
       // order is important: everything that moves and can collide to something else needs to be
       // updated before the grid. Explosions are an exception, for example, but put it before bc
       // it doesn't matter
-      gPlayerManager.update(delta, m_sceneWidth, m_sceneHeight);
-      gEnemyManager.update(delta);
-      gMissileManager.update(delta, m_sceneHeight);
-      gExplosionManager.update(delta);
-      updateGrid();
-      gRendererManager.render(RenderArgs{
-        .aliensToDraw         = gEnemyManager.numAliveAliens(),
-        .playerLivesToDraw    = gPlayerManager.currlives(),
-        .explosionsToDraw     = gExplosionManager.numActiveExplosions(),
-        .playerMissilesToDraw = gMissileManager.numActivePlayerMissiles(),
-        .alienMissilesToDraw  = gMissileManager.numActiveAlienMissiles(),
+      m_gridManager.beginFrame();
+      m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
+      m_enemyManager.update(delta);
+      m_missileManager.update(delta, m_sceneHeight);
+      m_explosionManager.update(delta);
+      m_renderManager.render(RenderArgs{
+        .aliensToDraw         = m_enemyManager.numAliveAliens(),
+        .playerLivesToDraw    = m_playerManager.currlives(),
+        .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
+        .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
+        .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
         .playersToDraw        = 1
       });
     }
@@ -65,7 +73,7 @@ namespace Sim {
 
   void SimulationManager::checkGameState()
   {
-    if(gPlayerManager.currlives() == 0) {
+    if(m_playerManager.currlives() == 0) {
       m_state = State::LOSE;
       return;
     }

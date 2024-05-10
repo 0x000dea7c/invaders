@@ -1,24 +1,20 @@
+#include "common.h"
+#include "invaders_grid.h"
+#include "invaders_input.h"
+#include "invaders_level.h"
 #include "invaders_missile.h"
 #include "invaders_player.h"
 #include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
-#include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "invaders.h"
 #include "invaders_opengl.h"
 #include "invaders_timer.h"
-#include "invaders.h"
-
-// !!! One translation unit to speed up compilation !!!
-#include "invaders_input.cpp"
-#include "invaders_sim.cpp"
-#include "invaders_resources.cpp"
-#include "invaders_renderer.cpp"
-
-using namespace Game;
+#include "event.h"
 
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
@@ -61,7 +57,7 @@ PFNGLDELETEPROGRAMPROC glDeleteProgram;
 PFNGLUNIFORM1FPROC glUniform1f;
 PFNGLUNIFORM4FPROC glUniform4f;
 
-void initOpenGLfptrs()
+void Game::initOpenGLfptrs()
 {
     glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)getGLProcAddress("glGetUniformLocation");
     glUniform1i = (PFNGLUNIFORM1IPROC)getGLProcAddress("glUniform1i");
@@ -97,15 +93,16 @@ void initOpenGLfptrs()
     glUniform4f = (PFNGLUNIFORM4FPROC)getGLProcAddress("glUniform4f");
 }
 
-TexInfo loadTexFromFile(const LoadTexFromFileArgs& args)
-{
-    if(args.flip) {
+namespace Game {
+  TexInfo loadTexFromFile(const LoadTexFromFileArgs& args)
+  {
+    if(args.m_flip) {
       stbi_set_flip_vertically_on_load(true);
     }
     int width, height, channels;
-    unsigned char* data{ stbi_load(args.filepath, &width, &height, &channels, 0) };
+    unsigned char* data{ stbi_load(args.m_filepath, &width, &height, &channels, 0) };
     if(!data) {
-      std::cerr << __FUNCTION__ << " failed loading image -> " << args.filepath << '\n';
+      std::cerr << __FUNCTION__ << " failed loading image -> " << args.m_filepath << '\n';
       exit(EXIT_FAILURE);
     }
     // don't assume dimensions are multiple of 4
@@ -115,67 +112,67 @@ TexInfo loadTexFromFile(const LoadTexFromFileArgs& args)
     glBindTexture(GL_TEXTURE_2D, id);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 (args.alpha) ? GL_RGBA : GL_RGB,
+                 (args.m_alpha) ? GL_RGBA : GL_RGB,
                  width,
                  height,
                  0,
-                 (args.alpha) ? GL_RGBA : GL_RGB
+                 (args.m_alpha) ? GL_RGBA : GL_RGB
                  ,
                  GL_UNSIGNED_BYTE,
                  data);
     glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, args.wrapS);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, args.wrapT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, args.m_wrapS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, args.m_wrapT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(data);
-    if(args.flip) {
+    if(args.m_flip) {
       stbi_set_flip_vertically_on_load(false);
     }
-    return TexInfo {
-        .width = width,
-        .height = height,
-        .channels = channels,
-        .id = id
+    return Game::TexInfo {
+      .m_width = width,
+      .m_height = height,
+      .m_channels = channels,
+      .m_id = id
     };
-}
+  }
+};
+
+// !!! One translation unit to speed up compilation !!!
+#include "invaders_resources.cpp"
+#include "invaders_input.cpp"
+#include "invaders_player.cpp"
+#include "invaders_enemy.cpp"
+#include "invaders_missile.cpp"
+#include "invaders_explosion.cpp"
+#include "invaders_grid.cpp"
+#include "invaders_sim.cpp"
+#include "invaders_renderer.cpp"
+#include "invaders_level.cpp"
+#include "invaders_physics.cpp"
 
 // this depends on the underlying platform, in this case, x11, that's why
 // this function it's here and not within the InputManager
 static Input::Key map_x11_key_to_game(const KeySym& key)
 {
-    switch(key) {
-    case XK_a: return Input::KEY_A;
-    case XK_d: return Input::KEY_D;
-    case XK_q: return Input::KEY_Q;
-    case XK_Escape: return Input::KEY_ESCAPE;
-    case XK_space: return Input::KEY_SPACE;
-    case XK_Left: return Input::KEY_LEFT;
-    case XK_Right: return Input::KEY_RIGHT;
-    case XK_Return: return Input::KEY_ENTER;
-    case XK_Up: return Input::KEY_UP;
-    case XK_Down: return Input::KEY_DOWN;
-    case XK_w: return Input::KEY_W;
-    case XK_s: return Input::KEY_S;
-    case XK_p: return Input::KEY_P;
-    default: assert(false && "map_x11_key_to_game -> This should not happen");
-    }
+  switch(key) {
+    case XK_a:      return Input::Key::KEY_A;
+    case XK_d:      return Input::Key::KEY_D;
+    case XK_q:      return Input::Key::KEY_Q;
+    case XK_Escape: return Input::Key::KEY_ESCAPE;
+    case XK_space:  return Input::Key::KEY_SPACE;
+    case XK_Left:   return Input::Key::KEY_LEFT;
+    case XK_Right:  return Input::Key::KEY_RIGHT;
+    case XK_Return: return Input::Key::KEY_ENTER;
+    case XK_Up:     return Input::Key::KEY_UP;
+    case XK_Down:   return Input::Key::KEY_DOWN;
+    case XK_w:      return Input::Key::KEY_W;
+    case XK_s:      return Input::Key::KEY_S;
+    case XK_p:      return Input::Key::KEY_P;
+    default:        return Input::Key::KEY_UNKNOWN;
+  }
 }
-
-// implementing something more coherent like an ECS
-// requires a good understanding of game arch, which I don't have at the moment.
-// The reason why this works decently is because this game is small, there are no
-// tests and it won't scale.
-Res::ResourceManager      gResourceManager;
-Input::InputManager       gInputManager;
-Game::PlayerManager       gPlayerManager;
-Game::EnemyManager        gEnemyManager;
-Game::MissileManager      gMissileManager;
-Game::ExplosionManager    gExplosionManager;
-Sim::SimulationManager    gSimulationManager;
-Renderer::RendererManager gRenderManager;
-// AudioManager      gAudioManager;
 
 int main()
 {
@@ -193,20 +190,20 @@ int main()
   // ---------------------------------------------
   // get a matching fb config
   static int attrs[] = {
-      GLX_X_RENDERABLE    , True,
-      GLX_DRAWABLE_TYPE   , GLX_WINDOW_BIT,
-      GLX_RENDER_TYPE     , GLX_RGBA_BIT,
-      GLX_X_VISUAL_TYPE   , GLX_TRUE_COLOR,
-      GLX_RED_SIZE        , 8,
-      GLX_GREEN_SIZE      , 8,
-      GLX_BLUE_SIZE       , 8,
-      GLX_ALPHA_SIZE      , 8,
-      GLX_DEPTH_SIZE      , 24,
-      GLX_STENCIL_SIZE    , 8,
-      GLX_DOUBLEBUFFER    , True,
-      //GLX_SAMPLE_BUFFERS  , 1,
-      //GLX_SAMPLES         , 4,
-      None
+    GLX_X_RENDERABLE    , True,
+    GLX_DRAWABLE_TYPE   , GLX_WINDOW_BIT,
+    GLX_RENDER_TYPE     , GLX_RGBA_BIT,
+    GLX_X_VISUAL_TYPE   , GLX_TRUE_COLOR,
+    GLX_RED_SIZE        , 8,
+    GLX_GREEN_SIZE      , 8,
+    GLX_BLUE_SIZE       , 8,
+    GLX_ALPHA_SIZE      , 8,
+    GLX_DEPTH_SIZE      , 24,
+    GLX_STENCIL_SIZE    , 8,
+    GLX_DOUBLEBUFFER    , True,
+    //GLX_SAMPLE_BUFFERS  , 1,
+    //GLX_SAMPLES         , 4,
+    None
   };
   XSetWindowAttributes setWindowAttrs;
   XWindowAttributes gwa;
@@ -222,17 +219,17 @@ int main()
   for(int i = 0; i < fbcount; ++i) {
     XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbc[i]);
     if(vi) {
-        int samp_buf, samples;
-        glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
-        glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLES       , &samples  );
-        if(best_fbc < 0 || (samp_buf && samples > best_num_samp)) {
-            best_fbc = i;
-            best_num_samp = samples;
-        }
-        if(worst_fbc < 0 || !samp_buf || samples < worst_num_samp) {
-            worst_fbc = i;
-            worst_num_samp = samples;
-        }
+      int samp_buf, samples;
+      glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
+      glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLES       , &samples  );
+      if(best_fbc < 0 || (samp_buf && samples > best_num_samp)) {
+          best_fbc = i;
+          best_num_samp = samples;
+      }
+      if(worst_fbc < 0 || !samp_buf || samples < worst_num_samp) {
+          worst_fbc = i;
+          worst_num_samp = samples;
+      }
     }
     XFree(vi);
   }
@@ -263,6 +260,9 @@ int main()
   hints.min_width = hints.max_width = WINDOW_WIDTH;
   hints.min_height = hints.max_height = WINDOW_HEIGHT;
   XSetWMNormalHints(display, window, &hints);
+  // closing window gracefully when user clicks on the X btn
+  Atom wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
+  XSetWMProtocols(display, window, &wmDeleteMessage, 1);
   // pretty important, setup opengl context for renderdoc
   glXCreateContextAttribsARBProc glXCreateContextAttribsARB = 0;
   glXCreateContextAttribsARB =
@@ -283,17 +283,30 @@ int main()
   // once OpenGL and X11 are ready to fight, game init takes place.
   // init all resource managers game has. If there's any error initialising them,
   // the game will straight up close with a diagnostic msg
-  gInputManager.init();
-  gResourceManager.init();
-  gMissileManager.init();
-  gExplosionManager.init();
-  gSimulationManager.init();
-  gRenderManager.init();
-  // gAudioManager.init();
+  Ev::EventManager eventManager;
+  Res::ResourceManager resourceManager;
+  Input::InputManager inputManager;
+  Game::ExplosionManager explosionManager(resourceManager);
+  Game::GridManager gridManager(WINDOW_WIDTH, WINDOW_HEIGHT);
+  Game::MissileManager missileManager(resourceManager, gridManager, explosionManager, eventManager);
+  Game::PlayerManager playerManager(resourceManager, inputManager, missileManager, gridManager, eventManager);
+  Game::EnemyManager enemyManager(resourceManager, missileManager, gridManager, eventManager);
+  Game::LevelManager levelManager(enemyManager);
+  Renderer::RendererManager renderManager(resourceManager);
+  Sim::SimulationManager simulationManager(resourceManager,
+                                           inputManager,
+                                           playerManager,
+                                           enemyManager,
+                                           missileManager,
+                                           explosionManager,
+                                           gridManager,
+                                           renderManager,
+                                           WINDOW_WIDTH,
+                                           WINDOW_HEIGHT);
   // run the game
-  constexpr float kFpsMax = 1000.0f / 144.0f; // 144fps is the cap
+  // constexpr float kFpsMax = 1000.0f / 144.0f; // 144fps is the cap
   float lastFrame = 0.0f;
-  while(!gSimulationManager.shouldEnd()) {
+  while(!simulationManager.shouldEnd()) {
     // computing the delta time like this is a good idea, but remember that this delta
     // time corresponds to the previous frame, not the current one, so that's problematic
     // if this frame runs slower than the previous one. To solve this, if this frame ends
@@ -303,7 +316,7 @@ int main()
     float delta = currentFrame - lastFrame;
     lastFrame = currentFrame;
     glViewport(0, 0, gwa.width, gwa.height);
-    gInputManager.beginFrame();
+    inputManager.beginFrame();
     // polling for x11 window events
     while(XPending(display)) {
       XNextEvent(display, &xev);
@@ -311,32 +324,25 @@ int main()
         const bool is_pressed = xev.type == KeyPress;
         const KeySym x_key = XLookupKeysym(&xev.xkey, 0);
         const Input::Key key = map_x11_key_to_game(x_key);
-        gInputManager.updateKey(key, is_pressed);
+        inputManager.updateKey(key, is_pressed);
+      } else if(xev.type == ClientMessage) {
+        if(static_cast<Atom>(xev.xclient.data.l[0]) == wmDeleteMessage) {
+          simulationManager.setShouldEnd(true);
+        }
       }
     }
     // the simulation manager will update the world and then it'll call the renderer
-    gSimulationManager.update(delta);
+    simulationManager.update(delta);
     XGetWindowAttributes(display, window, &gwa);
     glXSwapBuffers(display, window);
     // put main thread to sleep if necessary, ensuring consistent delta times
-    const float frameTime = Game::time() - currentFrame;
-    if(frameTime < kFpsMax) {
-      // turns out this could be a problem bc people say it's not accurate. Don't know
-      // what that really means...
-      std::this_thread::sleep_for(std::chrono::duration<float>(kFpsMax - frameTime));
-    }
+    // const float frameTime = Game::time() - currentFrame;
+    // if(frameTime < kFpsMax) {
+    //   // turns out this could be a problem bc people say it's not accurate. Don't know
+    //   // what that really means...
+    //   std::this_thread::sleep_for(std::chrono::duration<float>(kFpsMax - frameTime));
+    // }
   }
-  // there might not be a "need" to release resources in PCs because the OS will do
-  // all the cleanup, but it's considered a good practice, so might as well do it.
-  // If there was a situation where cleanup would slow down too much the game's closing
-  // procedure, perhaps it's would be a good idea to get rid of these function calls.
-  gRenderManager.close();
-  gSimulationManager.close();
-  gExplosionManager.close();
-  gMissileManager.close();
-  gResourceManager.close();
-  gInputManager.close();
-  // gAudioManager.close();
   glXMakeCurrent(display, None, nullptr);
   glXDestroyContext(display, glContext);
   XDestroyWindow(display, window);

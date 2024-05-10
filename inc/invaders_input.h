@@ -2,8 +2,8 @@
 
 namespace Input {
 
-  enum Key {
-    KEY_Q,
+  enum class Key : unsigned int {
+    KEY_Q = 0,
     KEY_A,
     KEY_W,
     KEY_S,
@@ -17,12 +17,13 @@ namespace Input {
     KEY_ENTER,
     KEY_P,
 
-    KEY_COUNT
+    KEY_COUNT,
+    KEY_UNKNOWN
   };
 
   // the only goal of this class is to manage and store key states.
   // Since in this game you only need a keyboard, that's all it has.
-  class InputManager {
+  class InputManager final {
   public:
     InputManager();
     ~InputManager();
@@ -38,8 +39,8 @@ namespace Input {
     void updateKey(const Key k, const bool pressed);
   private:
     // presses, of course
-    bool currkeys[Key::KEY_COUNT];
-    bool prevkeys[Key::KEY_COUNT];
+    bool m_currkeys[static_cast<unsigned int>(Key::KEY_COUNT)];
+    bool m_prevkeys[static_cast<unsigned int>(Key::KEY_COUNT)];
   };
 
 };

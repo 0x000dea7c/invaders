@@ -1,16 +1,14 @@
 #pragma once
 
-namespace Game {
+#include "invaders_math.h"
 
-    struct AABB final {
-        v2 min;
-        v2 max;
-    };
+namespace Phys {
 
-    struct Ray final {
-        v2 origin;
-        v2 dir;
-    };
+  struct AABB final {
+    Math::v2 min;
+    Math::v2 max;
+  };
 
-    bool aabb_aabb_test(const AABB a, const AABB b, const v2 vel, const i32 steps);
+  bool aabb_aabb_test(const AABB a, const AABB b, const Math::v2 vel, const int steps);
+
 };

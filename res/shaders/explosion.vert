@@ -13,5 +13,8 @@ void main()
 {
   outColour = colour;
   texCoords = vertex_data[gl_VertexID].zw;
-  gl_Position = projection * model * vec4(vertex_data[gl_VertexID].xy, 0.f, 1.0f);
+  gl_Position = projection * model * vec4(vertex_data[gl_VertexID].x + colour.w * 0.05f,
+                                          vertex_data[gl_VertexID].y + colour.w * 0.05f,
+                                          0.0f,
+                                          1.0f);
 }
