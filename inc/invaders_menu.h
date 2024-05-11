@@ -47,6 +47,7 @@ namespace Game {
                 const Input::InputManager& inputManager);
     ~MenuManager();
     void update();
+    inline auto currentItem() const noexcept { return m_currentItem; }
   private:
     void handleInput();
     Ev::EventManager& m_eventManager;

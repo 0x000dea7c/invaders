@@ -3,6 +3,7 @@
 #include "invaders_math.h"
 #include "invaders_resources.h"
 #include "invaders_text.h"
+#include "invaders_menu.h"
 
 namespace Res {
   class Shader;
@@ -37,7 +38,8 @@ namespace Renderer {
   class RendererManager final {
   public:
     RendererManager(Res::ResourceManager& resourceManager,
-                    TextRenderer& textRenderer);
+                    TextRenderer& textRenderer,
+                    const Game::MenuManager& menuManager);
     ~RendererManager();
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
@@ -61,6 +63,7 @@ namespace Renderer {
     Res::Shader* m_menuShader;
     Res::ResourceManager& m_resourceManager;
     TextRenderer& m_textRenderer;
+    const Game::MenuManager& m_menuManager;
   };
 
 };

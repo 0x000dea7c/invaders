@@ -302,7 +302,7 @@ int main()
                                       28,
                                       resourceManager);
   Game::MenuManager menuManager(eventManager, inputManager);
-  Renderer::RendererManager renderManager(resourceManager, textRenderer);
+  Renderer::RendererManager renderManager(resourceManager, textRenderer, menuManager);
   Sim::SimulationManager simulationManager(resourceManager,
                                            inputManager,
                                            playerManager,

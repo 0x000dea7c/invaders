@@ -6,11 +6,17 @@
 
 namespace Renderer {
   using namespace Math;
+  using namespace Game;
+
+  static constexpr v4 kWhiteColour  = v4{ 1.0f, 1.0f, 1.0f, 1.0f };
+  static constexpr v4 kYellowColour = v4{ 1.0f, 1.0f, 0.0f, 1.0f };
 
   RendererManager::RendererManager(Res::ResourceManager& resourceManager,
-                                   TextRenderer& textRenderer)
+                                   TextRenderer& textRenderer,
+                                   const MenuManager& menuManager)
     : m_resourceManager{ resourceManager },
-      m_textRenderer{ textRenderer }
+      m_textRenderer{ textRenderer },
+      m_menuManager{ menuManager }
   {
     m_backgroundShader    = m_resourceManager.getShader(IDs::SID_SHADER_MAIN_BACKGROUND);
     m_backgroundTex       = m_resourceManager.getTex(IDs::SID_TEX_MAIN_BACKGROUND);
@@ -90,9 +96,19 @@ namespace Renderer {
     glBindVertexArray(m_menuShader->m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     // now draw text on top of it
-    m_textRenderer.renderText("Play",  v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 600.0f, 1.0f);
-    m_textRenderer.renderText("Sound", v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 550.0f, 1.0f);
-    m_textRenderer.renderText("Quit",  v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 500.0f, 1.0f);
+    if(m_menuManager.currentItem() == Game::MenuItem::CONTINUE) {
+      m_textRenderer.renderText("Continue", kYellowColour, 600.0f, 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kWhiteColour,  600.0f, 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  600.0f, 400.0f, 1.0f);
+    } else if(m_menuManager.currentItem() == Game::MenuItem::SOUND) {
+      m_textRenderer.renderText("Continue", kWhiteColour,  600.0f, 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kYellowColour, 600.0f, 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  600.0f, 400.0f, 1.0f);
+    } else if(m_menuManager.currentItem() == Game::MenuItem::QUIT) {
+      m_textRenderer.renderText("Continue", kWhiteColour,  600.0f, 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kWhiteColour,  600.0f, 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kYellowColour, 600.0f, 400.0f, 1.0f);
+    }
   }
 
 };
