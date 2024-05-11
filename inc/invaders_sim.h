@@ -1,9 +1,11 @@
 #pragma once
 
+#include "event.h"
 #include "invaders_enemy.h"
 #include "invaders_explosion.h"
 #include "invaders_grid.h"
 #include "invaders_input.h"
+#include "invaders_menu.h"
 #include "invaders_missile.h"
 #include "invaders_player.h"
 #include "invaders_renderer.h"
@@ -31,14 +33,16 @@ namespace Sim {
                       Game::ExplosionManager& explosionManager,
                       Game::GridManager& gridManager,
                       Renderer::RendererManager& renderManager,
+                      Game::MenuManager& menuManager,
+                      Ev::EventManager& eventManager,
                       const int sceneWidth,
                       const int sceneHeight);
     ~SimulationManager();
     void update(const float delta);
-    inline auto shouldEnd()   const { return m_end; }
-    inline auto sceneWidth()  const { return m_sceneWidth; }
-    inline auto sceneHeight() const { return m_sceneHeight; }
-    inline void setShouldEnd(const bool end) { m_end = end; }
+    inline auto shouldEnd()   const noexcept { return m_end; }
+    inline auto sceneWidth()  const noexcept { return m_sceneWidth; }
+    inline auto sceneHeight() const noexcept { return m_sceneHeight; }
+    inline void setShouldEnd(const bool end) noexcept { m_end = end; }
   private:
     void checkGameState();
     const Res::ResourceManager& m_resourceManager;
@@ -49,6 +53,8 @@ namespace Sim {
     Game::ExplosionManager& m_explosionManager;
     Game::GridManager& m_gridManager;
     Renderer::RendererManager& m_renderManager;
+    Game::MenuManager& m_menuManager;
+    Ev::EventManager& m_eventManager;
     int m_sceneWidth;
     int m_sceneHeight;
     State m_state;

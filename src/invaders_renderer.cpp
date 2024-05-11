@@ -3,11 +3,14 @@
 #include "invaders_timer.h"
 #include "invaders_opengl.h"
 
+
 namespace Renderer {
   using namespace Math;
 
-  RendererManager::RendererManager(Res::ResourceManager& resourceManager)
-    : m_resourceManager{ resourceManager }
+  RendererManager::RendererManager(Res::ResourceManager& resourceManager,
+                                   TextRenderer& textRenderer)
+    : m_resourceManager{ resourceManager },
+      m_textRenderer{ textRenderer }
   {
     m_backgroundShader    = m_resourceManager.getShader(IDs::SID_SHADER_MAIN_BACKGROUND);
     m_backgroundTex       = m_resourceManager.getTex(IDs::SID_TEX_MAIN_BACKGROUND);
@@ -23,6 +26,7 @@ namespace Renderer {
     m_missilePlayerTex    = m_resourceManager.getTex(IDs::SID_TEX_MISSILE_PLAYER);
     m_missileAlienShader  = m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_ALIEN);
     m_missileAlienTex     = m_resourceManager.getTex(IDs::SID_TEX_MISSILE_ALIEN);
+    m_menuShader          = m_resourceManager.getShader(IDs::SID_SHADER_MENU);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
@@ -55,7 +59,7 @@ namespace Renderer {
     glBindVertexArray(m_playerLivesShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_playerLivesTex->m_id);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, args.playerLivesToDraw);
-    // player
+    // player batch draw
     m_resourceManager.useShaderProgram(m_playerShader->m_id);
     glBindVertexArray(m_playerShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_playerTex->m_id);
@@ -75,6 +79,20 @@ namespace Renderer {
     glBindVertexArray(m_missileAlienShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_missileAlienTex->m_id);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, args.alienMissilesToDraw);
+  }
+
+  void RendererManager::renderMenu()
+  {
+    // you're not clearing because you want to show the game behind when you pause
+    // this draws a black rectangle at the center of the screen
+    glActiveTexture(GL_TEXTURE0);
+    m_resourceManager.useShaderProgram(m_menuShader->m_id);
+    glBindVertexArray(m_menuShader->m_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // now draw text on top of it
+    m_textRenderer.renderText("Play",  v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 600.0f, 1.0f);
+    m_textRenderer.renderText("Sound", v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 550.0f, 1.0f);
+    m_textRenderer.renderText("Quit",  v4{ 1.0f, 1.0f, 1.0f, 1.0f }, 600.0f, 500.0f, 1.0f);
   }
 
 };

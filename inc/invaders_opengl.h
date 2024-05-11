@@ -34,6 +34,7 @@ extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 extern PFNGLBUFFERSUBDATAPROC glBufferSubData;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 extern PFNGLUNIFORM1FPROC glUniform1f;
+extern PFNGLUNIFORM3FPROC glUniform3f;
 extern PFNGLUNIFORM4FPROC glUniform4f;
 
 inline void* getGLProcAddress(const char* name)

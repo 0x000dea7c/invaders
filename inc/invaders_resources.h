@@ -91,6 +91,10 @@ namespace Res {
     {
       glUniform1i(getUniformLocation(id, uniname), value);
     }
+    inline auto setUniformVec4(const unsigned int id, const char* uniname, const Math::v4& value)
+    {
+      glUniform4f(getUniformLocation(id, uniname), value.x, value.y, value.z, value.w);
+    }
   private:
     // if anything fails, game will close with diag msg
     unsigned int loadCompileShaders(const char* vertpath, const char* fragpath); // returns shader program id
@@ -101,6 +105,8 @@ namespace Res {
     Shader loadPlayerShader(const char* vertpath, const char* fragpath, const Math::m4& m);
     Shader loadExplosionShader(const char* vertpath, const char* fragpath, const Math::m4& m);
     Shader loadMissileShader(const char* vertpath, const char* fragpath, const Math::m4& m);
+    Shader loadTextShader(const char* vertpath, const char* fragpath, const Math::m4& m);
+    Shader loadMenuShader(const char* vertpath, const char* fragpath);
     std::unordered_map<int, std::unique_ptr<Texture2D>> m_textures;
     std::unordered_map<int, std::unique_ptr<Shader>> m_shaders;
     std::unordered_map<std::pair<unsigned int, std::string>, unsigned int, PairHash> m_uniforms;

@@ -3,7 +3,6 @@
 #include "invaders_opengl.h"
 
 #include <cassert>
-#include <iostream>
 
 #define MAX_ALIENS_ALIVE 16
 

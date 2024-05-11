@@ -2,8 +2,10 @@
 #include "invaders_grid.h"
 #include "invaders_input.h"
 #include "invaders_level.h"
+#include "invaders_menu.h"
 #include "invaders_missile.h"
 #include "invaders_player.h"
+#include "invaders_text.h"
 #include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
@@ -55,6 +57,7 @@ PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
 PFNGLBUFFERSUBDATAPROC glBufferSubData;
 PFNGLDELETEPROGRAMPROC glDeleteProgram;
 PFNGLUNIFORM1FPROC glUniform1f;
+PFNGLUNIFORM3FPROC glUniform3f;
 PFNGLUNIFORM4FPROC glUniform4f;
 
 void Game::initOpenGLfptrs()
@@ -90,6 +93,7 @@ void Game::initOpenGLfptrs()
     glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLProcAddress("glBufferSubData");
     glDeleteProgram = (PFNGLDELETEPROGRAMPROC)getGLProcAddress("glDeleteProgram");
     glUniform1f = (PFNGLUNIFORM1FPROC)getGLProcAddress("glUniform1f");
+    glUniform3f = (PFNGLUNIFORM3FPROC)getGLProcAddress("glUniform3f");
     glUniform4f = (PFNGLUNIFORM4FPROC)getGLProcAddress("glUniform4f");
 }
 
@@ -151,6 +155,8 @@ namespace Game {
 #include "invaders_renderer.cpp"
 #include "invaders_level.cpp"
 #include "invaders_physics.cpp"
+#include "invaders_text.cpp"
+#include "invaders_menu.cpp"
 
 // this depends on the underlying platform, in this case, x11, that's why
 // this function it's here and not within the InputManager
@@ -201,8 +207,8 @@ int main()
     GLX_DEPTH_SIZE      , 24,
     GLX_STENCIL_SIZE    , 8,
     GLX_DOUBLEBUFFER    , True,
-    //GLX_SAMPLE_BUFFERS  , 1,
-    //GLX_SAMPLES         , 4,
+    GLX_SAMPLE_BUFFERS  , 1,
+    GLX_SAMPLES         , 4,
     None
   };
   XSetWindowAttributes setWindowAttrs;
@@ -270,7 +276,7 @@ int main()
   int contextAttribs[] = {
       GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
       GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-      //GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+      GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
       None
   };
   // !!!renderdoc!!!
@@ -292,7 +298,11 @@ int main()
   Game::PlayerManager playerManager(resourceManager, inputManager, missileManager, gridManager, eventManager);
   Game::EnemyManager enemyManager(resourceManager, missileManager, gridManager, eventManager);
   Game::LevelManager levelManager(enemyManager);
-  Renderer::RendererManager renderManager(resourceManager);
+  Renderer::TextRenderer textRenderer("./res/fonts/FreeMonoBold.ttf",
+                                      28,
+                                      resourceManager);
+  Game::MenuManager menuManager(eventManager, inputManager);
+  Renderer::RendererManager renderManager(resourceManager, textRenderer);
   Sim::SimulationManager simulationManager(resourceManager,
                                            inputManager,
                                            playerManager,
@@ -301,6 +311,8 @@ int main()
                                            explosionManager,
                                            gridManager,
                                            renderManager,
+                                           menuManager,
+                                           eventManager,
                                            WINDOW_WIDTH,
                                            WINDOW_HEIGHT);
   // run the game

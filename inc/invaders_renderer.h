@@ -2,7 +2,7 @@
 
 #include "invaders_math.h"
 #include "invaders_resources.h"
-#include <array>
+#include "invaders_text.h"
 
 namespace Res {
   class Shader;
@@ -36,10 +36,12 @@ namespace Renderer {
   // renders all given data, no ifs, no updates, just render. This class is omoiiiiiiiiiiiiii
   class RendererManager final {
   public:
-    RendererManager(Res::ResourceManager& resourceManager);
+    RendererManager(Res::ResourceManager& resourceManager,
+                    TextRenderer& textRenderer);
     ~RendererManager();
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
+    void renderMenu();
   private:
     // TODO: these are all references, not fucking pointers
     Res::Shader* m_backgroundShader;
@@ -56,7 +58,9 @@ namespace Renderer {
     Res::Texture2D* m_missilePlayerTex;
     Res::Shader* m_missileAlienShader;
     Res::Texture2D* m_missileAlienTex;
+    Res::Shader* m_menuShader;
     Res::ResourceManager& m_resourceManager;
+    TextRenderer& m_textRenderer;
   };
 
 };

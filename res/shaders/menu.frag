@@ -4,8 +4,6 @@ in vec2 texCoords;
 
 out vec4 FragColour;
 
-uniform vec4 colour;
-
 const float edge_width = 0.05f;
 
 void main()

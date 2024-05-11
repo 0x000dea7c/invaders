@@ -38,4 +38,6 @@ namespace IDs {
   extern int SID_SHADER_EXPLOSION;
   extern int SID_SHADER_MISSILE_PLAYER;
   extern int SID_SHADER_MISSILE_ALIEN;
+  extern int SID_SHADER_TEXT;
+  extern int SID_SHADER_MENU;
 };

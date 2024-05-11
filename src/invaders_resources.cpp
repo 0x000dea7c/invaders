@@ -29,6 +29,10 @@
 #define FRAG_SHADER_FILE_MISSILE_PLAYER  "./res/shaders/missiles.frag"
 #define VERT_SHADER_FILE_MISSILE_ALIEN   "./res/shaders/missiles.vert"
 #define FRAG_SHADER_FILE_MISSILE_ALIEN   "./res/shaders/missiles.frag"
+#define VERT_SHADER_FILE_TEXT            "./res/shaders/text.vert"
+#define FRAG_SHADER_FILE_TEXT            "./res/shaders/text.frag"
+#define VERT_SHADER_FILE_MENU            "./res/shaders/menu.vert"
+#define FRAG_SHADER_FILE_MENU            "./res/shaders/menu.frag"
 
 #include <iostream>
 #include <fstream>
@@ -54,6 +58,8 @@ namespace IDs {
   int SID_SHADER_EXPLOSION;
   int SID_SHADER_MISSILE_PLAYER;
   int SID_SHADER_MISSILE_ALIEN;
+  int SID_SHADER_TEXT;
+  int SID_SHADER_MENU;
 };
 
 namespace Res {
@@ -207,8 +213,16 @@ namespace Res {
                         m)
     );
     // -----------------------------------------------
-    // TODO fonts
+    // text menu
     // -----------------------------------------------
+    IDs::SID_SHADER_TEXT = fnv1a(VERT_SHADER_FILE_TEXT);
+    m_shaders[IDs::SID_SHADER_TEXT] = std::make_unique<Shader>(loadTextShader(VERT_SHADER_FILE_TEXT, FRAG_SHADER_FILE_TEXT, m));
+    // -----------------------------------------------
+    // menu
+    // -----------------------------------------------
+    IDs::SID_SHADER_MENU = fnv1a(VERT_SHADER_FILE_MENU);
+    m_shaders[IDs::SID_SHADER_MENU] = std::make_unique<Shader>(loadMenuShader(VERT_SHADER_FILE_MENU, FRAG_SHADER_FILE_MENU));
+    // uniform caching
     m_uniforms.reserve(8);
   }
 
@@ -617,4 +631,45 @@ namespace Res {
     return Shader(id, VAO, VBO);
   }
 
+  Shader ResourceManager::loadTextShader(const char* vertpath, const char* fragpath, const m4& m)
+  {
+    const auto id = loadCompileShaders(vertpath, fragpath);
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    useShaderProgram(id);
+    setUniformInt(id, "image", 0);
+    setUniformMat4(id, "projection", m);
+    return Shader(id, VAO, VBO);
+  }
+
+  Shader ResourceManager::loadMenuShader(const char* vertpath, const char* fragpath)
+  {
+    const auto id = loadCompileShaders(vertpath, fragpath);
+    unsigned int VAO, VBO;
+    constexpr float vertices[] = {
+      -0.5f, -0.5f,
+       0.5f,  0.5f,
+      -0.5f,  0.5f,
+
+      -0.5f, -0.5f,
+       0.5f, -0.5f,
+       0.5f,  0.5f
+    };
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
+    return Shader(id, VAO, VBO);
+  }
 };

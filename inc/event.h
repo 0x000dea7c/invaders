@@ -8,7 +8,11 @@ namespace Ev {
 
   enum class EventType {
     PlayerDestroyed,
-    AlienDestroyed
+    AlienDestroyed,
+    MenuContinue,
+    MenuSoundIncrease,
+    MenuSoundDecrease,
+    MenuQuit
   };
 
   class Event final {
