@@ -44,8 +44,13 @@ namespace Game {
     ~PlayerManager();
     void update(const float delta, const int rightLimit, const int topLimit);
     void handleInput();
-    inline auto currlives() const { return m_player.m_currlives; };
-    void destroyPlayer();
+    inline auto currlives() const noexcept { return m_player.m_currlives; };
+    inline void destroyPlayer()   noexcept { m_player.m_destroyed = true; }
+    inline void resetPos()        noexcept
+    {
+      m_player.m_pos.x = m_player.m_pos.y = m_player.m_vel.x = m_player.m_vel.y = 0.0f;
+    }
+    void reset();
   private:
     void updatePlayerLivesInstanceData();
     Renderer::InstanceData m_playerInstanceData;

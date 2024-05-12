@@ -107,6 +107,7 @@ namespace Res {
     Shader loadMissileShader(const char* vertpath, const char* fragpath, const Math::m4& m);
     Shader loadTextShader(const char* vertpath, const char* fragpath, const Math::m4& m);
     Shader loadMenuShader(const char* vertpath, const char* fragpath);
+    Shader loadBasicShader(const char* vertpath, const char* fragpath);
     std::unordered_map<int, std::unique_ptr<Texture2D>> m_textures;
     std::unordered_map<int, std::unique_ptr<Shader>> m_shaders;
     std::unordered_map<std::pair<unsigned int, std::string>, unsigned int, PairHash> m_uniforms;

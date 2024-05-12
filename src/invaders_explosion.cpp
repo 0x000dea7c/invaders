@@ -76,4 +76,9 @@ namespace Game {
     m_explosionsInstanceData.emplace_back(ExplosionInstanceData{});
   }
 
+  void ExplosionManager::reset()
+  {
+    m_explosions.clear();
+    m_explosionsInstanceData.clear();
+  }
 };

@@ -21,14 +21,18 @@
 * DONE Decrease size of entities
 * DONE Menu option selection, highlight, smooth edges
 * DONE Make window no resizable
-* TODO Audio, missile hits, bg music, die music, win round and win game
-* TODO Power-ups?
+* DONE Lose and win screens and input handling
+* TODO Adjust win/lose screen text, aligned
+* TODO Audio for missile hits, bg music, die music, win round and win game
+* TODO Add text with fading alpha for each new level
 * TODO Points?
-* TODO Code cleanup, to do this, first you need to read a bit more about game architecture
-* TODO Profile (REALLY!), main problem is the grid
+* TODO Power-ups?
 * TODO Code it on windows, too, to prove the portability point
-* TODO Get rid of meters_per_pixel? Don't know how they're being useful
-* TODO Change window to no resizable
-* TODO Improve all visuals!!!!!!!!!!!!!!!!!
+* TODO Improve all visuals!!!!!!!!!!!!!!!!! (idk not creative)
 * TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points
-* TODO When finished, add frame rate governing to avoid problems if there's (an unlikely) frame rate drop.
+* TODO Make infinite levels? and then a basic ranking system (saving score in a file, scoreboard, idk)
+* DONE Code cleanup, to do this, first you need to read a bit more about game architecture
+* DONE Profile (REALLY!), main problem is the grid
+* DONE Get rid of meters_per_pixel? Don't know how they're being useful
+* DONE Change window to no resizable
+

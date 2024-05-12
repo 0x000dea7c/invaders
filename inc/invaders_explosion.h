@@ -22,6 +22,7 @@ namespace Game {
     void update(const float delta);
     void spawnExplosion(const Math::v3& refPos);
     inline auto numActiveExplosions() const { return m_explosions.size(); }
+    void reset();
   private:
     std::vector<Explosion> m_explosions;
     std::vector<Renderer::ExplosionInstanceData> m_explosionsInstanceData;

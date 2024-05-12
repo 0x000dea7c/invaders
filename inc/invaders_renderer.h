@@ -44,6 +44,9 @@ namespace Renderer {
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
     void renderMenu();
+    void renderWinScreen();
+    void renderLoseScreen();
+    void renderStartScreen();
   private:
     // TODO: these are all references, not fucking pointers
     Res::Shader* m_backgroundShader;
@@ -64,6 +67,8 @@ namespace Renderer {
     Res::ResourceManager& m_resourceManager;
     TextRenderer& m_textRenderer;
     const Game::MenuManager& m_menuManager;
+    Res::Shader* m_basicShader;
+    Res::Texture2D* m_invadersTexture;
   };
 
 };

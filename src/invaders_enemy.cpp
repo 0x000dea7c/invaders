@@ -217,4 +217,9 @@ namespace Game {
     ((Alien*)event.getEntity())->m_destroyed = true;
   }
 
+  void EnemyManager::reset()
+  {
+    m_aliens.clear();
+    m_aliensInstanceData.clear();
+  }
 };

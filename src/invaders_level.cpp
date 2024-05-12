@@ -58,7 +58,8 @@ namespace Game {
     };
     static constexpr float Xspacing{ 10.0f };
     static constexpr float Yspacing{ 120.0f };
-    // yooo can't be bothered, ideally you should have an in-game editor to place entities there
+    // yooo can't be bothered, ideally you should have an in-game editor to place entities there,
+    // but you don't
     for(int i{ 0 }; i < 4; ++i) {
       for(int j{ 0 }; j < 4; ++j) {
         const auto alienType = (*levels[m_currentLevel])[i][j];
@@ -72,4 +73,9 @@ namespace Game {
     }
   }
 
+  void LevelManager::reset()
+  {
+    m_currentLevel = 0;
+    loadLevel();
+  }
 };

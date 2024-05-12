@@ -14,6 +14,7 @@
 #define TEX_FILE_MISSILE_ALIEN   "./res/textures/missile_alien.png"
 #define TEX_FILE_EXPLOSION       "./res/textures/explosion.png"
 #define TEX_FILE_PLAYER_LIVES    "./res/textures/heart.png"
+#define TEX_FILE_INVADERS        "./res/textures/invaders.png"
 // shaders
 #define VERT_SHADER_FILE_MAIN_BACKGROUND "./res/shaders/bg.vert"
 #define FRAG_SHADER_FILE_MAIN_BACKGROUND "./res/shaders/bg.frag"
@@ -33,6 +34,8 @@
 #define FRAG_SHADER_FILE_TEXT            "./res/shaders/text.frag"
 #define VERT_SHADER_FILE_MENU            "./res/shaders/menu.vert"
 #define FRAG_SHADER_FILE_MENU            "./res/shaders/menu.frag"
+#define VERT_SHADER_FILE_BASIC           "./res/shaders/basic.vert"
+#define FRAG_SHADER_FILE_BASIC           "./res/shaders/basic.frag"
 
 #include <iostream>
 #include <fstream>
@@ -50,6 +53,7 @@ namespace IDs {
   int SID_TEX_MISSILE_ALIEN;
   int SID_TEX_EXPLOSION;
   int SID_TEX_PLAYER_LIVES;
+  int SID_TEX_INVADERS;
   // shader ids
   int SID_SHADER_MAIN_BACKGROUND;
   int SID_SHADER_ALIEN;
@@ -60,6 +64,7 @@ namespace IDs {
   int SID_SHADER_MISSILE_ALIEN;
   int SID_SHADER_TEXT;
   int SID_SHADER_MENU;
+  int SID_SHADER_BASIC;
 };
 
 namespace Res {
@@ -152,6 +157,16 @@ namespace Res {
     });
     IDs::SID_TEX_PLAYER_LIVES = fnv1a(TEX_FILE_PLAYER_LIVES);
     m_textures[IDs::SID_TEX_PLAYER_LIVES] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
+    // invaders main image
+    t = loadTexFromFile(LoadTexFromFileArgs{
+      .m_filepath = TEX_FILE_INVADERS,
+      .m_alpha    = true,
+      .m_flip     = true,
+      .m_wrapS    = GL_CLAMP_TO_EDGE,
+      .m_wrapT    = GL_CLAMP_TO_EDGE
+    });
+    IDs::SID_TEX_INVADERS = fnv1a(TEX_FILE_INVADERS);
+    m_textures[IDs::SID_TEX_INVADERS] = std::make_unique<Texture2D>(t.m_width, t.m_height, t.m_id);
     // -----------------------------------------------
     // shaders, since every shader is different, call different functions...
     // -----------------------------------------------
@@ -222,6 +237,11 @@ namespace Res {
     // -----------------------------------------------
     IDs::SID_SHADER_MENU = fnv1a(VERT_SHADER_FILE_MENU);
     m_shaders[IDs::SID_SHADER_MENU] = std::make_unique<Shader>(loadMenuShader(VERT_SHADER_FILE_MENU, FRAG_SHADER_FILE_MENU));
+    //  -----------------------------------------------
+    // basic shader, this is used for rendering start, win and lose screen
+    //  -----------------------------------------------
+    IDs::SID_SHADER_BASIC = fnv1a(VERT_SHADER_FILE_BASIC);
+    m_shaders[IDs::SID_SHADER_BASIC] = std::make_unique<Shader>(loadBasicShader(VERT_SHADER_FILE_BASIC, FRAG_SHADER_FILE_BASIC));
     // uniform caching
     m_uniforms.reserve(8);
   }
@@ -672,4 +692,30 @@ namespace Res {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
     return Shader(id, VAO, VBO);
   }
+
+  Shader ResourceManager::loadBasicShader(const char* vertpath, const char* fragpath)
+  {
+    const auto id = loadCompileShaders(vertpath, fragpath);
+    unsigned int VAO, VBO;
+    constexpr float vertices[] = {
+      -1.0f, -1.0f, 0.0f, 0.0f,
+       1.0f,  1.0f, 1.0f, 1.0f,
+      -1.0f,  1.0f, 0.0f, 1.0f,
+
+      -1.0f, -1.0f, 0.0f, 0.0f,
+       1.0f, -1.0f, 1.0f, 0.0f,
+       1.0f,  1.0f, 1.0f, 1.0f,
+    };
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    useShaderProgram(id);
+    setUniformInt(id, "image", 0);
+    return Shader(id, VAO, VBO);
+  }
+
 };

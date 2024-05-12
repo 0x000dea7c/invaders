@@ -46,6 +46,7 @@ namespace Game {
     inline auto numAliveAliens() const { return m_aliens.size(); }
     void spawnAlien(const Math::v3& pos, const AlienType type);
     void destroyAlien(const Ev::Event& event);
+    void reset();
   private:
     Math::v2 getAlienSize(const AlienType type) const;
     Math::v2 getAlienVel(const AlienType type)  const;

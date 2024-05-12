@@ -32,8 +32,8 @@ namespace Game {
     void spawnPlayerMissiles(const Math::v3 refPos, const Math::v2 refSize);
     inline auto numActivePlayerMissiles() const { return m_playerMissiles.size(); }
     inline auto numActiveAlienMissiles() const { return m_alienMissiles.size(); }
-  private:
     void clearMissiles();
+  private:
     // it's convenient storing different kind of missiles in separate vectors
     std::vector<Missile> m_playerMissiles;
     std::vector<Renderer::InstanceData> m_playerMissilesInstanceData;

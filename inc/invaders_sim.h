@@ -5,6 +5,7 @@
 #include "invaders_explosion.h"
 #include "invaders_grid.h"
 #include "invaders_input.h"
+#include "invaders_level.h"
 #include "invaders_menu.h"
 #include "invaders_missile.h"
 #include "invaders_player.h"
@@ -16,6 +17,7 @@ namespace Sim {
   // it properly yet) all game units will be pixels.
 
   enum class State {
+    START,
     PLAY,
     MENU,
     WIN_LEVEL,
@@ -25,6 +27,7 @@ namespace Sim {
 
   class SimulationManager final {
   public:
+    // yes, you are annoyed
     SimulationManager(const Res::ResourceManager& resourceManager,
                       Input::InputManager& inputManager,
                       Game::PlayerManager& playerManager,
@@ -32,9 +35,10 @@ namespace Sim {
                       Game::MissileManager& missileManager,
                       Game::ExplosionManager& explosionManager,
                       Game::GridManager& gridManager,
-                      Renderer::RendererManager& renderManager,
+                      Renderer::RendererManager&  renderManager,
                       Game::MenuManager& menuManager,
                       Ev::EventManager& eventManager,
+                      Game::LevelManager& levelManager,
                       const int sceneWidth,
                       const int sceneHeight);
     ~SimulationManager();
@@ -45,6 +49,11 @@ namespace Sim {
     inline void setShouldEnd(const bool end) noexcept { m_end = end; }
   private:
     void checkGameState();
+    void clearLevel();
+    void winScreenHandleInput();
+    void loseScreenHandleInput();
+    void startScreenHandleInput();
+    void resetGame();
     const Res::ResourceManager& m_resourceManager;
     Input::InputManager& m_inputManager;
     Game::PlayerManager& m_playerManager;
@@ -55,6 +64,7 @@ namespace Sim {
     Renderer::RendererManager& m_renderManager;
     Game::MenuManager& m_menuManager;
     Ev::EventManager& m_eventManager;
+    Game::LevelManager& m_levelManager;
     int m_sceneWidth;
     int m_sceneHeight;
     State m_state;

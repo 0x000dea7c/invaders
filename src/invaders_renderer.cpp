@@ -2,6 +2,7 @@
 #include "common.h"
 #include "invaders_timer.h"
 #include "invaders_opengl.h"
+#include <GL/gl.h>
 
 
 namespace Renderer {
@@ -10,6 +11,7 @@ namespace Renderer {
 
   static constexpr v4 kWhiteColour  = v4{ 1.0f, 1.0f, 1.0f, 1.0f };
   static constexpr v4 kYellowColour = v4{ 1.0f, 1.0f, 0.0f, 1.0f };
+  static constexpr v4 kSilverColour = v4{ 0.75f, 0.75f, 0.75f, 1.0f };
 
   RendererManager::RendererManager(Res::ResourceManager& resourceManager,
                                    TextRenderer& textRenderer,
@@ -33,6 +35,8 @@ namespace Renderer {
     m_missileAlienShader  = m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_ALIEN);
     m_missileAlienTex     = m_resourceManager.getTex(IDs::SID_TEX_MISSILE_ALIEN);
     m_menuShader          = m_resourceManager.getShader(IDs::SID_SHADER_MENU);
+    m_basicShader         = m_resourceManager.getShader(IDs::SID_SHADER_BASIC);
+    m_invadersTexture     = m_resourceManager.getTex(IDs::SID_TEX_INVADERS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
@@ -115,6 +119,49 @@ namespace Renderer {
       m_textRenderer.renderText("Sound",    kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
       m_textRenderer.renderText("Quit",     kYellowColour, centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     }
+  }
+
+  void RendererManager::renderWinScreen()
+  {
+    // war crimes with these computations
+    glActiveTexture(GL_TEXTURE0);
+    m_resourceManager.useShaderProgram(m_basicShader->m_id);
+    glBindVertexArray(m_basicShader->m_VAO);
+    glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    static const auto centerX      = WINDOW_WIDTH * 0.5f;
+    static const auto winMsgWidth  = m_textRenderer.getTextWidth("Congratulations! You win!");
+    static const auto win2MsgWidth = m_textRenderer.getTextWidth("Press SPACE/ENTER to play again or Q/ESC to quit");
+    m_textRenderer.renderText("Congratulations! You win!", kWhiteColour, centerX - (winMsgWidth * 0.5f), 600.0f, 1.0f);
+    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit", kWhiteColour, centerX - (win2MsgWidth * 0.5f), 500.0f, 1.0f);
+  }
+
+  void RendererManager::renderLoseScreen()
+  {
+    glActiveTexture(GL_TEXTURE0);
+    m_resourceManager.useShaderProgram(m_basicShader->m_id);
+    glBindVertexArray(m_basicShader->m_VAO);
+    glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    static const auto centerX       = WINDOW_WIDTH * 0.5f;
+    static const auto loseMsgWidth  = m_textRenderer.getTextWidth("You lost :(");
+    static const auto lose2MsgWidth = m_textRenderer.getTextWidth("Press SPACE/ENTER to play again or Q/ESC to quit");
+    m_textRenderer.renderText("You lost :(", kWhiteColour, centerX - (loseMsgWidth * 0.5f), 600.0f, 1.0f);
+    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit", kWhiteColour, centerX - (lose2MsgWidth * 0.5f), 500.0f, 1.0f);
+  }
+
+  void RendererManager::renderStartScreen()
+  {
+    glActiveTexture(GL_TEXTURE0);
+    m_resourceManager.useShaderProgram(m_basicShader->m_id);
+    glBindVertexArray(m_basicShader->m_VAO);
+    glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    static const auto centerX   = WINDOW_WIDTH * 0.5f;
+    static const auto msgWidth  = m_textRenderer.getTextWidth("Hi, welcome! Press SPACE/ENTER to play!");
+    static const auto msg2Width = m_textRenderer.getTextWidth("You can also press Q/ESC to quit");
+    m_textRenderer.renderText("Hi, welcome! Press SPACE/ENTER to play!", kSilverColour, centerX - (msgWidth * 0.5f) - 50.0f, 600.0f, 1.0f); // war crimes
+    m_textRenderer.renderText("You can also press Q/ESC to quit", kSilverColour, centerX - (msg2Width * 0.5f) - 50.0f, 500.0f, 1.0f);
   }
 
 };

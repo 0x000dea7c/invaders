@@ -169,9 +169,13 @@ namespace Game {
     }
   }
 
-  void PlayerManager::destroyPlayer()
+  void PlayerManager::reset()
   {
-    m_player.m_destroyed = true;
+    // reset all (game or w/e)
+    resetPos();
+    m_player.m_currlives = MAX_PLAYER_LIVES;
+    m_player.m_destroyed = false;
+    m_player.m_shooting = false;
   }
 
 };

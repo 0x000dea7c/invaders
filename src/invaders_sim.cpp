@@ -26,6 +26,7 @@ namespace Sim {
                                        RendererManager& renderManager,
                                        MenuManager& menuManager,
                                        EventManager& eventManager,
+                                       LevelManager& levelManager,
                                        const int sceneWidth,
                                        const int sceneHeight)
     : m_resourceManager{ resourceManager },
@@ -38,9 +39,10 @@ namespace Sim {
       m_renderManager{ renderManager },
       m_menuManager{ menuManager },
       m_eventManager{ eventManager },
+      m_levelManager{ levelManager },
       m_sceneWidth{ sceneWidth },
       m_sceneHeight{ sceneHeight },
-      m_state{ State::PLAY },
+      m_state{ State::START },
       m_end{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
@@ -86,6 +88,20 @@ namespace Sim {
     } else if(m_state == State::MENU) {
       m_menuManager.update();
       m_renderManager.renderMenu();
+    } else if(m_state == State::WIN_GAME) {
+      // don't know where to put this, state manager? for now it will be here
+      winScreenHandleInput();
+      m_renderManager.renderWinScreen();
+    } else if(m_state == State::WIN_LEVEL) {
+      m_levelManager.changeLevel();
+      m_state = State::PLAY;
+      clearLevel();
+    } else if(m_state == State::LOSE) {
+      loseScreenHandleInput();
+      m_renderManager.renderLoseScreen();
+    } else if(m_state == State::START) {
+      startScreenHandleInput();
+      m_renderManager.renderStartScreen();
     }
     checkGameState();
   }
@@ -94,7 +110,54 @@ namespace Sim {
   {
     if(m_playerManager.currlives() == 0) {
       m_state = State::LOSE;
-      return;
+    } else if(m_enemyManager.numAliveAliens() == 0 && m_levelManager.lastLevel()) {
+      m_state = State::WIN_GAME;
+    } else if(m_enemyManager.numAliveAliens() == 0) {
+      m_state = State::WIN_LEVEL;
     }
+  }
+
+  void SimulationManager::clearLevel()
+  {
+    // when a new game level is loaded, you need to clear previous' frame mess
+    // and also reset player's position, aliens are loaded by the level manager
+    m_playerManager.resetPos();
+    m_missileManager.clearMissiles();
+  }
+
+  void SimulationManager::winScreenHandleInput()
+  {
+    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
+      resetGame();
+    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_end = true;
+    }
+  }
+
+  void SimulationManager::loseScreenHandleInput()
+  {
+    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
+      resetGame();
+    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_end = true;
+    }
+  }
+  void SimulationManager::startScreenHandleInput()
+  {
+    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
+      m_state = State::PLAY;
+    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_end = true;
+    }
+  }
+
+  void SimulationManager::resetGame()
+  {
+    // NOTE: careful, first you reset enemies, then level (bc lvl loads enemies)
+    m_enemyManager.reset();
+    m_levelManager.reset();
+    m_playerManager.reset();
+    m_missileManager.clearMissiles();
+    m_explosionManager.reset();
   }
 };

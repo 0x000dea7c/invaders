@@ -313,6 +313,7 @@ int main()
                                            renderManager,
                                            menuManager,
                                            eventManager,
+                                           levelManager,
                                            WINDOW_WIDTH,
                                            WINDOW_HEIGHT);
   // run the game

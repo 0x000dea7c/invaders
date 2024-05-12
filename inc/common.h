@@ -30,6 +30,7 @@ namespace IDs {
   extern int SID_TEX_MISSILE_ALIEN;
   extern int SID_TEX_EXPLOSION;
   extern int SID_TEX_PLAYER_LIVES;
+  extern int SID_TEX_INVADERS;
   // shader ids
   extern int SID_SHADER_MAIN_BACKGROUND;
   extern int SID_SHADER_ALIEN;
@@ -40,4 +41,5 @@ namespace IDs {
   extern int SID_SHADER_MISSILE_ALIEN;
   extern int SID_SHADER_TEXT;
   extern int SID_SHADER_MENU;
+  extern int SID_SHADER_BASIC;
 };
