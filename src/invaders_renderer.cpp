@@ -96,18 +96,24 @@ namespace Renderer {
     glBindVertexArray(m_menuShader->m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     // now draw text on top of it
+    // @HACK: since you don't have any way to center text on the screen, you need to do this
+    // make them static to avoid computing this every time
+    static const auto centerX       = WINDOW_WIDTH * 0.5f;
+    static const auto continueWidth = m_textRenderer.getTextWidth("Continue");
+    static const auto soundWidth    = m_textRenderer.getTextWidth("Sound");
+    static const auto quitWidth     = m_textRenderer.getTextWidth("Quit");
     if(m_menuManager.currentItem() == Game::MenuItem::CONTINUE) {
-      m_textRenderer.renderText("Continue", kYellowColour, 600.0f, 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kWhiteColour,  600.0f, 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kWhiteColour,  600.0f, 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kYellowColour, centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::SOUND) {
-      m_textRenderer.renderText("Continue", kWhiteColour,  600.0f, 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kYellowColour, 600.0f, 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kWhiteColour,  600.0f, 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kYellowColour, centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::QUIT) {
-      m_textRenderer.renderText("Continue", kWhiteColour,  600.0f, 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kWhiteColour,  600.0f, 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kYellowColour, 600.0f, 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText("Sound",    kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kYellowColour, centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     }
   }
 

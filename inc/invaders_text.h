@@ -29,6 +29,7 @@ namespace Renderer {
                     float x,
                     const float y,
                     const float scale);
+    float getTextWidth(const std::string& text);
   private:
     std::unordered_map<unsigned char, Character> m_characters;
     Res::ResourceManager& m_resourceManager;
