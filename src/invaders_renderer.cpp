@@ -2,8 +2,7 @@
 #include "common.h"
 #include "invaders_timer.h"
 #include "invaders_opengl.h"
-#include <GL/gl.h>
-
+#include <sstream>
 
 namespace Renderer {
   using namespace Math;
@@ -123,7 +122,6 @@ namespace Renderer {
 
   void RendererManager::renderWinScreen()
   {
-    // war crimes with these computations
     glActiveTexture(GL_TEXTURE0);
     m_resourceManager.useShaderProgram(m_basicShader->m_id);
     glBindVertexArray(m_basicShader->m_VAO);
@@ -160,8 +158,18 @@ namespace Renderer {
     static const auto centerX   = WINDOW_WIDTH * 0.5f;
     static const auto msgWidth  = m_textRenderer.getTextWidth("Hi, welcome! Press SPACE/ENTER to play!");
     static const auto msg2Width = m_textRenderer.getTextWidth("You can also press Q/ESC to quit");
-    m_textRenderer.renderText("Hi, welcome! Press SPACE/ENTER to play!", kSilverColour, centerX - (msgWidth * 0.5f) - 50.0f, 600.0f, 1.0f); // war crimes
-    m_textRenderer.renderText("You can also press Q/ESC to quit", kSilverColour, centerX - (msg2Width * 0.5f) - 50.0f, 500.0f, 1.0f);
+    m_textRenderer.renderText("Hi, welcome! Press SPACE/ENTER to play!", kSilverColour, centerX - (msgWidth * 0.5f), 600.0f, 1.0f);
+    m_textRenderer.renderText("You can also press Q/ESC to quit", kSilverColour, centerX - (msg2Width * 0.5f), 500.0f, 1.0f);
+  }
+
+  void RendererManager::renderLevelLabel(const unsigned int currentLevel, const float alpha)
+  {
+    std::stringstream ss;
+    ss << "Level " << (currentLevel + 1);
+    static const auto centerX  = WINDOW_WIDTH * 0.5f;
+    const auto str = ss.str();
+    static const auto msgWidth = m_textRenderer.getTextWidth(str);
+    m_textRenderer.renderText(str, v4{ 1.0f, 1.0f, 1.0f, alpha }, centerX - (msgWidth * 0.5f), 300.0f, 1.0f);
   }
 
 };

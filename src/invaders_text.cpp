@@ -60,6 +60,8 @@ namespace Renderer {
       };
       m_characters[c] = ch;
     }
+    // @NOTE: adding size.x to the space bc freetype doesn't
+    m_characters[' '].m_sizeX = m_characters['x'].m_sizeX;
     glBindTexture(GL_TEXTURE_2D, 0);
     FT_Done_Face(face);
     FT_Done_FreeType(ft);

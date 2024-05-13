@@ -65,10 +65,12 @@ namespace Sim {
     Game::MenuManager& m_menuManager;
     Ev::EventManager& m_eventManager;
     Game::LevelManager& m_levelManager;
+    float m_levelLabelAlpha;
     int m_sceneWidth;
     int m_sceneHeight;
     State m_state;
     bool m_end;
+    bool m_renderNewLevelLabel;
   };
 
 };

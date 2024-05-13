@@ -47,6 +47,7 @@ namespace Renderer {
     void renderWinScreen();
     void renderLoseScreen();
     void renderStartScreen();
+    void renderLevelLabel(const unsigned int currentLevel, const float alpha);
   private:
     // TODO: these are all references, not fucking pointers
     Res::Shader* m_backgroundShader;

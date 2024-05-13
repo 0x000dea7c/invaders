@@ -13,6 +13,7 @@ namespace Game {
     void changeLevel();
     inline auto lastLevel() const noexcept { return m_currentLevel == kLevels; }
     void reset();
+    inline auto currentLevel() const noexcept { return m_currentLevel; }
   private:
     void loadLevel();
     EnemyManager& m_enemyManager;

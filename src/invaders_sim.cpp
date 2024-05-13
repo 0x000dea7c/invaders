@@ -40,10 +40,12 @@ namespace Sim {
       m_menuManager{ menuManager },
       m_eventManager{ eventManager },
       m_levelManager{ levelManager },
+      m_levelLabelAlpha { 1.0f },
       m_sceneWidth{ sceneWidth },
       m_sceneHeight{ sceneHeight },
       m_state{ State::START },
-      m_end{ false }
+      m_end{ false },
+      m_renderNewLevelLabel{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
@@ -85,6 +87,13 @@ namespace Sim {
         .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
         .playersToDraw        = 1
       });
+      if(m_renderNewLevelLabel) {
+        m_renderManager.renderLevelLabel(m_levelManager.currentLevel(), m_levelLabelAlpha);
+        m_levelLabelAlpha -= delta;
+        if(m_levelLabelAlpha < 0.0f) {
+          m_renderNewLevelLabel = false;
+        }
+      }
     } else if(m_state == State::MENU) {
       m_menuManager.update();
       m_renderManager.renderMenu();
@@ -96,6 +105,8 @@ namespace Sim {
       m_levelManager.changeLevel();
       m_state = State::PLAY;
       clearLevel();
+      m_renderNewLevelLabel = true;
+      m_levelLabelAlpha = 1.0f;
     } else if(m_state == State::LOSE) {
       loseScreenHandleInput();
       m_renderManager.renderLoseScreen();
@@ -129,6 +140,7 @@ namespace Sim {
   {
     if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
       resetGame();
+      m_state = State::PLAY;
     } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
       m_end = true;
     }
@@ -142,10 +154,13 @@ namespace Sim {
       m_end = true;
     }
   }
+
   void SimulationManager::startScreenHandleInput()
   {
     if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
       m_state = State::PLAY;
+      m_renderNewLevelLabel = true;
+      m_levelLabelAlpha = 1.0f;
     } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
       m_end = true;
     }

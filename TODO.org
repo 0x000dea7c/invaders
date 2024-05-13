@@ -22,9 +22,9 @@
 * DONE Menu option selection, highlight, smooth edges
 * DONE Make window no resizable
 * DONE Lose and win screens and input handling
-* TODO Adjust win/lose screen text, aligned
-* TODO Audio for missile hits, bg music, die music, win round and win game
+* DONE Adjust win/lose screen text, aligned
 * TODO Add text with fading alpha for each new level
+* TODO Audio for missile hits, bg music, die music, win round and win game
 * TODO Points?
 * TODO Power-ups?
 * TODO Code it on windows, too, to prove the portability point
