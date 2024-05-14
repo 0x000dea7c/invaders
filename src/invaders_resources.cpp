@@ -38,7 +38,7 @@
 #define FRAG_SHADER_FILE_BASIC           "./res/shaders/basic.frag"
 // Audio
 #define AUDIO_FILE_BG_MUSIC   "./res/audio/Otome90fade.ogg"
-#define AUDIO_FILE_EXPLOSION  "./res/audio/explosion.ogg"
+#define AUDIO_FILE_EXPLOSION  "./res/audio/RetroExplosion15.ogg"
 #define AUDIO_FILE_LOSE_GAME  "./res/audio/loseGame.ogg"
 #define AUDIO_FILE_WIN_GAME   "./res/audio/winGame.ogg"
 #define AUDIO_FILE_PLAYER_DIE "./res/audio/playerDie.ogg"
@@ -263,13 +263,13 @@ namespace Res {
     // -----------------------------------------------
     Game::initAudioSystem();
     IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
-    // IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
+    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
     // IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
     // IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
     // IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
     // IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
     m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC);
-    // m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION);
+    m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION);
     // m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME);
     // m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME);
     // m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE);
