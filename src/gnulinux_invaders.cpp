@@ -11,8 +11,7 @@
 #include <cstdlib>
 #include <pulse/pulseaudio.h>
 #include <iostream>
-#include <future>
-#include <pulse/sample.h>
+#include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -227,7 +226,12 @@ namespace Game {
         .minreq    = static_cast<uint32_t>(pa_usec_to_bytes(10000, &sampleSpec)),
         .fragsize  = static_cast<uint32_t>(-1)
       };
-      pa_stream_connect_playback(stream, "alsa_output.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo", &bufferAttrs, PA_STREAM_ADJUST_LATENCY, nullptr, nullptr);
+      pa_stream_connect_playback(stream,
+                                 "alsa_output.usb-SteelSeries_SteelSeries_Arctis_1_Wireless-00.analog-stereo",
+                                 &bufferAttrs,
+                                 PA_STREAM_ADJUST_LATENCY,
+                                 nullptr,
+                                 nullptr);
       while(true) {
         const auto state = pa_stream_get_state(stream);
         if(state == PA_STREAM_READY) {
@@ -240,18 +244,14 @@ namespace Game {
         pa_threaded_mainloop_wait(mainloop);
       }
       const auto bytesToWrite = data->m_samples * data->m_channels * sizeof(short);
-      // std::clog << "bytesToWrite = " << bytesToWrite << std::endl;
-      // assert(bytesToWrite >= 1800000 && bytesToWrite <= 2000000);
-      // TODO: optimisation available look at pa wiki
       pa_stream_write(stream, data->m_data, bytesToWrite, nullptr, 0, PA_SEEK_RELATIVE);
-      // Wait for the stream to finish playing
-      pa_operation* drain_op = pa_stream_drain(stream, [](pa_stream* s, int success, void* userdata) {
+      auto* drain = pa_stream_drain(stream, []([[maybe_unused]]pa_stream* s, [[maybe_unused]]int success, void* userdata) {
         pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(userdata), 0);
       }, mainloop);
-      while (pa_operation_get_state(drain_op) == PA_OPERATION_RUNNING) {
+      while (pa_operation_get_state(drain) == PA_OPERATION_RUNNING) {
         pa_threaded_mainloop_wait(mainloop);
       }
-      pa_operation_unref(drain_op);
+      pa_operation_unref(drain);
       pa_stream_disconnect(stream);
       pa_stream_unref(stream);
       pa_threaded_mainloop_unlock(mainloop);
