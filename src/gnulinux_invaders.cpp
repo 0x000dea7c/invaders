@@ -9,9 +9,20 @@
 #include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
+#include <pulse/channelmap.h>
+#include <pulse/context.h>
+#include <pulse/def.h>
+#include <pulse/mainloop.h>
+#include <pulse/pulseaudio.h>
+#include <iostream>
+#include <pulse/thread-mainloop.h>
+#include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+//#define STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.c"
 
 #include "invaders.h"
 #include "invaders_opengl.h"
@@ -60,8 +71,9 @@ PFNGLUNIFORM1FPROC glUniform1f;
 PFNGLUNIFORM3FPROC glUniform3f;
 PFNGLUNIFORM4FPROC glUniform4f;
 
-void Game::initOpenGLfptrs()
-{
+namespace Game {
+  void initOpenGLfptrs()
+  {
     glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)getGLProcAddress("glGetUniformLocation");
     glUniform1i = (PFNGLUNIFORM1IPROC)getGLProcAddress("glUniform1i");
     glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)getGLProcAddress("glGenVertexArrays");
@@ -95,9 +107,8 @@ void Game::initOpenGLfptrs()
     glUniform1f = (PFNGLUNIFORM1FPROC)getGLProcAddress("glUniform1f");
     glUniform3f = (PFNGLUNIFORM3FPROC)getGLProcAddress("glUniform3f");
     glUniform4f = (PFNGLUNIFORM4FPROC)getGLProcAddress("glUniform4f");
-}
+  }
 
-namespace Game {
   TexInfo loadTexFromFile(const LoadTexFromFileArgs& args)
   {
     if(args.m_flip) {
@@ -141,6 +152,113 @@ namespace Game {
       .m_id = id
     };
   }
+
+  std::unique_ptr<AudioData> openAudioFile(const char* filepath)
+  {
+    AudioData data{
+      .m_channels = 0,
+      .m_sampleRate = 0,
+      .m_samples = 0,
+      .m_data = nullptr
+    };
+    // using a lightweight lib here bc cba dealing w/ audio
+    data.m_samples = stb_vorbis_decode_filename(filepath, &data.m_channels, &data.m_sampleRate, &data.m_data);
+    if(data.m_samples <= 0) {
+      std::cerr << "Error loading audio " << filepath << '\n';
+      return nullptr;
+    }
+    return std::make_unique<AudioData>(data);
+  }
+
+  // use pulseaudio async API bc pulseaudio-simple has functions that block the main thread and
+  // that's not desired
+  // initialise pulseaudio main loop and context, etc
+  static pa_threaded_mainloop* mainloop{ nullptr };
+  static pa_mainloop_api* mainloopAPI{ nullptr };
+  static pa_context* ctx{ nullptr };
+  static pa_channel_map map;
+
+  // you could pass data here, in case you need to do something if the context
+  // changes, but you don't need it for now
+  static void contextStateCallback([[maybe_unused]]pa_context* ctx, [[maybe_unused]]void* data)
+  {
+    pa_threaded_mainloop_signal(mainloop, 0);
+  }
+
+  // this takes forever wtf
+  bool initAudioSystem()
+  {
+    mainloop    = pa_threaded_mainloop_new();
+    if(!mainloop) {
+      std::cerr << "PulseAudio: couldn't create threaded mainloop.\n";
+      return false;
+    }
+    mainloopAPI = pa_threaded_mainloop_get_api(mainloop);
+    ctx = pa_context_new(mainloopAPI, "Invaders");
+    if(!ctx) {
+      std::cerr << "PulseAudio: couldn't create context.\n";
+      return false;
+    }
+    // needed to wait for the ctx to be ready
+    pa_context_set_state_callback(ctx, &contextStateCallback, mainloop);
+    // lock mainloop so it doesn't run inmediately and crash before the ctx is ready
+    pa_threaded_mainloop_lock(mainloop);
+    if(!pa_threaded_mainloop_start(mainloop)) {
+      std::cerr << "PulseAudio: couldn't start mainloop.\n";
+      return false;
+    }
+    if(!pa_context_connect(ctx, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr)) {
+      std::cerr << "PulseAudio: couldn't connect to context.\n";
+      return false;
+    }
+    while(true) {
+      // wait until the ctx is ready
+      const auto ctxState = pa_context_get_state(ctx);
+      if(ctxState == PA_CONTEXT_READY) {
+        break;
+      }
+      pa_threaded_mainloop_wait(mainloop);
+    }
+    pa_channel_map_init_stereo(&map);
+    return true;
+  }
+
+  // you don't want to do anything here, really
+  static void streamStateCallback([[maybe_unused]]pa_stream* s, [[maybe_unused]]void* data)
+  {
+  }
+
+  void playAudioTrack(AudioData* data)
+  {
+    static const pa_sample_spec pss{
+      .format   = PA_SAMPLE_S16LE,
+      .rate     = static_cast<unsigned int>(data->m_sampleRate),
+      .channels = static_cast<unsigned char>(data->m_channels)
+    };
+    pa_stream* stream = pa_stream_new(ctx, "playback", &pss, &map);
+    pa_stream_set_state_callback(stream, streamStateCallback, mainloop);
+    if(!pa_stream_connect_playback(stream, nullptr, nullptr, PA_STREAM_NOFLAGS, nullptr, nullptr)) {
+      std::clog << "PulseAudio: Couldn't connect playback to stream.\n";
+      return;
+    }
+    // stream couldn't be ready yet, so wait meanwhile
+    while(true) {
+      const auto streamState = pa_stream_get_state(stream);
+      if(streamState == PA_STREAM_READY) {
+        break;
+      }
+      pa_threaded_mainloop_wait(mainloop);
+    }
+    pa_threaded_mainloop_unlock(mainloop);
+    // now unlock the stream to let it play
+    pa_stream_cork(stream, 0, nullptr, mainloop);
+  }
+
+  void closeAudioSystem()
+  {
+
+  }
+
 };
 
 // !!! One translation unit to speed up compilation !!!

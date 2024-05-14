@@ -42,4 +42,11 @@ namespace IDs {
   extern int SID_SHADER_TEXT;
   extern int SID_SHADER_MENU;
   extern int SID_SHADER_BASIC;
+  // audio ids
+  extern int SID_AUDIO_BG_MUSIC;
+  extern int SID_AUDIO_EXPLOSION;
+  extern int SID_AUDIO_WIN_LEVEL;
+  extern int SID_AUDIO_WIN_GAME;
+  extern int SID_AUDIO_LOSE_GAME;
+  extern int SID_AUDIO_PLAYER_DIE;
 };

@@ -8,7 +8,7 @@
 # things differently
 #
 all:
-	g++ -ggdb -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -lpulse-simple -o invaders
+	g++ -std=c++20 -ggdb -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -lpulse -o invaders
 
 clean:
 	rm invaders

@@ -1,4 +1,5 @@
 #include "invaders_sim.h"
+#include "common.h"
 #include "invaders_enemy.h"
 #include "invaders_input.h"
 #include "invaders_menu.h"
@@ -53,6 +54,7 @@ namespace Sim {
     m_eventManager.subscribe(EventType::MenuContinue, [this](const Event&){
       m_state = State::PLAY;
     });
+    m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC);
   }
 
   SimulationManager::~SimulationManager()

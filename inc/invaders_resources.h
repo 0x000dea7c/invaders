@@ -1,5 +1,6 @@
 #pragma once
 
+#include "invaders.h"
 #include "invaders_math.h"
 #include "invaders_opengl.h"
 #include <functional>
@@ -95,6 +96,7 @@ namespace Res {
     {
       glUniform4f(getUniformLocation(id, uniname), value.x, value.y, value.z, value.w);
     }
+    void playAudioTrack(const int sid) const noexcept;
   private:
     // if anything fails, game will close with diag msg
     unsigned int loadCompileShaders(const char* vertpath, const char* fragpath); // returns shader program id
@@ -110,6 +112,7 @@ namespace Res {
     Shader loadBasicShader(const char* vertpath, const char* fragpath);
     std::unordered_map<int, std::unique_ptr<Texture2D>> m_textures;
     std::unordered_map<int, std::unique_ptr<Shader>> m_shaders;
+    std::unordered_map<int, std::unique_ptr<Game::AudioData>> m_audioTracks;
     std::unordered_map<std::pair<unsigned int, std::string>, unsigned int, PairHash> m_uniforms;
   };
 

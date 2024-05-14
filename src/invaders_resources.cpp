@@ -1,7 +1,7 @@
 #include "invaders_resources.h"
 #include "common.h"
-#include "invaders_math.h"
 #include "invaders.h"
+#include "invaders_math.h"
 // NOTE: HEADS UP! need to include renderer to use InstanceData classes, 99.9% it's wrong
 #include "invaders_renderer.h"
 
@@ -36,6 +36,13 @@
 #define FRAG_SHADER_FILE_MENU            "./res/shaders/menu.frag"
 #define VERT_SHADER_FILE_BASIC           "./res/shaders/basic.vert"
 #define FRAG_SHADER_FILE_BASIC           "./res/shaders/basic.frag"
+// Audio
+#define AUDIO_FILE_BG_MUSIC   "./res/audio/Otome90fade.ogg"
+#define AUDIO_FILE_EXPLOSION  "./res/audio/explosion.ogg"
+#define AUDIO_FILE_LOSE_GAME  "./res/audio/loseGame.ogg"
+#define AUDIO_FILE_WIN_GAME   "./res/audio/winGame.ogg"
+#define AUDIO_FILE_PLAYER_DIE "./res/audio/playerDie.ogg"
+#define AUDIO_FILE_WIN_LEVEL  "./res/audio/winLevel.ogg"
 
 #include <iostream>
 #include <fstream>
@@ -65,6 +72,13 @@ namespace IDs {
   int SID_SHADER_TEXT;
   int SID_SHADER_MENU;
   int SID_SHADER_BASIC;
+  // audio
+  int SID_AUDIO_BG_MUSIC;
+  int SID_AUDIO_EXPLOSION;
+  int SID_AUDIO_LOSE_GAME;
+  int SID_AUDIO_WIN_GAME;
+  int SID_AUDIO_PLAYER_DIE;
+  int SID_AUDIO_WIN_LEVEL;
 };
 
 namespace Res {
@@ -244,6 +258,22 @@ namespace Res {
     m_shaders[IDs::SID_SHADER_BASIC] = std::make_unique<Shader>(loadBasicShader(VERT_SHADER_FILE_BASIC, FRAG_SHADER_FILE_BASIC));
     // uniform caching
     m_uniforms.reserve(8);
+    // -----------------------------------------------
+    // Audio
+    // -----------------------------------------------
+    Game::initAudioSystem();
+    IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
+    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
+    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
+    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
+    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
+    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC);
+    // m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION);
+    // m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME);
+    // m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME);
+    // m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE);
+    // m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL);
   }
 
   ResourceManager::~ResourceManager()
@@ -254,6 +284,7 @@ namespace Res {
     for(auto& s : m_shaders) {
       glDeleteProgram(s.second->m_id);
     }
+    closeAudioSystem();
   }
 
   bool ResourceManager::checkCompileErrors(const unsigned int object, const ShaderType type)
@@ -718,4 +749,10 @@ namespace Res {
     return Shader(id, VAO, VBO);
   }
 
+  void ResourceManager::playAudioTrack(const int sid) const noexcept
+  {
+    // this is a bridge to the underlying platform that needs to define how to play audio
+    // yes, looks like a mess, but the idea is to not use platform dependent code here
+    Game::playAudioTrack(m_audioTracks.at(sid).get());
+  }
 };

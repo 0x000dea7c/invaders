@@ -77,7 +77,7 @@ namespace Game {
       // compute displacement due to new velocity for *this frame
       const auto velocity_dt = scale(m_player.m_vel, delta);
       // additional position adjustment due to acceleration using the kinematic equation: Δx = ½at²
-      const auto acc_dt = scale(acc, 0.5f * square(delta));
+      const auto acc_dt = scale(acc, 0.5f * Math::square(delta));
       // update position by adding both velocity displacement and acceleration displacement
       // clamp pos with screen dimensions
       m_player.m_pos = add(m_player.m_pos, velocity_dt);

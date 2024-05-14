@@ -23,7 +23,7 @@
 * DONE Make window no resizable
 * DONE Lose and win screens and input handling
 * DONE Adjust win/lose screen text, aligned
-* TODO Add text with fading alpha for each new level
+* DONE Add text with fading alpha for each new level
 * TODO Audio for missile hits, bg music, die music, win round and win game
 * TODO Points?
 * TODO Power-ups?
