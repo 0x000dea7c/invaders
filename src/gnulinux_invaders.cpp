@@ -9,14 +9,10 @@
 #include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
-#include <pulse/channelmap.h>
-#include <pulse/context.h>
-#include <pulse/def.h>
-#include <pulse/mainloop.h>
 #include <pulse/pulseaudio.h>
 #include <iostream>
-#include <pulse/thread-mainloop.h>
-#include <thread>
+#include <future>
+#include <pulse/sample.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -174,89 +170,91 @@ namespace Game {
   // that's not desired
   // initialise pulseaudio main loop and context, etc
   static pa_threaded_mainloop* mainloop{ nullptr };
-  static pa_mainloop_api* mainloopAPI{ nullptr };
-  static pa_context* ctx{ nullptr };
-  static pa_channel_map map;
-
-  // you could pass data here, in case you need to do something if the context
-  // changes, but you don't need it for now
-  static void contextStateCallback([[maybe_unused]]pa_context* ctx, [[maybe_unused]]void* data)
-  {
-    pa_threaded_mainloop_signal(mainloop, 0);
-  }
+  static pa_context* context{ nullptr };
 
   // this takes forever wtf
   bool initAudioSystem()
   {
-    mainloop    = pa_threaded_mainloop_new();
-    if(!mainloop) {
-      std::cerr << "PulseAudio: couldn't create threaded mainloop.\n";
-      return false;
-    }
-    mainloopAPI = pa_threaded_mainloop_get_api(mainloop);
-    ctx = pa_context_new(mainloopAPI, "Invaders");
-    if(!ctx) {
-      std::cerr << "PulseAudio: couldn't create context.\n";
-      return false;
-    }
-    // needed to wait for the ctx to be ready
-    pa_context_set_state_callback(ctx, &contextStateCallback, mainloop);
-    // lock mainloop so it doesn't run inmediately and crash before the ctx is ready
-    pa_threaded_mainloop_lock(mainloop);
-    if(!pa_threaded_mainloop_start(mainloop)) {
-      std::cerr << "PulseAudio: couldn't start mainloop.\n";
-      return false;
-    }
-    if(!pa_context_connect(ctx, nullptr, PA_CONTEXT_NOAUTOSPAWN, nullptr)) {
-      std::cerr << "PulseAudio: couldn't connect to context.\n";
-      return false;
-    }
+    mainloop = pa_threaded_mainloop_new();
+    assert(mainloop);
+    auto* mainloopAPI = pa_threaded_mainloop_get_api(mainloop);
+    assert(mainloopAPI);
+    context = pa_context_new(mainloopAPI, "test");
+    assert(context);
+    pa_context_set_state_callback(context, []([[maybe_unused]]pa_context* ctx, void* data) {
+      pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(data), 0);
+    }, mainloop);
+    pa_threaded_mainloop_lock(mainloop); // locked!!!!!!!!!!!!!
+    pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+    pa_threaded_mainloop_start(mainloop);
     while(true) {
-      // wait until the ctx is ready
-      const auto ctxState = pa_context_get_state(ctx);
-      if(ctxState == PA_CONTEXT_READY) {
+      const auto state = pa_context_get_state(context);
+      if(state == PA_CONTEXT_READY) {
         break;
+      } else if(state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
+        pa_threaded_mainloop_unlock(mainloop);
+        pa_context_unref(context);
+        pa_threaded_mainloop_free(mainloop);
+        assert(false);
       }
       pa_threaded_mainloop_wait(mainloop);
     }
-    pa_channel_map_init_stereo(&map);
+    pa_threaded_mainloop_unlock(mainloop); // unlocked!!!!!!!!!!!
     return true;
-  }
-
-  // you don't want to do anything here, really
-  static void streamStateCallback([[maybe_unused]]pa_stream* s, [[maybe_unused]]void* data)
-  {
   }
 
   void playAudioTrack(AudioData* data)
   {
-    static const pa_sample_spec pss{
-      .format   = PA_SAMPLE_S16LE,
-      .rate     = static_cast<unsigned int>(data->m_sampleRate),
-      .channels = static_cast<unsigned char>(data->m_channels)
-    };
-    pa_stream* stream = pa_stream_new(ctx, "playback", &pss, &map);
-    pa_stream_set_state_callback(stream, streamStateCallback, mainloop);
-    if(!pa_stream_connect_playback(stream, nullptr, nullptr, PA_STREAM_NOFLAGS, nullptr, nullptr)) {
-      std::clog << "PulseAudio: Couldn't connect playback to stream.\n";
-      return;
-    }
-    // stream couldn't be ready yet, so wait meanwhile
-    while(true) {
-      const auto streamState = pa_stream_get_state(stream);
-      if(streamState == PA_STREAM_READY) {
-        break;
+    auto a = std::async(std::launch::async, [data]() {
+      pa_threaded_mainloop_lock(mainloop);
+      auto sampleSpec = pa_sample_spec{
+        .format = PA_SAMPLE_S16LE,
+        .rate = static_cast<uint32_t>(data->m_sampleRate),
+        .channels = static_cast<uint8_t>(data->m_channels)
+      };
+      auto* stream = pa_stream_new(context, "audio stream test", &sampleSpec, nullptr);
+      if(!stream) {
+        pa_threaded_mainloop_unlock(mainloop);
+        assert(false);
       }
-      pa_threaded_mainloop_wait(mainloop);
-    }
-    pa_threaded_mainloop_unlock(mainloop);
-    // now unlock the stream to let it play
-    pa_stream_cork(stream, 0, nullptr, mainloop);
+      pa_stream_set_state_callback(stream, []([[maybe_unused]]pa_stream*, void* data) {
+        pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(data), 0);
+      }, mainloop);
+      auto bufferAttrs = pa_buffer_attr{
+        .maxlength = static_cast<uint32_t>(-1),
+        .tlength   = static_cast<uint32_t>(pa_usec_to_bytes(20000, &sampleSpec)),
+        .prebuf    = static_cast<uint32_t>(-1),
+        .minreq    = static_cast<uint32_t>(pa_usec_to_bytes(10000, &sampleSpec)),
+        .fragsize  = static_cast<uint32_t>(-1)
+      };
+      pa_stream_connect_playback(stream, nullptr, &bufferAttrs, PA_STREAM_ADJUST_LATENCY, nullptr, nullptr);
+      while(true) {
+        const auto state = pa_stream_get_state(stream);
+        if(state == PA_STREAM_READY) {
+          break;
+        } else if(state == PA_STREAM_FAILED || state == PA_STREAM_TERMINATED) {
+          pa_stream_unref(stream);
+          pa_threaded_mainloop_unlock(mainloop);
+          assert(false);
+        }
+        pa_threaded_mainloop_wait(mainloop);
+      }
+      const auto bytesToWrite = data->m_sampleRate * data->m_channels * sizeof(short);
+      pa_stream_write(stream, data->m_data, bytesToWrite, nullptr, 0, PA_SEEK_RELATIVE);
+      pa_stream_disconnect(stream);
+      pa_stream_unref(stream);
+      pa_threaded_mainloop_unlock(mainloop);
+    });
   }
 
   void closeAudioSystem()
   {
-
+    pa_threaded_mainloop_lock(mainloop);
+    pa_context_disconnect(context);
+    pa_context_unref(context);
+    pa_threaded_mainloop_unlock(mainloop);
+    pa_threaded_mainloop_stop(mainloop);
+    pa_threaded_mainloop_free(mainloop);
   }
 
 };

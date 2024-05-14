@@ -263,11 +263,11 @@ namespace Res {
     // -----------------------------------------------
     Game::initAudioSystem();
     IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
-    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
-    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
-    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
-    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
-    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    // IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
+    // IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
+    // IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
+    // IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
+    // IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
     m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC);
     // m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION);
     // m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME);
@@ -284,7 +284,7 @@ namespace Res {
     for(auto& s : m_shaders) {
       glDeleteProgram(s.second->m_id);
     }
-    closeAudioSystem();
+    // closeAudioSystem();
   }
 
   bool ResourceManager::checkCompileErrors(const unsigned int object, const ShaderType type)
