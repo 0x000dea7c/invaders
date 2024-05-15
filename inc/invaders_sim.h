@@ -71,6 +71,7 @@ namespace Sim {
     State m_state;
     bool m_end;
     bool m_renderNewLevelLabel;
+    bool m_playedSound;
   };
 
 };

@@ -5,7 +5,6 @@
 // NOTE: HEADS UP! need to include renderer to use InstanceData classes, 99.9% it's wrong
 #include "invaders_renderer.h"
 
-// TODO: all of this should be in a config file of some sort...
 // textures
 #define TEX_FILE_PLAYER          "./res/textures/player.png"
 #define TEX_FILE_ALIEN_ATLAS     "./res/textures/aliens.png"
@@ -39,10 +38,10 @@
 // Audio
 #define AUDIO_FILE_BG_MUSIC   "./res/audio/Otome90fade.ogg"
 #define AUDIO_FILE_EXPLOSION  "./res/audio/RetroExplosion15.ogg"
-#define AUDIO_FILE_LOSE_GAME  "./res/audio/loseGame.ogg"
-#define AUDIO_FILE_WIN_GAME   "./res/audio/winGame.ogg"
-#define AUDIO_FILE_PLAYER_DIE "./res/audio/playerDie.ogg"
-#define AUDIO_FILE_WIN_LEVEL  "./res/audio/winLevel.ogg"
+#define AUDIO_FILE_LOSE_GAME  "./res/audio/RetroNegativeMelody02.ogg"
+#define AUDIO_FILE_WIN_GAME   "./res/audio/RetroSuccess.ogg"
+#define AUDIO_FILE_PLAYER_DIE "./res/audio/RetronegativeShort23.ogg"
+#define AUDIO_FILE_WIN_LEVEL  "./res/audio/RetroBlopStereoUP04.ogg"
 
 #include <iostream>
 #include <fstream>
@@ -264,16 +263,16 @@ namespace Res {
     Game::initAudioSystem();
     IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
     IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
-    // IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
-    // IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
-    // IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
-    // IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
-    m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC);
-    m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION);
-    // m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME);
-    // m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME);
-    // m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE);
-    // m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL);
+    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
+    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
+    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
+    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC,   AudioType::MUSIC);
+    m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION,  AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME,  AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME,   AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE, AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL,  AudioType::EFFECT);
   }
 
   ResourceManager::~ResourceManager()
@@ -284,7 +283,7 @@ namespace Res {
     for(auto& s : m_shaders) {
       glDeleteProgram(s.second->m_id);
     }
-    // closeAudioSystem();
+    closeAudioSystem();
   }
 
   bool ResourceManager::checkCompileErrors(const unsigned int object, const ShaderType type)
@@ -749,10 +748,28 @@ namespace Res {
     return Shader(id, VAO, VBO);
   }
 
-  void ResourceManager::playAudioTrack(const int sid) const noexcept
+  void ResourceManager::playAudioTrack(const int sid, const bool loop) const noexcept
   {
-    // this is a bridge to the underlying platform that needs to define how to play audio
-    // yes, looks like a mess, but the idea is to not use platform dependent code here
-    Game::playAudioTrack(m_audioTracks.at(sid).get());
+    Game::playAudioTrack(m_audioTracks.at(sid).get(), loop);
+  }
+
+  void ResourceManager::stopAudioTrack(const int sid) const noexcept
+  {
+    Game::stopAudioTrack(m_audioTracks.at(sid).get());
+  }
+
+  void ResourceManager::increaseVolume() const noexcept
+  {
+    Game::increaseVolume();
+  }
+
+  void ResourceManager::decreaseVolume() const noexcept
+  {
+    Game::decreaseVolume();
+  }
+
+  float ResourceManager::getVolume() const noexcept
+  {
+    return Game::getNormalizedVolumeValue();
   }
 };

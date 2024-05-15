@@ -25,6 +25,12 @@
 * DONE Adjust win/lose screen text, aligned
 * DONE Add text with fading alpha for each new level
 * TODO Audio for missile hits, bg music, die music, win round and win game
+- bg        ok
+- missile   ok
+- die       ok
+- win rnd
+- win game
+- lose game
 * TODO Points?
 * TODO Power-ups?
 * TODO Code it on windows, too, to prove the portability point

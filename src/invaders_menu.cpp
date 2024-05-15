@@ -34,7 +34,13 @@ namespace Game {
         m_eventManager.post(Event(EventType::MenuContinue));
       } else if(m_currentItem == MenuItem::QUIT) {
         m_eventManager.post(Event(EventType::MenuQuit));
-      } // TODO: sound
+      }
+    } else if(m_currentItem == MenuItem::SOUND) {
+      if(m_inputManager.isKeyPressed(Key::KEY_LEFT) || m_inputManager.isKeyPressed(Key::KEY_A)) {
+	m_eventManager.post(Event(EventType::MenuDecreaseVolume));
+      } else if(m_inputManager.isKeyPressed(Key::KEY_RIGHT) || m_inputManager.isKeyPressed(Key::KEY_D)) {
+	m_eventManager.post(Event(EventType::MenuIncreaseVolume));
+      }
     }
   }
 };

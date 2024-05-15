@@ -10,8 +10,8 @@ namespace Ev {
     PlayerDestroyed,
     AlienDestroyed,
     MenuContinue,
-    MenuSoundIncrease,
-    MenuSoundDecrease,
+    MenuIncreaseVolume,
+    MenuDecreaseVolume,
     MenuQuit
   };
 

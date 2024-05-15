@@ -101,21 +101,24 @@ namespace Renderer {
     // now draw text on top of it
     // @HACK: since you don't have any way to center text on the screen, you need to do this
     // make them static to avoid computing this every time
+    std::stringstream volumess;
+    volumess << '<' << m_resourceManager.getVolume() << '>';
+    const auto volumestr = "Sound:" + volumess.str();
     static const auto centerX       = WINDOW_WIDTH * 0.5f;
     static const auto continueWidth = m_textRenderer.getTextWidth("Continue");
-    static const auto soundWidth    = m_textRenderer.getTextWidth("Sound");
+    static const auto soundWidth    = m_textRenderer.getTextWidth(volumestr);
     static const auto quitWidth     = m_textRenderer.getTextWidth("Quit");
     if(m_menuManager.currentItem() == Game::MenuItem::CONTINUE) {
       m_textRenderer.renderText("Continue", kYellowColour, centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
       m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::SOUND) {
       m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kYellowColour, centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kYellowColour, centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
       m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::QUIT) {
       m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText("Sound",    kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
       m_textRenderer.renderText("Quit",     kYellowColour, centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
     }
   }

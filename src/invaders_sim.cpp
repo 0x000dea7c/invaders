@@ -46,7 +46,8 @@ namespace Sim {
       m_sceneHeight{ sceneHeight },
       m_state{ State::START },
       m_end{ false },
-      m_renderNewLevelLabel{ false }
+      m_renderNewLevelLabel{ false },
+      m_playedSound{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
@@ -54,7 +55,14 @@ namespace Sim {
     m_eventManager.subscribe(EventType::MenuContinue, [this](const Event&){
       m_state = State::PLAY;
     });
-    m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC);
+    // here? or in resources??? :thinking:
+    m_eventManager.subscribe(EventType::MenuIncreaseVolume, [this](const Event&){
+      m_resourceManager.increaseVolume();
+    });
+    m_eventManager.subscribe(EventType::MenuDecreaseVolume, [this](const Event&){
+      m_resourceManager.decreaseVolume();
+    });
+    m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC, true);
   }
 
   SimulationManager::~SimulationManager()
@@ -69,6 +77,7 @@ namespace Sim {
       return;
     }
     if(m_state == State::PLAY) {
+      m_playedSound = false;
       if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
         m_state = State::MENU;
         return;
@@ -103,15 +112,29 @@ namespace Sim {
       // don't know where to put this, state manager? for now it will be here
       winScreenHandleInput();
       m_renderManager.renderWinScreen();
+      // TODO: there's a problem here, need to get this bool out somwhow; problem
+      // is that the state transition is not instant, so you can't just keep playing
+      // the sound; that doesn't happen with the win level sound bc the state changes
+      // in one frame
+      if(!m_playedSound) {
+	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);
+	m_playedSound = true;
+      }
     } else if(m_state == State::WIN_LEVEL) {
       m_levelManager.changeLevel();
       m_state = State::PLAY;
       clearLevel();
       m_renderNewLevelLabel = true;
       m_levelLabelAlpha = 1.0f;
+      m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_LEVEL, false);
     } else if(m_state == State::LOSE) {
       loseScreenHandleInput();
       m_renderManager.renderLoseScreen();
+      // TODO: remove bool here too
+      if(!m_playedSound) {
+	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_LOSE_GAME, false);
+	m_playedSound = true;
+      }
     } else if(m_state == State::START) {
       startScreenHandleInput();
       m_renderManager.renderStartScreen();
@@ -152,6 +175,7 @@ namespace Sim {
   {
     if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
       resetGame();
+      m_state = State::PLAY;
     } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
       m_end = true;
     }

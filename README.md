@@ -2,21 +2,17 @@
 
 Second game in C++ and OpenGL with not too many dependencies
 
-The idea was to not use any, but don't have much time left for audio and image processing
-
 WIP - WORK IN PROGRESS
 
-# Dependencies
+# External dependencies
 
 ## GNU/LINUX
 
-- X11 lib: pre-installed in most distros
-- OpenGL lib: pre-installed in most distros
-- PulseAudio lib: pre-installed in most distros
-- libvorbis: pre-installed in most distros
-- stb_image.h and stb_vorbis.c: included in src code, you don't have to worry
+The idea was to not use any, but don't have much time left for audio, text and image processing. Might get into them eventually.
 
-- Freetype (freetype2): you probably need to install this separately if you don't have it already
+- libvorbis: pre-installed in most distros
+- SDL_mixer & SDL: you need to install this separately
+- Freetype (freetype2): you probably need to install this separately, too
 
 ## WINDOWS
 

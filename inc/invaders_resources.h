@@ -96,7 +96,11 @@ namespace Res {
     {
       glUniform4f(getUniformLocation(id, uniname), value.x, value.y, value.z, value.w);
     }
-    void playAudioTrack(const int sid) const noexcept;
+    void playAudioTrack(const int sid, const bool loop) const noexcept;
+    void stopAudioTrack(const int sid) const noexcept;
+    void increaseVolume() const noexcept;
+    void decreaseVolume() const noexcept;
+    float getVolume() const noexcept;
   private:
     // if anything fails, game will close with diag msg
     unsigned int loadCompileShaders(const char* vertpath, const char* fragpath); // returns shader program id

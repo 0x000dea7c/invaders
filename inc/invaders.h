@@ -26,17 +26,26 @@ namespace Game {
 
   TexInfo loadTexFromFile(const LoadTexFromFileArgs& args);
 
-  class AudioData final {
-  public:
-    int m_channels;
-    int m_sampleRate;
-    int m_samples;
-    short* m_data;
+  //
+  // audio
+  //
+  enum class AudioType {
+    MUSIC,
+    EFFECT
   };
 
-  // returns TRUE -> initialised correctly, FALSE otherwise
+  class AudioData final {
+  public:
+    void* m_data;
+    AudioType m_type;
+  };
+
   bool initAudioSystem();
-  std::unique_ptr<AudioData> openAudioFile(const char* filepath);
+  std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type);
   void playAudioTrack(AudioData* data);
+  void stopAudioTrack(AudioData* data);
+  void increaseVolume();
+  void decreaseVolume();
+  float getNormalizedVolumeValue();
   void closeAudioSystem();
 };

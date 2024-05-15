@@ -63,7 +63,7 @@ namespace Game {
             m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
             m_explosionManager.spawnExplosion(a->m_pos);
-            m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION);
+            m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
           }
         }
       }
@@ -134,7 +134,7 @@ namespace Game {
             m_alienMissiles[i].m_destroyed = true;
             m_explosionManager.spawnExplosion(p->m_pos);
             clearMissiles();
-            m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION);
+            m_resourceManager.playAudioTrack(IDs::SID_AUDIO_PLAYER_DIE, false);
             return;
           }
         }

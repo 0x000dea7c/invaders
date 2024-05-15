@@ -9,15 +9,13 @@
 #include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
-#include <pulse/pulseaudio.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <thread>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-//#define STB_VORBIS_HEADER_ONLY
-#include "stb_vorbis.c"
 
 #include "invaders.h"
 #include "invaders_opengl.h"
@@ -148,125 +146,110 @@ namespace Game {
     };
   }
 
-  std::unique_ptr<AudioData> openAudioFile(const char* filepath)
+  static float volume{ MIX_MAX_VOLUME };
+  static int userAudioDeviceOpt{ 0 };
+
+  std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type)
   {
-    AudioData data{
-      .m_channels = 0,
-      .m_sampleRate = 0,
-      .m_samples = 0,
-      .m_data = nullptr
-    };
-    // using a lightweight lib here bc cba dealing w/ audio
-    data.m_samples = stb_vorbis_decode_filename(filepath, &data.m_channels, &data.m_sampleRate, &data.m_data);
-    if(data.m_samples <= 0) {
-      std::cerr << "Error loading audio " << filepath << '\n';
-      return nullptr;
+    AudioData data;
+    data.m_type = type;
+    switch(data.m_type) {
+    case AudioType::MUSIC:
+      data.m_data = Mix_LoadMUS(filepath);
+      if(!data.m_data) {
+	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << '\n';
+	return nullptr;
+      }
+      break;
+    case AudioType::EFFECT:
+      data.m_data = Mix_LoadWAV(filepath);
+      if(!data.m_data) {
+	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << '\n';
+	return nullptr;
+      }
+      break;
     }
     return std::make_unique<AudioData>(data);
   }
 
-  // use pulseaudio async API bc pulseaudio-simple has functions that block the main thread and
-  // that's not desired
-  // initialise pulseaudio main loop and context, etc
-  static pa_threaded_mainloop* mainloop{ nullptr };
-  static pa_context* context{ nullptr };
-
-  // this takes forever wtf
   bool initAudioSystem()
   {
-    mainloop = pa_threaded_mainloop_new();
-    assert(mainloop);
-    auto* mainloopAPI = pa_threaded_mainloop_get_api(mainloop);
-    assert(mainloopAPI);
-    context = pa_context_new(mainloopAPI, "test");
-    assert(context);
-    pa_context_set_state_callback(context, []([[maybe_unused]]pa_context* ctx, void* data) {
-      pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(data), 0);
-    }, mainloop);
-    pa_threaded_mainloop_lock(mainloop); // locked!!!!!!!!!!!!!
-    pa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-    pa_threaded_mainloop_start(mainloop);
-    while(true) {
-      const auto state = pa_context_get_state(context);
-      if(state == PA_CONTEXT_READY) {
-        break;
-      } else if(state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
-        pa_threaded_mainloop_unlock(mainloop);
-        pa_context_unref(context);
-        pa_threaded_mainloop_free(mainloop);
-        assert(false);
-      }
-      pa_threaded_mainloop_wait(mainloop);
+    if(SDL_Init(SDL_INIT_AUDIO) < 0) {
+      std::cerr << __FUNCTION__ << ": couldn't initialise SDL: " << SDL_GetError() << '\n';
+      return false;
     }
-    pa_threaded_mainloop_unlock(mainloop); // unlocked!!!!!!!!!!!
+    // prompt to ask for the device to play audio to; yes, it's not pretty
+    const auto count{ SDL_GetNumAudioDevices(0) };
+    for(int i{ 0 }; i < count; ++i) {
+      std::cout << '(' << i << ") Audio device: " << SDL_GetAudioDeviceName(i, 0) << " found." << std::endl;
+    }
+    std::cout << "Select your audio device: " << std::endl;
+    std::cin >> userAudioDeviceOpt;
+    if(userAudioDeviceOpt < 0 || userAudioDeviceOpt > count) {
+      std::cout << "Invalid audio device selection, try again.\n";
+      return false;
+    }
+    const auto deviceName = SDL_GetAudioDeviceName(userAudioDeviceOpt, 0);
+    if(Mix_OpenAudioDevice(44100, MIX_DEFAULT_FORMAT, 2, 2048, deviceName, 0) < 0) {
+      std::cerr << __FUNCTION__  << ": couldn't open audio device: " << Mix_GetError() << '\n';
+      return false;
+    }
     return true;
   }
 
-  void playAudioTrack(AudioData* data)
+  void playAudioTrack(AudioData* data, const bool loop)
   {
-    auto t = std::thread([data]() {
-      pa_threaded_mainloop_lock(mainloop);
-      auto sampleSpec = pa_sample_spec{
-        .format = PA_SAMPLE_S16LE,
-        .rate = static_cast<uint32_t>(data->m_sampleRate),
-        .channels = static_cast<uint8_t>(data->m_channels)
-      };
-      auto* stream = pa_stream_new(context, "audio stream test", &sampleSpec, nullptr);
-      if(!stream) {
-        pa_threaded_mainloop_unlock(mainloop);
-        assert(false);
-      }
-      pa_stream_set_state_callback(stream, []([[maybe_unused]]pa_stream*, void* data) {
-        pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(data), 0);
-      }, mainloop);
-      auto bufferAttrs = pa_buffer_attr{
-        .maxlength = static_cast<uint32_t>(-1),
-        .tlength   = static_cast<uint32_t>(pa_usec_to_bytes(20000, &sampleSpec)),
-        .prebuf    = static_cast<uint32_t>(-1),
-        .minreq    = static_cast<uint32_t>(pa_usec_to_bytes(10000, &sampleSpec)),
-        .fragsize  = static_cast<uint32_t>(-1)
-      };
-      pa_stream_connect_playback(stream,
-                                 "alsa_output.usb-SteelSeries_SteelSeries_Arctis_1_Wireless-00.analog-stereo",
-                                 &bufferAttrs,
-                                 PA_STREAM_ADJUST_LATENCY,
-                                 nullptr,
-                                 nullptr);
-      while(true) {
-        const auto state = pa_stream_get_state(stream);
-        if(state == PA_STREAM_READY) {
-          break;
-        } else if(state == PA_STREAM_FAILED || state == PA_STREAM_TERMINATED) {
-          pa_stream_unref(stream);
-          pa_threaded_mainloop_unlock(mainloop);
-          assert(false);
-        }
-        pa_threaded_mainloop_wait(mainloop);
-      }
-      const auto bytesToWrite = data->m_samples * data->m_channels * sizeof(short);
-      pa_stream_write(stream, data->m_data, bytesToWrite, nullptr, 0, PA_SEEK_RELATIVE);
-      auto* drain = pa_stream_drain(stream, []([[maybe_unused]]pa_stream* s, [[maybe_unused]]int success, void* userdata) {
-        pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop*>(userdata), 0);
-      }, mainloop);
-      while (pa_operation_get_state(drain) == PA_OPERATION_RUNNING) {
-        pa_threaded_mainloop_wait(mainloop);
-      }
-      pa_operation_unref(drain);
-      pa_stream_disconnect(stream);
-      pa_stream_unref(stream);
-      pa_threaded_mainloop_unlock(mainloop);
-    });
-    t.detach();
+    switch(data->m_type) {
+    case AudioType::MUSIC:
+      // @NOTE: beware! only one music can be played at a time!
+      // -1 means loop forevah
+      Mix_PlayMusic(reinterpret_cast<Mix_Music*>(data->m_data), (loop) ? -1 : 0);
+      break;
+    case AudioType::EFFECT:
+      // you can play as many effects as you want
+      // -1: play on the first free channel you find
+      //  0: play once and stop
+      Mix_PlayChannel(-1, reinterpret_cast<Mix_Chunk*>(data->m_data), (loop) ? -1 : 0);
+      break;
+    }
+  }
+
+  void stopAudioTrack(AudioData* data)
+  {
+    // you only need to stop main music for now
+    switch(data->m_type){
+    case AudioType::MUSIC:
+      Mix_FadeOutMusic(100);
+      break;
+    default:
+      break;
+    }
+  }
+
+  void increaseVolume()
+  {
+    volume = std::min(volume + 13.3f, static_cast<float>(MIX_MAX_VOLUME));
+    Mix_MasterVolume(static_cast<int>(volume));
+    Mix_VolumeMusic(static_cast<int>(volume));
+  }
+
+  void decreaseVolume()
+  {
+    volume = std::max(volume - 13.3f, 0.0f);
+    std::clog << "new vol value: " << volume << std::endl;
+    Mix_MasterVolume(static_cast<int>(volume));
+    Mix_VolumeMusic(static_cast<int>(volume));   
+  }
+
+  float getNormalizedVolumeValue()
+  {
+    return std::round((volume / MIX_MAX_VOLUME) * 10.f) / 10.f;
   }
 
   void closeAudioSystem()
   {
-    pa_threaded_mainloop_lock(mainloop);
-    pa_context_disconnect(context);
-    pa_context_unref(context);
-    pa_threaded_mainloop_unlock(mainloop);
-    pa_threaded_mainloop_stop(mainloop);
-    pa_threaded_mainloop_free(mainloop);
+    Mix_CloseAudio();
+    SDL_Quit();
   }
 
 };
