@@ -36,10 +36,10 @@
 #define VERT_SHADER_FILE_BASIC           "./res/shaders/basic.vert"
 #define FRAG_SHADER_FILE_BASIC           "./res/shaders/basic.frag"
 // Audio
-#define AUDIO_FILE_BG_MUSIC   "./res/audio/Otome90fade.ogg"
-#define AUDIO_FILE_EXPLOSION  "./res/audio/RetroExplosion15.ogg"
+#define AUDIO_FILE_BG_MUSIC   "./res/audio/music_zapsplat_game_music_action_retro_8_bit_repeating_016.ogg"
+#define AUDIO_FILE_EXPLOSION  "./res/audio/mixkit-war-explosions-2773.ogg"
 #define AUDIO_FILE_LOSE_GAME  "./res/audio/RetroNegativeMelody02.ogg"
-#define AUDIO_FILE_WIN_GAME   "./res/audio/RetroSuccess.ogg"
+#define AUDIO_FILE_WIN_GAME   "./res/audio/mixkit-game-level-completed-2059.ogg"
 #define AUDIO_FILE_PLAYER_DIE "./res/audio/RetronegativeShort23.ogg"
 #define AUDIO_FILE_WIN_LEVEL  "./res/audio/RetroBlopStereoUP04.ogg"
 

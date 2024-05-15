@@ -83,8 +83,11 @@ Modified some of them to fit better in-game, but my art sucks.
 
 Thank you for your generosity.
 
-## Music
+## Music and effects
 
-From: https://kronbits.itch.io/freesfx and https://lunalucid.itch.io/free-creative-commons-bgm-collection?download.
+- https://mixkit.co/free-sound-effects/game/
+- https://kronbits.itch.io/freesfx
+- https://lunalucid.itch.io/free-creative-commons-bgm-collection?download.
+- https://www.zapsplat.com/sound-effect-category/game-music-and-loops/
 
 Thank you for your generosity.

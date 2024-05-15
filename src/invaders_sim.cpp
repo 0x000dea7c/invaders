@@ -250,7 +250,7 @@ namespace Sim {
       m_currentAudioSelection = (m_currentAudioSelection + 1) % (devices.size());
     } else if(m_inputManager.isKeyPressed(Key::KEY_ENTER) || m_inputManager.isKeyPressed(Key::KEY_SPACE)) {
       m_resourceManager.initAudio(devices[m_currentAudioSelection]);
-      m_state = State::PLAY;
+      m_state = State::START;
     }
   }
 
