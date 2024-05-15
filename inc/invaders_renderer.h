@@ -49,6 +49,7 @@ namespace Renderer {
     void renderLoseScreen();
     void renderStartScreen();
     void renderLevelLabel(const unsigned int currentLevel, const float alpha);
+    void renderAudioDeviceSelection(const std::vector<Game::AudioDevice>& devices, unsigned int currentOption);
   private:
     // TODO: these are all references, not fucking pointers
     Res::Shader* m_backgroundShader;

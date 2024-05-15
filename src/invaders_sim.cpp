@@ -17,7 +17,7 @@ namespace Sim {
   using namespace Game;
   using namespace Ev;
 
-  SimulationManager::SimulationManager(const Res::ResourceManager& resourceManager,
+  SimulationManager::SimulationManager(Res::ResourceManager& resourceManager,
                                        InputManager& inputManager,
                                        PlayerManager& playerManager,
                                        EnemyManager& enemyManager,
@@ -30,25 +30,26 @@ namespace Sim {
                                        LevelManager& levelManager,
                                        const int sceneWidth,
                                        const int sceneHeight)
-    : m_resourceManager{ resourceManager },
-      m_inputManager{ inputManager },
-      m_playerManager{ playerManager },
-      m_enemyManager{ enemyManager },
-      m_missileManager{ missileManager },
-      m_explosionManager{ explosionManager },
-      m_gridManager{ gridManager },
-      m_renderManager{ renderManager },
-      m_menuManager{ menuManager },
-      m_eventManager{ eventManager },
-      m_levelManager{ levelManager },
-      m_levelLabelAlpha { 1.0f },
-      m_sceneWidth{ sceneWidth },
-      m_sceneHeight{ sceneHeight },
-      m_state{ State::START },
-      m_end{ false },
-      m_renderNewLevelLabel{ false },
-      m_playedEffect{ false },
-      m_playedBgMusic{ false }
+  : m_resourceManager{ resourceManager },
+    m_inputManager{ inputManager },
+    m_playerManager{ playerManager },
+    m_enemyManager{ enemyManager },
+    m_missileManager{ missileManager },
+    m_explosionManager{ explosionManager },
+    m_gridManager{ gridManager },
+    m_renderManager{ renderManager },
+    m_menuManager{ menuManager },
+    m_eventManager{ eventManager },
+    m_levelManager{ levelManager },
+    m_levelLabelAlpha { 1.0f },
+    m_sceneWidth{ sceneWidth },
+    m_sceneHeight{ sceneHeight },
+    m_currentAudioSelection{ 0 },
+    m_state{ State::AUDIO_DEV_SELECTION },
+    m_end{ false },
+    m_renderNewLevelLabel{ false },
+    m_playedEffect{ false },
+    m_playedBgMusic{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
@@ -149,6 +150,10 @@ namespace Sim {
     } else if(m_state == State::START) {
       startScreenHandleInput();
       m_renderManager.renderStartScreen();
+    } else if(m_state == State::AUDIO_DEV_SELECTION) {
+      auto devices = Game::getAudioDevices();
+      audioDeviceSelectionHandleInput(devices);
+      m_renderManager.renderAudioDeviceSelection(devices, m_currentAudioSelection);
     }
     checkGameState();
   }
@@ -236,4 +241,17 @@ namespace Sim {
     }
     m_playerManager.increasePoints(pts);
   }
+
+  void SimulationManager::audioDeviceSelectionHandleInput(std::vector<AudioDevice>& devices)
+  {
+    if(m_inputManager.isKeyPressed(Key::KEY_UP) || m_inputManager.isKeyPressed(Key::KEY_W)) {
+      m_currentAudioSelection = ((m_currentAudioSelection - 1) + (devices.size())) % (devices.size());
+    } else if(m_inputManager.isKeyPressed(Key::KEY_DOWN) || m_inputManager.isKeyPressed(Key::KEY_S)) {
+      m_currentAudioSelection = (m_currentAudioSelection + 1) % (devices.size());
+    } else if(m_inputManager.isKeyPressed(Key::KEY_ENTER) || m_inputManager.isKeyPressed(Key::KEY_SPACE)) {
+      m_resourceManager.initAudio(devices[m_currentAudioSelection]);
+      m_state = State::PLAY;
+    }
+  }
+
 };

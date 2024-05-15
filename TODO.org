@@ -27,9 +27,9 @@
 * DONE Audio for missile hits, bg music, die music, win round and win game
 * DONE Points?
 * DONE Stop bg music when player loses or wins / replay if player wants to play agian
+* DONE Audio device selection in window not in console
 * TODO Save points and table scoreboard when player loses/wins
  - in here, if new score is in top 5, print it as yellow
-* TODO Audio device selection in window not in console
 * TODO change explosion and win game sound
 * TODO Power-ups?
 * TODO Code it on windows, too, to prove the portability point

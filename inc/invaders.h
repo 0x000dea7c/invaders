@@ -27,8 +27,14 @@ namespace Game {
   TexInfo loadTexFromFile(const LoadTexFromFileArgs& args);
 
   //
-  // audio
+  // audio, you know this needs cleanup, you know ittttttttttttttttttttttttt
   //
+  class AudioDevice final {
+  public:
+    std::string m_name;
+    int m_index; // maybe this interface is not enough for windows or some other platforms
+  };
+
   enum class AudioType {
     MUSIC,
     EFFECT
@@ -40,7 +46,8 @@ namespace Game {
     AudioType m_type;
   };
 
-  bool initAudioSystem();
+  std::vector<AudioDevice> getAudioDevices();
+  bool initAudioSystem(const AudioDevice& audioDevice);
   std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type);
   void playAudioTrack(AudioData* data);
   void stopAudioTrack(AudioData* data, const unsigned int delay);

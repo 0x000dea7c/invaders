@@ -178,4 +178,21 @@ namespace Renderer {
     m_textRenderer.renderText(str, v4{ 1.0f, 1.0f, 1.0f, alpha }, centerX - (msgWidth * 0.5f), 300.0f, 1.0f);
   }
 
+  void RendererManager::renderAudioDeviceSelection(const std::vector<AudioDevice>& devices, unsigned int currentOption)
+  {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    static const auto str = "Select your audio device";
+    static const auto centerX  = WINDOW_WIDTH * 0.5f;
+    static const auto strWidth = m_textRenderer.getTextWidth(str);
+    m_textRenderer.renderText(str, kWhiteColour, centerX - (strWidth * 0.5f), 800.0f, 1.0f);
+    auto startingHeight = 600.0f;
+    for(unsigned long i{ 0 }; i < devices.size(); ++i) {
+      const auto deviceName = devices[i].m_name;
+      const auto deviceNameWidth = m_textRenderer.getTextWidth(deviceName);
+      auto colour = (i == currentOption) ? kYellowColour : kWhiteColour;
+      m_textRenderer.renderText(deviceName, colour, centerX - (deviceNameWidth * 0.5f), startingHeight, 1.0f);
+      startingHeight -= 100.0f;
+    }
+  }
 };

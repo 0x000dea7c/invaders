@@ -1,6 +1,7 @@
 #pragma once
 
 #include "event.h"
+#include "invaders.h"
 #include "invaders_enemy.h"
 #include "invaders_explosion.h"
 #include "invaders_grid.h"
@@ -17,6 +18,7 @@ namespace Sim {
   // it properly yet) all game units will be pixels.
 
   enum class State {
+    AUDIO_DEV_SELECTION, // this most likely doesn't go in here
     START,
     PLAY,
     MENU,
@@ -28,7 +30,7 @@ namespace Sim {
   class SimulationManager final {
   public:
     // yes, you are annoyed
-    SimulationManager(const Res::ResourceManager& resourceManager,
+    SimulationManager(Res::ResourceManager& resourceManager,
                       Input::InputManager& inputManager,
                       Game::PlayerManager& playerManager,
                       Game::EnemyManager& enemyManager,
@@ -55,7 +57,8 @@ namespace Sim {
     void startScreenHandleInput();
     void resetGame();
     void increasePlayerPoints(const Ev::Event& event);
-    const Res::ResourceManager& m_resourceManager;
+    void audioDeviceSelectionHandleInput(std::vector<Game::AudioDevice>& devices);
+    Res::ResourceManager& m_resourceManager;
     Input::InputManager& m_inputManager;
     Game::PlayerManager& m_playerManager;
     Game::EnemyManager& m_enemyManager;
@@ -69,6 +72,7 @@ namespace Sim {
     float m_levelLabelAlpha;
     int m_sceneWidth;
     int m_sceneHeight;
+    unsigned int m_currentAudioSelection;
     State m_state;
     bool m_end;
     bool m_renderNewLevelLabel;

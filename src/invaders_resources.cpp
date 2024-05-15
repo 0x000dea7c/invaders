@@ -257,22 +257,6 @@ namespace Res {
     m_shaders[IDs::SID_SHADER_BASIC] = std::make_unique<Shader>(loadBasicShader(VERT_SHADER_FILE_BASIC, FRAG_SHADER_FILE_BASIC));
     // uniform caching
     m_uniforms.reserve(8);
-    // -----------------------------------------------
-    // Audio
-    // -----------------------------------------------
-    Game::initAudioSystem();
-    IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
-    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
-    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
-    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
-    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
-    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
-    m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC,   AudioType::MUSIC);
-    m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION,  AudioType::EFFECT);
-    m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME,  AudioType::EFFECT);
-    m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME,   AudioType::EFFECT);
-    m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE, AudioType::EFFECT);
-    m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL,  AudioType::EFFECT);
   }
 
   ResourceManager::~ResourceManager()
@@ -771,5 +755,22 @@ namespace Res {
   float ResourceManager::getVolume() const noexcept
   {
     return Game::getNormalizedVolumeValue();
+  }
+
+  void ResourceManager::initAudio(AudioDevice audioDevice)
+  {
+    IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
+    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
+    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
+    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
+    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
+    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    Game::initAudioSystem(audioDevice);
+    m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC,   AudioType::MUSIC);
+    m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION,  AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_LOSE_GAME]  = Game::openAudioFile(AUDIO_FILE_LOSE_GAME,  AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME,   AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE, AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL,  AudioType::EFFECT);
   }
 };

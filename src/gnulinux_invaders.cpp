@@ -147,7 +147,6 @@ namespace Game {
   }
 
   static float volume{ MIX_MAX_VOLUME };
-  static int userAudioDeviceOpt{ 0 };
 
   std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type)
   {
@@ -157,14 +156,14 @@ namespace Game {
     case AudioType::MUSIC:
       data.m_data = Mix_LoadMUS(filepath);
       if(!data.m_data) {
-	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << '\n';
+	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << ':' << Mix_GetError() << '\n';
 	return nullptr;
       }
       break;
     case AudioType::EFFECT:
       data.m_data = Mix_LoadWAV(filepath);
       if(!data.m_data) {
-	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << '\n';
+	std::cerr << __FUNCTION__ << ": couldn't open file " << filepath << ':' << Mix_GetError() << '\n';
 	return nullptr;
       }
       break;
@@ -172,29 +171,22 @@ namespace Game {
     return std::make_unique<AudioData>(data);
   }
 
-  bool initAudioSystem()
+  bool initAudioSystem(const AudioDevice& audioDevice)
   {
-    if(SDL_Init(SDL_INIT_AUDIO) < 0) {
-      std::cerr << __FUNCTION__ << ": couldn't initialise SDL: " << SDL_GetError() << '\n';
-      return false;
-    }
-    // prompt to ask for the device to play audio to; yes, it's not pretty
-    const auto count{ SDL_GetNumAudioDevices(0) };
-    for(int i{ 0 }; i < count; ++i) {
-      std::cout << '(' << i << ") Audio device: " << SDL_GetAudioDeviceName(i, 0) << " found." << std::endl;
-    }
-    std::cout << "Select your audio device: " << std::endl;
-    std::cin >> userAudioDeviceOpt;
-    if(userAudioDeviceOpt < 0 || userAudioDeviceOpt > count) {
-      std::cout << "Invalid audio device selection, try again.\n";
-      return false;
-    }
-    const auto deviceName = SDL_GetAudioDeviceName(userAudioDeviceOpt, 0);
-    if(Mix_OpenAudioDevice(44100, MIX_DEFAULT_FORMAT, 2, 2048, deviceName, 0) < 0) {
+    if(Mix_OpenAudioDevice(44100, MIX_DEFAULT_FORMAT, 2, 2048, audioDevice.m_name.c_str(), 0) < 0) {
       std::cerr << __FUNCTION__  << ": couldn't open audio device: " << Mix_GetError() << '\n';
       return false;
     }
     return true;
+  }
+
+  std::vector<AudioDevice> getAudioDevices()
+  {
+    std::vector<AudioDevice> res;
+    for(int i{ 0 }; i < SDL_GetNumAudioDevices(0); ++i) {
+      res.emplace_back(AudioDevice{ .m_name = std::string(SDL_GetAudioDeviceName(i, 0)), .m_index = i });
+    }
+    return res;
   }
 
   void playAudioTrack(AudioData* data, const bool loop)
@@ -208,7 +200,7 @@ namespace Game {
     case AudioType::EFFECT:
       // you can play as many effects as you want
       // -1: play on the first free channel you find
-      //  0: play once and stop
+      //  0; -1: play once and stop; play in loop
       Mix_PlayChannel(-1, reinterpret_cast<Mix_Chunk*>(data->m_data), (loop) ? -1 : 0);
       break;
     }
@@ -301,6 +293,13 @@ int main()
   // idea is to have a win32_invaders.cpp and init OpenGL's function pointers in
   // a similar fashion
   Game::initOpenGLfptrs();
+  // @NOTE: you need to initialise SDL here bc otherwise you cannot get audio devices
+  // names b4 calling Mix_OpenAudioDevice! honestly, you could, but then you'd need to
+  // have more deps just to do that (alsa or pulseaudio), not worth imho
+  if(SDL_Init(SDL_INIT_AUDIO) < 0) {
+    std::cerr << __FUNCTION__ << ": couldn't initialise SDL: " << SDL_GetError() << '\n';
+    return false;
+  }
   // ---------------------------------------------
   // X11 specific code for init a window with OpenGL.
   // Don't know why X11, maybe should've used Wayland instead, well, cba
@@ -428,16 +427,15 @@ int main()
                                            WINDOW_WIDTH,
                                            WINDOW_HEIGHT);
   // run the game
-  // constexpr float kFpsMax = 1000.0f / 144.0f; // 144fps is the cap
-  float lastFrame = 0.0f;
+  auto lastFrame = 0.0f;
   while(!simulationManager.shouldEnd()) {
     // computing the delta time like this is a good idea, but remember that this delta
     // time corresponds to the previous frame, not the current one, so that's problematic
     // if this frame runs slower than the previous one. To solve this, if this frame ends
     // faster than expected, you put it to sleep for the remaining duration, effectively
-    // making all frames render at the same time.
-    float currentFrame = Game::time();
-    float delta = currentFrame - lastFrame;
+    // making all frames render at the same time, howver not doing it for now
+    auto currentFrame = Game::time();
+    auto delta = currentFrame - lastFrame;
     lastFrame = currentFrame;
     glViewport(0, 0, gwa.width, gwa.height);
     inputManager.beginFrame();
@@ -445,9 +443,9 @@ int main()
     while(XPending(display)) {
       XNextEvent(display, &xev);
       if(xev.type == KeyPress || xev.type == KeyRelease) {
-        const bool is_pressed = xev.type == KeyPress;
-        const KeySym x_key = XLookupKeysym(&xev.xkey, 0);
-        const Input::Key key = map_x11_key_to_game(x_key);
+        const auto is_pressed = xev.type == KeyPress;
+        const auto x_key = XLookupKeysym(&xev.xkey, 0);
+        const auto key = map_x11_key_to_game(x_key);
         inputManager.updateKey(key, is_pressed);
       } else if(xev.type == ClientMessage) {
         if(static_cast<Atom>(xev.xclient.data.l[0]) == wmDeleteMessage) {
@@ -459,13 +457,6 @@ int main()
     simulationManager.update(delta);
     XGetWindowAttributes(display, window, &gwa);
     glXSwapBuffers(display, window);
-    // put main thread to sleep if necessary, ensuring consistent delta times
-    // const float frameTime = Game::time() - currentFrame;
-    // if(frameTime < kFpsMax) {
-    //   // turns out this could be a problem bc people say it's not accurate. Don't know
-    //   // what that really means...
-    //   std::this_thread::sleep_for(std::chrono::duration<float>(kFpsMax - frameTime));
-    // }
   }
   glXMakeCurrent(display, None, nullptr);
   glXDestroyContext(display, glContext);
