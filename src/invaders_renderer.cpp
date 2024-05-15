@@ -88,6 +88,9 @@ namespace Renderer {
     glBindVertexArray(m_missileAlienShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_missileAlienTex->m_id);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, args.alienMissilesToDraw);
+    // draw points on tl
+    const auto ptsStr = std::to_string(args.playerPoints);
+    m_textRenderer.renderText(ptsStr, kWhiteColour, 5.0f, WINDOW_HEIGHT - 10.0f, 1.0f);
   }
 
   void RendererManager::renderMenu()

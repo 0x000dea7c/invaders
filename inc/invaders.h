@@ -43,7 +43,7 @@ namespace Game {
   bool initAudioSystem();
   std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type);
   void playAudioTrack(AudioData* data);
-  void stopAudioTrack(AudioData* data);
+  void stopAudioTrack(AudioData* data, const unsigned int delay);
   void increaseVolume();
   void decreaseVolume();
   float getNormalizedVolumeValue();

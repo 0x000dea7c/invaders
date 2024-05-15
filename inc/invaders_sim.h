@@ -54,6 +54,7 @@ namespace Sim {
     void loseScreenHandleInput();
     void startScreenHandleInput();
     void resetGame();
+    void increasePlayerPoints(const Ev::Event& event);
     const Res::ResourceManager& m_resourceManager;
     Input::InputManager& m_inputManager;
     Game::PlayerManager& m_playerManager;
@@ -71,7 +72,8 @@ namespace Sim {
     State m_state;
     bool m_end;
     bool m_renderNewLevelLabel;
-    bool m_playedSound;
+    bool m_playedEffect;
+    bool m_playedBgMusic;
   };
 
 };

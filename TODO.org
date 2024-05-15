@@ -24,14 +24,13 @@
 * DONE Lose and win screens and input handling
 * DONE Adjust win/lose screen text, aligned
 * DONE Add text with fading alpha for each new level
-* TODO Audio for missile hits, bg music, die music, win round and win game
-- bg        ok
-- missile   ok
-- die       ok
-- win rnd
-- win game
-- lose game
-* TODO Points?
+* DONE Audio for missile hits, bg music, die music, win round and win game
+* DONE Points?
+* DONE Stop bg music when player loses or wins / replay if player wants to play agian
+* TODO Save points and table scoreboard when player loses/wins
+ - in here, if new score is in top 5, print it as yellow
+* TODO Audio device selection in window not in console
+* TODO change explosion and win game sound
 * TODO Power-ups?
 * TODO Code it on windows, too, to prove the portability point
 * TODO Improve all visuals!!!!!!!!!!!!!!!!! (idk not creative)

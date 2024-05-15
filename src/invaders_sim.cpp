@@ -47,7 +47,8 @@ namespace Sim {
       m_state{ State::START },
       m_end{ false },
       m_renderNewLevelLabel{ false },
-      m_playedSound{ false }
+      m_playedEffect{ false },
+      m_playedBgMusic{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
@@ -62,7 +63,9 @@ namespace Sim {
     m_eventManager.subscribe(EventType::MenuDecreaseVolume, [this](const Event&){
       m_resourceManager.decreaseVolume();
     });
-    m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC, true);
+    m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev){
+      increasePlayerPoints(ev);
+    });
   }
 
   SimulationManager::~SimulationManager()
@@ -77,14 +80,17 @@ namespace Sim {
       return;
     }
     if(m_state == State::PLAY) {
-      m_playedSound = false;
+      if(!m_playedBgMusic) {
+	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC, true);
+	m_playedBgMusic = true;
+      }
+      m_playedEffect = false;
       if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
         m_state = State::MENU;
         return;
       }
       // order is important: everything that moves and can collide to something else needs to be
-      // updated before the grid. Explosions are an exception, for example, but put it before bc
-      // it doesn't matter
+      // updated before the grid. Explosions are an exception bc there's no need to track them
       m_gridManager.beginFrame();
       m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
       m_enemyManager.update(delta);
@@ -96,7 +102,8 @@ namespace Sim {
         .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
         .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
         .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
-        .playersToDraw        = 1
+        .playersToDraw        = 1,
+	.playerPoints         = m_playerManager.getPlayerPoints()
       });
       if(m_renderNewLevelLabel) {
         m_renderManager.renderLevelLabel(m_levelManager.currentLevel(), m_levelLabelAlpha);
@@ -109,6 +116,7 @@ namespace Sim {
       m_menuManager.update();
       m_renderManager.renderMenu();
     } else if(m_state == State::WIN_GAME) {
+      m_playedBgMusic = false;
       // don't know where to put this, state manager? for now it will be here
       winScreenHandleInput();
       m_renderManager.renderWinScreen();
@@ -116,9 +124,10 @@ namespace Sim {
       // is that the state transition is not instant, so you can't just keep playing
       // the sound; that doesn't happen with the win level sound bc the state changes
       // in one frame
-      if(!m_playedSound) {
+      if(!m_playedEffect) {
+	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
 	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);
-	m_playedSound = true;
+	m_playedEffect = true;
       }
     } else if(m_state == State::WIN_LEVEL) {
       m_levelManager.changeLevel();
@@ -128,12 +137,14 @@ namespace Sim {
       m_levelLabelAlpha = 1.0f;
       m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_LEVEL, false);
     } else if(m_state == State::LOSE) {
+      m_playedBgMusic = false;
       loseScreenHandleInput();
       m_renderManager.renderLoseScreen();
       // TODO: remove bool here too
-      if(!m_playedSound) {
+      if(!m_playedEffect) {
+	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
 	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_LOSE_GAME, false);
-	m_playedSound = true;
+	m_playedEffect = true;
       }
     } else if(m_state == State::START) {
       startScreenHandleInput();
@@ -200,5 +211,29 @@ namespace Sim {
     m_playerManager.reset();
     m_missileManager.clearMissiles();
     m_explosionManager.reset();
+  }
+
+  void SimulationManager::increasePlayerPoints(const Event& event)
+  {
+    unsigned int pts;
+    // bit of a cursed code
+    switch(reinterpret_cast<Alien*>(event.getEntity())->m_type) {
+    case AlienType::YELLOW:
+      pts = 50;
+      break;
+    case AlienType::BEIGE:
+      pts = 100;
+      break;
+    case AlienType::GREEN:
+      pts = 100;
+      break;
+    case AlienType::PINK:
+      pts = 200;
+      break;
+    case AlienType::BLUE:
+      pts = 200;
+      break;
+    }
+    m_playerManager.increasePoints(pts);
   }
 };

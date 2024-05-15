@@ -27,6 +27,7 @@ namespace Game {
     Math::v2 m_idx;
     float m_minX; // movement range
     float m_maxX; // "
+    AlienType m_type;
     int m_dir;
     int m_firecd;
     int m_currcd;

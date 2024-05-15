@@ -97,7 +97,7 @@ namespace Res {
       glUniform4f(getUniformLocation(id, uniname), value.x, value.y, value.z, value.w);
     }
     void playAudioTrack(const int sid, const bool loop) const noexcept;
-    void stopAudioTrack(const int sid) const noexcept;
+    void stopAudioTrack(const int sid, const unsigned int delay) const noexcept;
     void increaseVolume() const noexcept;
     void decreaseVolume() const noexcept;
     float getVolume() const noexcept;

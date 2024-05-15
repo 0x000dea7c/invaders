@@ -122,6 +122,7 @@ namespace Game {
       .m_idx       = v2{ static_cast<float>(getAtlasIdx(type)), 0 },
       .m_minX      = pos.x - 255.0f,
       .m_maxX      = pos.x + 300.0f,
+      .m_type      = type,
       .m_dir       = -1,
       .m_firecd    = getAlienFireCd(type),
       .m_currcd    = 0,
@@ -213,8 +214,8 @@ namespace Game {
 
   void EnemyManager::destroyAlien(const Ev::Event& event)
   {
-    // TODO: cursed code
-    ((Alien*)event.getEntity())->m_destroyed = true;
+    // cursed code
+    reinterpret_cast<Alien*>(event.getEntity())->m_destroyed = true;
   }
 
   void EnemyManager::reset()

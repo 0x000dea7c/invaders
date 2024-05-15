@@ -33,6 +33,7 @@ namespace Game {
     m_player.m_currlives = MAX_PLAYER_LIVES;
     m_player.m_shooting = false;
     m_player.m_destroyed = false;
+    m_player.m_points = 0;
     m_playerLivesInstanceData.reserve(MAX_PLAYER_LIVES);
     m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event&){
       destroyPlayer();
@@ -176,6 +177,12 @@ namespace Game {
     m_player.m_currlives = MAX_PLAYER_LIVES;
     m_player.m_destroyed = false;
     m_player.m_shooting = false;
+    m_player.m_points = 0;
+  }
+
+  void PlayerManager::increasePoints(unsigned int pts)
+  {
+    m_player.m_points += pts;
   }
 
 };

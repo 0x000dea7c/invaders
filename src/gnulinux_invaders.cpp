@@ -214,12 +214,12 @@ namespace Game {
     }
   }
 
-  void stopAudioTrack(AudioData* data)
+  void stopAudioTrack(AudioData* data, const unsigned int delay)
   {
     // you only need to stop main music for now
     switch(data->m_type){
     case AudioType::MUSIC:
-      Mix_FadeOutMusic(100);
+      Mix_FadeOutMusic(delay);
       break;
     default:
       break;

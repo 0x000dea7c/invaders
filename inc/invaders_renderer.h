@@ -32,6 +32,7 @@ namespace Renderer {
     unsigned long playerMissilesToDraw;
     unsigned long alienMissilesToDraw;
     unsigned long playersToDraw;
+    unsigned int playerPoints;
   };
 
   // renders all given data, no ifs, no updates, just render. This class is omoiiiiiiiiiiiiii

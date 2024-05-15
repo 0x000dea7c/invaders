@@ -753,9 +753,9 @@ namespace Res {
     Game::playAudioTrack(m_audioTracks.at(sid).get(), loop);
   }
 
-  void ResourceManager::stopAudioTrack(const int sid) const noexcept
+  void ResourceManager::stopAudioTrack(const int sid, const unsigned int delay) const noexcept
   {
-    Game::stopAudioTrack(m_audioTracks.at(sid).get());
+    Game::stopAudioTrack(m_audioTracks.at(sid).get(), delay);
   }
 
   void ResourceManager::increaseVolume() const noexcept
