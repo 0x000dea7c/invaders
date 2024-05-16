@@ -29,10 +29,10 @@
 * DONE Stop bg music when player loses or wins / replay if player wants to play agian
 * DONE Audio device selection in window not in console
 * DONE Make main music run instantly after audio selection
-* TODO Save points and table scoreboard when player loses/wins
- - if new score is in top 5, print it as yellow
- - save: current datetime and points
+* DONE Save points and table scoreboard when player loses/wins
 * DONE change explosion and win game sound
+* TODO Fix points bug
+ - always same aliens but different points, how is it possible, baka
 * TODO Make up to 100 levels, randomly create aliens for every level
 * TODO Improve aliens' AI, rn it's crap
 * TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points

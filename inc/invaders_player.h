@@ -52,7 +52,7 @@ namespace Game {
       m_player.m_pos.x = m_player.m_pos.y = m_player.m_vel.x = m_player.m_vel.y = 0.0f;
     }
     void reset();
-    void increasePoints(unsigned int pts);
+    void increasePoints(const unsigned int pts) noexcept;
     inline auto getPlayerPoints() const noexcept { return m_player.m_points; }
   private:
     void updatePlayerLivesInstanceData();
