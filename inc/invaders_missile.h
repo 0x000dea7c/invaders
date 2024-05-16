@@ -11,7 +11,8 @@
 
 namespace Game {
 
-  struct Missile final {
+  class Missile final {
+  public:
     Math::v3 m_pos;
     Math::v2 m_size;
     Math::v2 m_vel;

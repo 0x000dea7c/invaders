@@ -248,47 +248,60 @@ namespace Game {
     SDL_Quit();
   }
 
-  void saveAndGetScores(const unsigned int score, std::vector<ScoreEntry>& scores)
+  // the file is always sorted, grab the first five lines
+  void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores)
   {
-    // TODO: this definitely can be simplified but yolo
-    std::fstream scoreboard("scoreboard.dat", std::ios::in | std::ios::in | std::ios::binary | std::ios::app);
+    // @TODO: can be improved in may ways but yolo
+    std::fstream scoreboard("scoreboard.dat", std::ios::in | std::ios::out | std::ios::binary);
     if(!scoreboard) {
-      std::cerr << __FUNCTION__ << ": couldn't open scoreboard file.\n";
-      return;
-    }
-    const auto time = std::chrono::system_clock::now();
-    const auto timeT = std::chrono::system_clock::to_time_t(time);
-    const auto localTime = *std::localtime(&timeT);
-    std::stringstream ss;
-    ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score;
-    const auto timeStr = ss.str();
-    const auto timeStrLen = timeStr.size();
-    // first write the length of the string so you know how many bytes we need to read
-    // later on, ofc you know that's a fixed size by now, but you never know if this shit
-    // will change
-    scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
-    scoreboard.write(timeStr.data(), timeStrLen);
-    scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
-    scoreboard.seekg(0, std::ios::beg); // go to the beginning to read
-    scores.clear();
-    auto scoreEntry = ScoreEntry{};
-    while(scoreboard.peek() != EOF) {
-      std::string::size_type length;
-      scoreboard.read(reinterpret_cast<char*>(&length), sizeof(length));
-      scoreEntry.m_timebuff.resize(length);
-      scoreboard.read(&scoreEntry.m_timebuff[0], length);
-      scoreboard.read(reinterpret_cast<char*>(&scoreEntry.m_score), sizeof(scoreEntry.m_score));
-      // @TODO: terribad, if you just saved the file how come you have to do this?
-      if(scoreEntry.m_timebuff == timeStr) {
-	scoreEntry.m_currentScore = true;
-      } else {
-	scoreEntry.m_currentScore = false;
+      // it could fail for read bc it doesn't exist yet, in that case, try only for writing
+      scoreboard.open("scoreboard.dat", std::ios::out | std::ios::binary);
+      if(!scoreboard) {
+	std::cerr << __FUNCTION__ << ": couldn't open scoreboard file.\n";
+	return;
       }
-      scores.push_back(scoreEntry);
     }
-    std::sort(scores.begin(), scores.end(), [](ScoreEntry& a, ScoreEntry& b){
-      return a.m_score > b.m_score;
-    });
+    const auto time = std::chrono::system_clock::now(); // boring bit
+    const auto timeT = std::chrono::system_clock::to_time_t(time); // boring bit
+    const auto localTime = *std::localtime(&timeT);		   // boring bit
+    std::stringstream ss;					   // boring bit
+    ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score; // cut this out
+    const auto timeStr = ss.str();				   // cut this out
+    const auto timeStrLen = timeStr.size();			   // cut this out
+    unsigned long i{ 0 };
+    bool fileEmpty{ true };
+    while(scoreboard.peek() != EOF && i < scores.size()) {
+      std::string::size_type timeStrLen2{ 0 };
+      auto scoreEntry = ScoreEntry{};
+      scoreEntry.m_currentScore = false;
+      scoreboard.read(reinterpret_cast<char*>(&timeStrLen2), sizeof(timeStrLen2));
+      scoreEntry.m_timebuff.resize(timeStrLen2);
+      scoreboard.read(&scoreEntry.m_timebuff[0], timeStrLen2);
+      scoreboard.read(reinterpret_cast<char*>(&scoreEntry.m_score), sizeof(scoreEntry.m_score));
+      if(score > scoreEntry.m_score) {
+	scoreboard.seekp(-sizeof(timeStrLen2) + timeStrLen2 + sizeof(scoreEntry.m_score), std::ios::cur);
+	scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
+	scoreboard.write(&timeStr[0], timeStrLen);
+	scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
+	scores[i].m_timebuff = timeStr;
+	scores[i].m_score = score;
+	scores[i].m_currentScore = true;
+      } else {
+	scores[i] = scoreEntry;
+      }
+      fileEmpty = false;
+      ++i;
+    }
+    if(fileEmpty) {
+      scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
+      scoreboard.write(timeStr.data(), timeStrLen);
+      scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
+      scores[0] = ScoreEntry{
+	.m_timebuff = timeStr,
+	.m_score = score,
+	.m_currentScore = true
+      };
+    }
   }
 
 };

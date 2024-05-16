@@ -126,7 +126,7 @@ namespace Renderer {
     }
   }
 
-  void RendererManager::renderWinScreen(const std::vector<Game::ScoreEntry>& scores) const noexcept
+  void RendererManager::renderWinScreen(const std::array<ScoreEntry, 5>& scores) const noexcept
   {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -137,14 +137,16 @@ namespace Renderer {
     // draw scoreboard here, only top 5 bc not too much screen available
     auto startingHeight = 700.0f;
     for(unsigned long i{ 0 }; i < scores.size(); ++i) {
-      const auto line = scores[i].m_timebuff + " - " + std::to_string(scores[i].m_score);
-      const auto lineWidth = m_textRenderer.getTextWidth(line);
-      m_textRenderer.renderText(line,
-				(scores[i].m_currentScore) ? kYellowColour : kWhiteColour,
-				centerX - (lineWidth * 0.5f),
-				startingHeight,
-				1.0f);
-      startingHeight -= 50.0f;
+      if(!scores[i].m_timebuff.empty()) {
+	const auto line = scores[i].m_timebuff + " - " + std::to_string(scores[i].m_score);
+	const auto lineWidth = m_textRenderer.getTextWidth(line);
+	m_textRenderer.renderText(line,
+				  (scores[i].m_currentScore) ? kYellowColour : kWhiteColour,
+				  centerX - (lineWidth * 0.5f),
+				  startingHeight,
+				  1.0f);
+	startingHeight -= 50.0f;	
+      }
     }
     m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit",
 			      kWhiteColour,

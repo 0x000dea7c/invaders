@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <array>
 
 namespace Game {
   // code that depends on the underlying platform
@@ -58,6 +59,8 @@ namespace Game {
   void closeAudioSystem();
 
   // misc functions that need to know about the underlying OS (probably)
+  // even though you're using std::fstream, people say that it's too slow, so that's why
+  // it's in here, in case you want to use underlying OS or a lib to improve perf
   class ScoreEntry final {
   public:
     std::string m_timebuff; // @TODO: this is terribad, using a fixed char array might be way better, but this only runs once yolo
@@ -65,7 +68,6 @@ namespace Game {
     bool m_currentScore;    // tells if this entry is the current one
   };
 
-  // unified both steps to avoid opening a file twice, it returns the scores sorted
-  // this shouldn't be called too often
-  void saveAndGetScores(const unsigned int score, std::vector<ScoreEntry>& scores);
+  void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores);
+
 };

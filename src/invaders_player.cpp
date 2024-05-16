@@ -182,7 +182,6 @@ namespace Game {
 
   void PlayerManager::increasePoints(const unsigned int pts) noexcept
   {
-    std::clog << "adding " << pts << std::endl;
     m_player.m_points += pts;
   }
 

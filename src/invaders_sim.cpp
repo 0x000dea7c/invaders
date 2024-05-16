@@ -124,7 +124,7 @@ namespace Sim {
       // is that the state transition is not instant, so you can't just keep playing
       // the sound; that doesn't happen with the win level sound bc the state changes
       // in one frame
-      static std::vector<ScoreEntry> scores; // @TODO: you should stop naming the same thing w/ diff names
+      static std::array<ScoreEntry, 5> scores;
       if(!m_playedEffect) {
 	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
 	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);

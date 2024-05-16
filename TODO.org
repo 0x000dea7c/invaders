@@ -33,6 +33,9 @@
 * DONE change explosion and win game sound
 * TODO Fix points bug
  - always same aliens but different points, how is it possible, baka
+* TODO In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
+ - use events for things
+* TODO don't use spacebar to replay the game, use only enter
 * TODO Make up to 100 levels, randomly create aliens for every level
 * TODO Improve aliens' AI, rn it's crap
 * TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points

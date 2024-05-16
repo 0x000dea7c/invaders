@@ -6,6 +6,8 @@
 #include "invaders_enemy.h"
 #include "invaders_player.h"
 
+#include <set>
+
 namespace Game {
   using namespace Math;
   using namespace Renderer;
@@ -62,18 +64,19 @@ namespace Game {
             // associated with functions with no args.
             m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
-            m_explosionManager.spawnExplosion(a->m_pos);
+	    m_explosionManager.spawnExplosion(a->m_pos);
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
+	    break; // get out of here manually just in case since a missile should only hit one alien not 2
           }
         }
       }
       // if the missile collided with an alien, remove it
       if(m_playerMissiles[i].m_destroyed) {
-        std::swap(m_playerMissiles[i], m_playerMissiles.back());
-        std::swap(m_playerMissilesInstanceData[i], m_playerMissilesInstanceData.back());
-        m_playerMissiles.pop_back();
-        m_playerMissilesInstanceData.pop_back();
-        --i;
+	// lol
+	auto it = std::remove_if(m_playerMissiles.begin(), m_playerMissiles.end(), [](const Missile& m){
+	  return m.m_destroyed;
+	});
+	m_playerMissiles.erase(it, m_playerMissiles.end());
         continue;
       }
       // if not, update it
@@ -140,11 +143,10 @@ namespace Game {
         }
       }
       if(m_alienMissiles[i].m_destroyed) {
-        std::swap(m_alienMissiles[i], m_alienMissiles.back());
-        std::swap(m_alienMissilesInstanceData[i], m_alienMissilesInstanceData.back());
-        m_alienMissiles.pop_back();
-        m_alienMissilesInstanceData.pop_back();
-        --i;
+	auto it = std::remove_if(m_alienMissiles.begin(), m_alienMissiles.end(), [](const Missile& m){
+	  return m.m_destroyed;
+	});
+	m_alienMissiles.erase(it, m_alienMissiles.end());
         continue;
       }
       m_alienMissilesInstanceData[i].m_vertexData = {{

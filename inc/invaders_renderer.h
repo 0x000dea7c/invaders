@@ -45,7 +45,7 @@ namespace Renderer {
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
     void renderMenu();
-    void renderWinScreen(const std::vector<Game::ScoreEntry>& scores) const noexcept;
+    void renderWinScreen(const std::array<Game::ScoreEntry, 5>& scores) const noexcept;
     void renderLoseScreen();
     void renderStartScreen();
     void renderLevelLabel(const unsigned int currentLevel, const float alpha);
