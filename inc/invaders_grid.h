@@ -26,7 +26,7 @@ namespace Game {
     void update(const Math::v3& pos, const void* ent, const EntityType type);
     std::vector<EntityGridData> getNearby(const Math::v3& pos, const EntityType wanted);
   private:
-    inline auto getId(const Math::v3& pos)
+    inline auto getId(const Math::v3& pos) const noexcept
     {
       return std::floor(pos.x / CELL_WIDTH) + std::floor(pos.y / CELL_HEIGHT) * m_cols;
     }

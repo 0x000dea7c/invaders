@@ -6,13 +6,18 @@
 #include "invaders_missile.h"
 #include "invaders_player.h"
 #include "invaders_text.h"
-#include <X11/Xutil.h>
 #include <iostream>
 #include <cstdlib>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
 #include <iostream>
 #include <thread>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+
+#include <X11/Xutil.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -228,7 +233,6 @@ namespace Game {
   void decreaseVolume()
   {
     volume = std::max(volume - 13.3f, 0.0f);
-    std::clog << "new vol value: " << volume << std::endl;
     Mix_MasterVolume(static_cast<int>(volume));
     Mix_VolumeMusic(static_cast<int>(volume));   
   }
@@ -242,6 +246,49 @@ namespace Game {
   {
     Mix_CloseAudio();
     SDL_Quit();
+  }
+
+  void saveAndGetScores(const unsigned int score, std::vector<ScoreEntry>& scores)
+  {
+    // TODO: this definitely can be simplified but yolo
+    std::fstream scoreboard("scoreboard.dat", std::ios::in | std::ios::in | std::ios::binary | std::ios::app);
+    if(!scoreboard) {
+      std::cerr << __FUNCTION__ << ": couldn't open scoreboard file.\n";
+      return;
+    }
+    const auto time = std::chrono::system_clock::now();
+    const auto timeT = std::chrono::system_clock::to_time_t(time);
+    const auto localTime = *std::localtime(&timeT);
+    std::stringstream ss;
+    ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score;
+    const auto timeStr = ss.str();
+    const auto timeStrLen = timeStr.size();
+    // first write the length of the string so you know how many bytes we need to read
+    // later on, ofc you know that's a fixed size by now, but you never know if this shit
+    // will change
+    scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
+    scoreboard.write(timeStr.data(), timeStrLen);
+    scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
+    scoreboard.seekg(0, std::ios::beg); // go to the beginning to read
+    scores.clear();
+    auto scoreEntry = ScoreEntry{};
+    while(scoreboard.peek() != EOF) {
+      std::string::size_type length;
+      scoreboard.read(reinterpret_cast<char*>(&length), sizeof(length));
+      scoreEntry.m_timebuff.resize(length);
+      scoreboard.read(&scoreEntry.m_timebuff[0], length);
+      scoreboard.read(reinterpret_cast<char*>(&scoreEntry.m_score), sizeof(scoreEntry.m_score));
+      // @TODO: terribad, if you just saved the file how come you have to do this?
+      if(scoreEntry.m_timebuff == timeStr) {
+	scoreEntry.m_currentScore = true;
+      } else {
+	scoreEntry.m_currentScore = false;
+      }
+      scores.push_back(scoreEntry);
+    }
+    std::sort(scores.begin(), scores.end(), [](ScoreEntry& a, ScoreEntry& b){
+      return a.m_score > b.m_score;
+    });
   }
 
 };

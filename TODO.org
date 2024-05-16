@@ -31,12 +31,14 @@
 * DONE Make main music run instantly after audio selection
 * TODO Save points and table scoreboard when player loses/wins
  - if new score is in top 5, print it as yellow
+ - save: current datetime and points
 * DONE change explosion and win game sound
+* TODO Make up to 100 levels, randomly create aliens for every level
+* TODO Improve aliens' AI, rn it's crap
+* TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points
 * TODO Power-ups? they only make sense if you make the game inf
 * TODO Code it on windows, too, to prove the portability point
-* TODO Improve all visuals!!!!!!!!!!!!!!!!! (idk not creative)
-* TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points
-* TODO Make infinite levels? and then a basic ranking system (saving score in a file, scoreboard, idk)
+* TODO Improve all visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks a bit
 * DONE Code cleanup, to do this, first you need to read a bit more about game architecture
 * DONE Profile (REALLY!), main problem is the grid
 * DONE Get rid of meters_per_pixel? Don't know how they're being useful

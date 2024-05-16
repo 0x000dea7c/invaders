@@ -4,7 +4,8 @@
 
 namespace Game {
 
-  constexpr unsigned int kLevels{ 3 };
+  // TEMP: test
+  constexpr unsigned int kLevels{ 0 };
 
   class LevelManager final {
   public:

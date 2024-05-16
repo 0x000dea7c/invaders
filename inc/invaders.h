@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 namespace Game {
   // code that depends on the underlying platform
@@ -55,4 +56,16 @@ namespace Game {
   void decreaseVolume();
   float getNormalizedVolumeValue();
   void closeAudioSystem();
+
+  // misc functions that need to know about the underlying OS (probably)
+  class ScoreEntry final {
+  public:
+    std::string m_timebuff; // @TODO: this is terribad, using a fixed char array might be way better, but this only runs once yolo
+    unsigned int m_score;
+    bool m_currentScore;    // tells if this entry is the current one
+  };
+
+  // unified both steps to avoid opening a file twice, it returns the scores sorted
+  // this shouldn't be called too often
+  void saveAndGetScores(const unsigned int score, std::vector<ScoreEntry>& scores);
 };

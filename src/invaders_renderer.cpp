@@ -126,18 +126,31 @@ namespace Renderer {
     }
   }
 
-  void RendererManager::renderWinScreen()
+  void RendererManager::renderWinScreen(const std::vector<Game::ScoreEntry>& scores) const noexcept
   {
-    glActiveTexture(GL_TEXTURE0);
-    m_resourceManager.useShaderProgram(m_basicShader->m_id);
-    glBindVertexArray(m_basicShader->m_VAO);
-    glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static const auto centerX      = WINDOW_WIDTH * 0.5f;
     static const auto winMsgWidth  = m_textRenderer.getTextWidth("Congratulations! You win!");
     static const auto win2MsgWidth = m_textRenderer.getTextWidth("Press SPACE/ENTER to play again or Q/ESC to quit");
-    m_textRenderer.renderText("Congratulations! You win!", kWhiteColour, centerX - (winMsgWidth * 0.5f), 600.0f, 1.0f);
-    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit", kWhiteColour, centerX - (win2MsgWidth * 0.5f), 500.0f, 1.0f);
+    m_textRenderer.renderText("Congratulations! You win!", kWhiteColour, centerX - (winMsgWidth * 0.5f), 800.0f, 1.0f);
+    // draw scoreboard here, only top 5 bc not too much screen available
+    auto startingHeight = 700.0f;
+    for(unsigned long i{ 0 }; i < scores.size(); ++i) {
+      const auto line = scores[i].m_timebuff + " - " + std::to_string(scores[i].m_score);
+      const auto lineWidth = m_textRenderer.getTextWidth(line);
+      m_textRenderer.renderText(line,
+				(scores[i].m_currentScore) ? kYellowColour : kWhiteColour,
+				centerX - (lineWidth * 0.5f),
+				startingHeight,
+				1.0f);
+      startingHeight -= 50.0f;
+    }
+    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit",
+			      kWhiteColour,
+			      centerX - (win2MsgWidth * 0.5f),
+			      startingHeight - 50.0f,
+			      1.0f);
   }
 
   void RendererManager::renderLoseScreen()
@@ -195,4 +208,5 @@ namespace Renderer {
       startingHeight -= 100.0f;
     }
   }
+
 };

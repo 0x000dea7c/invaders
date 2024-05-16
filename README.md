@@ -19,7 +19,7 @@ Wanted to create a game that:
 - audio device selection in game
 - ...
 
-Note: apparently too dumb to implement decent intersection tests. This version is better than the previous game, but it still experiences tunneling. Wonder if the spatial hash grid implementation is decent, too. Anyway, let's keep improving.
+Note: apparently too dumb to implement decent intersection tests. This version is better than previous' game, but it still experiences tunneling. Wonder if the spatial hash grid implementation is decent, too. Anyway, let's keep improving.
 
 Need to improve on themes like:
 
@@ -31,6 +31,7 @@ Need to improve on themes like:
 - in-game editor for manipulating objects
 - overall optimisation
 - animations
+- inter text
 
 # Compilation
 

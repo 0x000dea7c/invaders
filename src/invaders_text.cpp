@@ -112,13 +112,4 @@ namespace Renderer {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
-  float TextRenderer::getTextWidth(const std::string& text)
-  {
-    auto sum = 0.0f;
-    for(const auto& c : text) {
-      sum += m_characters[c].m_sizeX;
-    }
-    return sum;
-  }
-
 };

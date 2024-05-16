@@ -29,7 +29,14 @@ namespace Renderer {
                     float x,
                     const float y,
                     const float scale);
-    float getTextWidth(const std::string& text);
+    inline float getTextWidth(const std::string& text) const noexcept
+    {
+      auto sum = 0.0f;
+      for(const auto& c : text) {
+	sum += m_characters.at(c).m_sizeX;
+      }
+      return sum;
+    }
   private:
     std::unordered_map<unsigned char, Character> m_characters;
     Res::ResourceManager& m_resourceManager;

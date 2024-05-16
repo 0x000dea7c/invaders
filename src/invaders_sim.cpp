@@ -120,16 +120,20 @@ namespace Sim {
       m_playedBgMusic = false;
       // don't know where to put this, state manager? for now it will be here
       winScreenHandleInput();
-      m_renderManager.renderWinScreen();
-      // TODO: there's a problem here, need to get this bool out somwhow; problem
+      // @TODO: there's a problem here, need to get this bool out somwhow; problem
       // is that the state transition is not instant, so you can't just keep playing
       // the sound; that doesn't happen with the win level sound bc the state changes
       // in one frame
+      static std::vector<ScoreEntry> scores; // @TODO: you should stop naming the same thing w/ diff names
       if(!m_playedEffect) {
 	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
 	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);
 	m_playedEffect = true;
+	// actually can use this bool flag to save current scoreboard and
+	// get it from disk to display it
+	Game::saveAndGetScores(m_playerManager.getPlayerPoints(), scores);
       }
+      m_renderManager.renderWinScreen(scores);
     } else if(m_state == State::WIN_LEVEL) {
       m_levelManager.changeLevel();
       m_state = State::PLAY;
