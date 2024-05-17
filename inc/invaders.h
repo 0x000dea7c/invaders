@@ -5,10 +5,14 @@
 #include <array>
 
 namespace Game {
-  // code that depends on the underlying platform
-
+  //
+  // code that depends on the underlying platform & libs
+  //
   void initOpenGLfptrs();
 
+  // ----------------------------------------------------------
+  // textures
+  // ----------------------------------------------------------
   class TexInfo final {
   public:
     int m_width;
@@ -28,13 +32,13 @@ namespace Game {
 
   TexInfo loadTexFromFile(const LoadTexFromFileArgs& args);
 
-  //
-  // audio, you know this needs cleanup, you know ittttttttttttttttttttttttt
-  //
-  class AudioDevice final {
+  // ----------------------------------------------------------
+  // audio
+  // ----------------------------------------------------------
+  class AudioDevice final { // you know this needs cleanup
   public:
     std::string m_name;
-    int m_index; // maybe this interface is not enough for windows or some other platforms
+    int m_index;
   };
 
   enum class AudioType {
@@ -50,7 +54,8 @@ namespace Game {
 
   std::vector<AudioDevice> getAudioDevices();
   bool initAudioSystem(const AudioDevice& audioDevice);
-  std::unique_ptr<AudioData> openAudioFile(const char* filepath, const AudioType type);
+  std::unique_ptr<AudioData> openAudioFile(const char* filepath,
+					   const AudioType type);
   void playAudioTrack(AudioData* data);
   void stopAudioTrack(AudioData* data, const unsigned int delay);
   void increaseVolume();
@@ -58,9 +63,6 @@ namespace Game {
   float getNormalizedVolumeValue();
   void closeAudioSystem();
 
-  // misc functions that need to know about the underlying OS (probably)
-  // even though you're using std::fstream, people say that it's too slow, so that's why
-  // it's in here, in case you want to use underlying OS or a lib to improve perf
   class ScoreEntry final {
   public:
     std::array<char, 21> m_datetimebuff{ 0 };
@@ -68,6 +70,12 @@ namespace Game {
     bool m_currentScore{ false };
   };
 
-  void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores);
+  // ----------------------------------------------------------
+  // misc
+  // ----------------------------------------------------------
+
+  // TRUE -> score in top 5, FALSE -> otherwise
+  bool saveAndGetScores(const unsigned int score,
+			std::array<ScoreEntry, 5>& scores);
 
 };

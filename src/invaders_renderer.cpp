@@ -2,15 +2,18 @@
 #include "common.h"
 #include "invaders_timer.h"
 #include "invaders_opengl.h"
+
 #include <sstream>
+
+#define WINDOW_CENTER WINDOW_WIDTH * 0.5f
 
 namespace Renderer {
   using namespace Math;
   using namespace Game;
+  using namespace std::string_literals;
 
   static constexpr v4 kWhiteColour  = v4{ 1.0f, 1.0f, 1.0f, 1.0f };
   static constexpr v4 kYellowColour = v4{ 1.0f, 1.0f, 0.0f, 1.0f };
-  static constexpr v4 kSilverColour = v4{ 0.75f, 0.75f, 0.75f, 1.0f };
 
   RendererManager::RendererManager(Res::ResourceManager& resourceManager,
                                    TextRenderer& textRenderer,
@@ -88,9 +91,10 @@ namespace Renderer {
     glBindVertexArray(m_missileAlienShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_missileAlienTex->m_id);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, args.alienMissilesToDraw);
-    // draw points on tl
-    const auto ptsStr = std::to_string(args.playerPoints);
-    m_textRenderer.renderText(ptsStr, kWhiteColour, 5.0f, WINDOW_HEIGHT - 10.0f, 1.0f);
+    // draw points on bottom right
+    const auto pts = std::to_string(args.playerPoints);
+    const auto width = m_textRenderer.getTextWidth(pts);
+    m_textRenderer.renderText(pts, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 25.0f, 1.0f);
   }
 
   void RendererManager::renderMenu()
@@ -102,113 +106,97 @@ namespace Renderer {
     glBindVertexArray(m_menuShader->m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     // now draw text on top of it
-    // @HACK: since you don't have any way to center text on the screen, you need to do this
-    // make them static to avoid computing this every time
     std::stringstream volumess;
     volumess << '<' << m_resourceManager.getVolume() << '>';
     const auto volumestr = "Sound:" + volumess.str();
-    static const auto centerX       = WINDOW_WIDTH * 0.5f;
+    // this won't change frequently so it's a good idea to make them static
     static const auto continueWidth = m_textRenderer.getTextWidth("Continue");
     static const auto soundWidth    = m_textRenderer.getTextWidth(volumestr);
     static const auto quitWidth     = m_textRenderer.getTextWidth("Quit");
     if(m_menuManager.currentItem() == Game::MenuItem::CONTINUE) {
-      m_textRenderer.renderText("Continue", kYellowColour, centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText(volumestr,  kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kYellowColour, WINDOW_CENTER - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kWhiteColour,  WINDOW_CENTER - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  WINDOW_CENTER - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::SOUND) {
-      m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText(volumestr,  kYellowColour, centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kWhiteColour,  centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kWhiteColour,  WINDOW_CENTER - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kYellowColour, WINDOW_CENTER - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kWhiteColour,  WINDOW_CENTER - (quitWidth * 0.5f), 400.0f, 1.0f);
     } else if(m_menuManager.currentItem() == Game::MenuItem::QUIT) {
-      m_textRenderer.renderText("Continue", kWhiteColour,  centerX - (continueWidth * 0.5f), 600.0f, 1.0f);
-      m_textRenderer.renderText(volumestr,  kWhiteColour,  centerX - (soundWidth * 0.5f), 500.0f, 1.0f);
-      m_textRenderer.renderText("Quit",     kYellowColour, centerX - (quitWidth * 0.5f), 400.0f, 1.0f);
+      m_textRenderer.renderText("Continue", kWhiteColour,  WINDOW_CENTER - (continueWidth * 0.5f), 600.0f, 1.0f);
+      m_textRenderer.renderText(volumestr,  kWhiteColour,  WINDOW_CENTER - (soundWidth * 0.5f), 500.0f, 1.0f);
+      m_textRenderer.renderText("Quit",     kYellowColour, WINDOW_CENTER - (quitWidth * 0.5f), 400.0f, 1.0f);
     }
   }
 
-  void RendererManager::renderWinScreen(const std::array<ScoreEntry, 5>& scores) const noexcept
+  void RendererManager::renderEnd(const std::array<ScoreEntry, 5>& scores, const bool topfive)
   {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    static const auto centerX      = WINDOW_WIDTH * 0.5f;
-    static const auto winMsgWidth  = m_textRenderer.getTextWidth("Congratulations! You win!");
-    static const auto win2MsgWidth = m_textRenderer.getTextWidth("Press SPACE/ENTER to play again or Q/ESC to quit");
-    m_textRenderer.renderText("Congratulations! You win!", kWhiteColour, centerX - (winMsgWidth * 0.5f), 800.0f, 1.0f);
-    // draw scoreboard here, only top 5 bc not too much screen available
-    auto startingHeight = 700.0f;
+    auto msg = "Congratulations!"s;
+    if(!topfive) {
+      msg = "Oops. You didn't make it :(";
+    }
+    auto width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 800.0f, 1.0f);
+    auto height = 700.0f;
     for(unsigned long i{ 0 }; i < scores.size(); ++i) {
+      // yes, it's not good to build strings on the fly like this, but cba
+      // for now bc this repeats only five times
       if(scores[i].m_datetimebuff[0] != '\0') {
-	// @YOLO: this is bad, but doesn't hurt bc this screen has so little to render
-	const auto line = std::string(scores[i].m_datetimebuff.data()) + " - " + std::to_string(scores[i].m_score);
-	const auto lineWidth = m_textRenderer.getTextWidth(line);
-	m_textRenderer.renderText(line,
+	msg = std::string(scores[i].m_datetimebuff.data()) + " - " + std::to_string(scores[i].m_score);
+	width = m_textRenderer.getTextWidth(msg);
+	m_textRenderer.renderText(msg,
 				  (scores[i].m_currentScore) ? kYellowColour : kWhiteColour,
-				  centerX - (lineWidth * 0.5f),
-				  startingHeight,
+				  WINDOW_CENTER - (width * 0.5f),
+				  height,
 				  1.0f);
-	startingHeight -= 50.0f;	
+	height -= 50.0f;
       }
     }
-    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit",
-			      kWhiteColour,
-			      centerX - (win2MsgWidth * 0.5f),
-			      startingHeight - 50.0f,
-			      1.0f);
+    height -= 50.0f;
+    msg = "Press ENTER to play again or Q/ESC to quit";
+    width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), height, 1.0f);
   }
 
-  void RendererManager::renderLoseScreen()
+  void RendererManager::renderStart()
   {
     glActiveTexture(GL_TEXTURE0);
     m_resourceManager.useShaderProgram(m_basicShader->m_id);
     glBindVertexArray(m_basicShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    static const auto centerX       = WINDOW_WIDTH * 0.5f;
-    static const auto loseMsgWidth  = m_textRenderer.getTextWidth("You lost :(");
-    static const auto lose2MsgWidth = m_textRenderer.getTextWidth("Press SPACE/ENTER to play again or Q/ESC to quit");
-    m_textRenderer.renderText("You lost :(", kWhiteColour, centerX - (loseMsgWidth * 0.5f), 600.0f, 1.0f);
-    m_textRenderer.renderText("Press SPACE/ENTER to play again or Q/ESC to quit", kWhiteColour, centerX - (lose2MsgWidth * 0.5f), 500.0f, 1.0f);
-  }
-
-  void RendererManager::renderStartScreen()
-  {
-    glActiveTexture(GL_TEXTURE0);
-    m_resourceManager.useShaderProgram(m_basicShader->m_id);
-    glBindVertexArray(m_basicShader->m_VAO);
-    glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    static const auto centerX   = WINDOW_WIDTH * 0.5f;
-    static const auto msgWidth  = m_textRenderer.getTextWidth("Hi, welcome! Press SPACE/ENTER to play!");
-    static const auto msg2Width = m_textRenderer.getTextWidth("You can also press Q/ESC to quit");
-    m_textRenderer.renderText("Hi, welcome! Press SPACE/ENTER to play!", kSilverColour, centerX - (msgWidth * 0.5f), 600.0f, 1.0f);
-    m_textRenderer.renderText("You can also press Q/ESC to quit", kSilverColour, centerX - (msg2Width * 0.5f), 500.0f, 1.0f);
+    auto msg = "Hi, welcome! Press SPACE/ENTER to play!"s;
+    auto width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 600.0f, 1.0f);
+    msg = "You can also press Q/ESC to quit";
+    width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 500.0f, 1.0f);
   }
 
   void RendererManager::renderLevelLabel(const unsigned int currentLevel, const float alpha)
   {
     std::stringstream ss;
     ss << "Level " << (currentLevel + 1);
-    static const auto centerX  = WINDOW_WIDTH * 0.5f;
-    const auto str = ss.str();
-    static const auto msgWidth = m_textRenderer.getTextWidth(str);
-    m_textRenderer.renderText(str, v4{ 1.0f, 1.0f, 1.0f, alpha }, centerX - (msgWidth * 0.5f), 300.0f, 1.0f);
+    const auto msg = ss.str();
+    const auto width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, v4{ 1.0f, 1.0f, 1.0f, alpha }, WINDOW_CENTER - (width * 0.5f), 300.0f, 1.0f);
   }
 
-  void RendererManager::renderAudioDeviceSelection(const std::vector<AudioDevice>& devices, unsigned int currentOption)
+  void RendererManager::renderAudioDeviceSelection(const std::vector<AudioDevice>& devices, const unsigned int currentOption)
   {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    static const auto str = "Select your audio device";
-    static const auto centerX  = WINDOW_WIDTH * 0.5f;
-    static const auto strWidth = m_textRenderer.getTextWidth(str);
-    m_textRenderer.renderText(str, kWhiteColour, centerX - (strWidth * 0.5f), 800.0f, 1.0f);
-    auto startingHeight = 600.0f;
+    static const auto msg = "Select your audio device";
+    static const auto width = m_textRenderer.getTextWidth(msg);
+    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 800.0f, 1.0f);
+    auto height = 600.0f;
     for(unsigned long i{ 0 }; i < devices.size(); ++i) {
       const auto deviceName = devices[i].m_name;
       const auto deviceNameWidth = m_textRenderer.getTextWidth(deviceName);
       auto colour = (i == currentOption) ? kYellowColour : kWhiteColour;
-      m_textRenderer.renderText(deviceName, colour, centerX - (deviceNameWidth * 0.5f), startingHeight, 1.0f);
-      startingHeight -= 100.0f;
+      m_textRenderer.renderText(deviceName, colour, WINDOW_CENTER - (deviceNameWidth * 0.5f), height, 1.0f);
+      height -= 100.0f;
     }
   }
 

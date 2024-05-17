@@ -250,9 +250,9 @@ namespace Game {
   }
 
   // the file is always sorted and always contains max 5 lines
-  void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores)
+  bool saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores)
   {
-    // @YOLO: can be improved
+    // @YOLO: can definitely be improved in many ways
     const auto time = std::chrono::system_clock::now(); // boring bit
     const auto timeT = std::chrono::system_clock::to_time_t(time); // boring bit
     const auto localTime = *std::localtime(&timeT);		   // boring bit
@@ -269,7 +269,7 @@ namespace Game {
       filewrite.write(scores[0].m_datetimebuff.data(), sizeof(scores[0].m_datetimebuff));
       filewrite.write(reinterpret_cast<char*>(&scores[0].m_score), sizeof(scores[0].m_score));
       filewrite << '\n';
-      return;
+      return true;
     }
     // file exists, read contents into SCORES
     unsigned long i{ 0 };
@@ -294,7 +294,7 @@ namespace Game {
       filewrite.write(scores[i].m_datetimebuff.data(), sizeof(scores[i].m_datetimebuff));
       filewrite.write(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
       filewrite << '\n';
-      return;
+      return true;
     } else {
       // if the file did contain five lines, create a new copy of SCORES with space for one more
       // line, sort, write first five lines and done
@@ -313,6 +313,9 @@ namespace Game {
 	filewrite.write(reinterpret_cast<const char*>(&entry.m_score), sizeof(entry.m_score));	
 	filewrite << '\n';
       }
+      return std::find_if(scores.begin(), scores.end(), [](const ScoreEntry& a) {
+	return a.m_currentScore;
+      });
     }
   }
 
@@ -474,9 +477,9 @@ int main()
   Ev::EventManager eventManager;
   Res::ResourceManager resourceManager;
   Input::InputManager inputManager;
-  Game::ExplosionManager explosionManager(resourceManager);
+  Game::ExplosionManager explosionManager(resourceManager, eventManager);
   Game::GridManager gridManager(WINDOW_WIDTH, WINDOW_HEIGHT);
-  Game::MissileManager missileManager(resourceManager, gridManager, explosionManager, eventManager);
+  Game::MissileManager missileManager(resourceManager, gridManager, eventManager);
   Game::PlayerManager playerManager(resourceManager, inputManager, missileManager, gridManager, eventManager);
   Game::EnemyManager enemyManager(resourceManager, missileManager, gridManager, eventManager);
   Game::LevelManager levelManager(enemyManager);

@@ -1,10 +1,23 @@
 #pragma once
 
+#include "invaders_math.h"
+
 #include <functional>
 #include <vector>
 #include <unordered_map>
+#include <variant>
+
+namespace Game {
+  class Alien;
+  class Player;
+}
 
 namespace Ev {
+
+  // @YOLO: if you need to pass new data with an event, you need to
+  // add it here. Don't know if this is the best approach...
+  // you also need to be careful not to pass heavy objects
+  using EventData = std::variant<std::nullptr_t, Game::Alien*, Game::Player*>;
 
   enum class EventType {
     PlayerDestroyed,
@@ -18,22 +31,18 @@ namespace Ev {
   class Event final {
   public:
     explicit Event(EventType type)
-      : m_type{ type },
-        m_entity{ nullptr }
+      : m_data{ nullptr },
+	m_type{ type }
     {}
-    // NOTE: you know this is bad!!!!!!! cursed code, the reason for this is because there are situations
-    // where you need to delete an alien or a player when they collide with a missile. In those cases,
-    // the missile emits an event of player/alien destroyed and then within that event a reference of the
-    // entity to be deleted is passed... this is probably wrong.
-    explicit Event(EventType type, void* entity)
-      : m_type{ type },
-        m_entity{ entity }
+    Event(EventType type, EventData data)
+      : m_data{ data },
+	m_type{ type }
     {}
-    inline auto getType() const { return m_type; }
-    inline auto getEntity() const { return m_entity; }
+    inline auto getData() const noexcept { return m_data; }
+    inline auto getType() const noexcept { return m_type; }
   private:
+    EventData m_data;
     EventType m_type;
-    void* m_entity;
   };
 
   class EventManager final {

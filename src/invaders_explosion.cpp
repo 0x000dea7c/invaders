@@ -8,14 +8,31 @@
 namespace Game {
   using namespace Math;
   using namespace Renderer;
+  using namespace Ev;
 
-  ExplosionManager::ExplosionManager(const Res::ResourceManager& resourceManager)
-    : m_resourceManager{ resourceManager }
+  ExplosionManager::ExplosionManager(const Res::ResourceManager& resourceManager,
+				     EventManager& eventManager)
+    : m_resourceManager{ resourceManager },
+      m_eventManager{ eventManager }
   {
     // aliens and player
     m_explosions.reserve(SIMUL_ALIENS_ALIVE + 1);
     m_explosionsInstanceData.reserve(SIMUL_ALIENS_ALIVE + 1);
     m_explosionWidth = m_resourceManager.getTex(IDs::SID_TEX_EXPLOSION)->m_width;
+    m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev) {
+      auto data = ev.getData();
+      if(std::holds_alternative<Alien*>(data)) {
+	auto pos = std::get<Alien*>(data)->m_pos;
+	spawnExplosion(pos);
+      }
+    });
+    m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event& ev) {
+      auto data = ev.getData();
+      if(std::holds_alternative<Player*>(data)) {
+	auto pos = std::get<Player*>(data)->m_pos;
+	spawnExplosion(pos);
+      }
+    });
   }
 
   ExplosionManager::~ExplosionManager()
@@ -65,7 +82,7 @@ namespace Game {
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ExplosionInstanceData) * m_explosionsInstanceData.size(), m_explosionsInstanceData.data());
   }
 
-  void ExplosionManager::spawnExplosion(const Math::v3& refPos)
+  void ExplosionManager::spawnExplosion(const v3& refPos)
   {
     m_explosions.emplace_back(Explosion
     {

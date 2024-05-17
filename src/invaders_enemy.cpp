@@ -24,7 +24,10 @@ namespace Game {
     m_aliensInstanceData.reserve(MAX_ALIENS_ALIVE);
     m_alienAtlasWidth = m_resourceManager.getTex(IDs::SID_TEX_ALIEN_ATLAS)->m_width;
     eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& e){
-      destroyAlien(e);
+      auto data = e.getData();
+      if(std::holds_alternative<Alien*>(data)) {
+	destroyAlien(std::get<Alien*>(data));
+      }
     });
   }
 
@@ -212,10 +215,9 @@ namespace Game {
     }
   }
 
-  void EnemyManager::destroyAlien(const Ev::Event& event)
+  void EnemyManager::destroyAlien(Alien* a)
   {
-    // cursed code
-    reinterpret_cast<Alien*>(event.getEntity())->m_destroyed = true;
+    a->m_destroyed = true;
   }
 
   void EnemyManager::reset()

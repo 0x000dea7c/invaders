@@ -25,7 +25,6 @@ namespace Game {
   public:
     MissileManager(const Res::ResourceManager& resourceManager,
                    GridManager& gridManager,
-                   ExplosionManager& explosionManager,
                    Ev::EventManager& eventManager);
     ~MissileManager();
     void update(const float delta, const int topLimit);
@@ -42,7 +41,6 @@ namespace Game {
     std::vector<Renderer::InstanceData> m_alienMissilesInstanceData;
     const Res::ResourceManager& m_resourceManager;
     GridManager& m_gridManager;
-    ExplosionManager& m_explosionManager;
     Ev::EventManager& m_eventManager;
   };
 

@@ -49,7 +49,8 @@ namespace Sim {
     m_end{ false },
     m_renderNewLevelLabel{ false },
     m_playedEffect{ false },
-    m_playedBgMusic{ false }
+    m_playedBgMusic{ false },
+    m_topfive{ false }
   {
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
@@ -65,13 +66,118 @@ namespace Sim {
       m_resourceManager.decreaseVolume();
     });
     m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev){
-      increasePlayerPoints(ev);
+      auto data = ev.getData();
+      if(std::holds_alternative<Alien*>(data)) {
+	increasePlayerPoints(std::get<Alien*>(data)->m_type);
+      }
     });
   }
 
   SimulationManager::~SimulationManager()
   {
 
+  }
+
+  void SimulationManager::processPlayState(const float delta)
+  {
+    m_topfive = false;
+    if(!m_playedBgMusic) {
+      m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC, true);
+      m_playedBgMusic = true;
+    }
+    m_playedEffect = false;
+    if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_state = State::MENU;
+      return;
+    }
+    // order is important: everything that moves and can collide to something else needs to be
+    // updated before the grid. Explosions are an exception bc there's no need to track them
+    m_gridManager.beginFrame();
+    m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
+    m_enemyManager.update(delta);
+    m_missileManager.update(delta, m_sceneHeight);
+    m_explosionManager.update(delta);
+    m_renderManager.render(RenderArgs{
+        .aliensToDraw         = m_enemyManager.numAliveAliens(),
+        .playerLivesToDraw    = m_playerManager.currlives(),
+        .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
+        .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
+        .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
+        .playersToDraw        = 1,
+	.playerPoints         = m_playerManager.getPlayerPoints()
+      });
+    if(m_renderNewLevelLabel) {
+      m_renderManager.renderLevelLabel(m_levelManager.currentLevel(), m_levelLabelAlpha);
+      m_levelLabelAlpha -= delta;
+      if(m_levelLabelAlpha < 0.0f) {
+	m_renderNewLevelLabel = false;
+      }
+    }
+  }
+
+  void SimulationManager::processMenuState()
+  {
+    m_menuManager.update();
+    m_renderManager.renderMenu();
+  }
+
+  void SimulationManager::processEndGameState()
+  {
+    m_playedBgMusic = false;
+    if(m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
+      resetGame();
+      m_state = State::PLAY;
+    } else if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_end = true;
+    }
+    // @YOLO: you're using the same bool flag for two things, disaster waiting to happen
+    if(!m_playedEffect) {
+      m_playedEffect = true;
+      m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
+      m_topfive = Game::saveAndGetScores(m_playerManager.getPlayerPoints(), m_scores);
+      if(m_topfive) {
+	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);
+      } else {
+	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_LOSE_GAME, false);
+      }
+    }
+    m_renderManager.renderEnd(m_scores, m_topfive);
+  }
+
+  void SimulationManager::processWinLevelState()
+  {
+    m_levelManager.changeLevel();
+    m_state = State::PLAY;
+    clearLevel();
+    m_renderNewLevelLabel = true;
+    m_levelLabelAlpha = 1.0f;
+    m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_LEVEL, false);
+  }
+
+  void SimulationManager::processStartState()
+  {
+    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
+      m_state = State::PLAY;
+      m_renderNewLevelLabel = true;
+      m_levelLabelAlpha = 1.0f;
+    } else if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
+      m_end = true;
+    }
+    m_renderManager.renderStart();
+  }
+
+  void SimulationManager::processAudioDeviceSelectionState()
+  {
+    auto devices = Game::getAudioDevices();
+    if(m_inputManager.isKeyPressed(Key::KEY_UP) || m_inputManager.isKeyPressed(Key::KEY_W)) {
+      m_currentAudioSelection = ((m_currentAudioSelection - 1) + (devices.size())) % (devices.size());
+    } else if(m_inputManager.isKeyPressed(Key::KEY_DOWN) || m_inputManager.isKeyPressed(Key::KEY_S)) {
+      m_currentAudioSelection = (m_currentAudioSelection + 1) % (devices.size());
+    } else if(m_inputManager.isKeyPressed(Key::KEY_ENTER) || m_inputManager.isKeyPressed(Key::KEY_SPACE)) {
+      m_resourceManager.initAudio(devices[m_currentAudioSelection]);
+      m_state = State::START;
+    }
+    m_renderManager.renderAudioDeviceSelection(devices, m_currentAudioSelection);
   }
 
   void SimulationManager::update(const float delta)
@@ -81,83 +187,17 @@ namespace Sim {
       return;
     }
     if(m_state == State::PLAY) {
-      if(!m_playedBgMusic) {
-	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_BG_MUSIC, true);
-	m_playedBgMusic = true;
-      }
-      m_playedEffect = false;
-      if(m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
-        m_state = State::MENU;
-        return;
-      }
-      // order is important: everything that moves and can collide to something else needs to be
-      // updated before the grid. Explosions are an exception bc there's no need to track them
-      m_gridManager.beginFrame();
-      m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
-      m_enemyManager.update(delta);
-      m_missileManager.update(delta, m_sceneHeight);
-      m_explosionManager.update(delta);
-      m_renderManager.render(RenderArgs{
-        .aliensToDraw         = m_enemyManager.numAliveAliens(),
-        .playerLivesToDraw    = m_playerManager.currlives(),
-        .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
-        .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
-        .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
-        .playersToDraw        = 1,
-	.playerPoints         = m_playerManager.getPlayerPoints()
-      });
-      if(m_renderNewLevelLabel) {
-        m_renderManager.renderLevelLabel(m_levelManager.currentLevel(), m_levelLabelAlpha);
-        m_levelLabelAlpha -= delta;
-        if(m_levelLabelAlpha < 0.0f) {
-          m_renderNewLevelLabel = false;
-        }
-      }
+      processPlayState(delta);
     } else if(m_state == State::MENU) {
-      m_menuManager.update();
-      m_renderManager.renderMenu();
-    } else if(m_state == State::WIN_GAME) {
-      m_playedBgMusic = false;
-      // don't know where to put this, state manager? for now it will be here
-      winScreenHandleInput();
-      // @TODO: there's a problem here, need to get this bool out somwhow; problem
-      // is that the state transition is not instant, so you can't just keep playing
-      // the sound; that doesn't happen with the win level sound bc the state changes
-      // in one frame
-      static std::array<ScoreEntry, 5> scores;
-      if(!m_playedEffect) {
-	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
-	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_GAME, false);
-	m_playedEffect = true;
-	// actually can use this bool flag to save current scoreboard and
-	// get it from disk to display it
-	Game::saveAndGetScores(m_playerManager.getPlayerPoints(), scores);
-      }
-      m_renderManager.renderWinScreen(scores);
+      processMenuState();
+    } else if(m_state == State::END) {
+      processEndGameState();
     } else if(m_state == State::WIN_LEVEL) {
-      m_levelManager.changeLevel();
-      m_state = State::PLAY;
-      clearLevel();
-      m_renderNewLevelLabel = true;
-      m_levelLabelAlpha = 1.0f;
-      m_resourceManager.playAudioTrack(IDs::SID_AUDIO_WIN_LEVEL, false);
-    } else if(m_state == State::LOSE) {
-      m_playedBgMusic = false;
-      loseScreenHandleInput();
-      m_renderManager.renderLoseScreen();
-      // TODO: remove bool here too
-      if(!m_playedEffect) {
-	m_resourceManager.stopAudioTrack(IDs::SID_AUDIO_BG_MUSIC, 0);
-	m_resourceManager.playAudioTrack(IDs::SID_AUDIO_LOSE_GAME, false);
-	m_playedEffect = true;
-      }
+      processWinLevelState();
     } else if(m_state == State::START) {
-      startScreenHandleInput();
-      m_renderManager.renderStartScreen();
+      processStartState();
     } else if(m_state == State::AUDIO_DEV_SELECTION) {
-      auto devices = Game::getAudioDevices();
-      audioDeviceSelectionHandleInput(devices);
-      m_renderManager.renderAudioDeviceSelection(devices, m_currentAudioSelection);
+      processAudioDeviceSelectionState();
     }
     checkGameState();
   }
@@ -165,9 +205,7 @@ namespace Sim {
   void SimulationManager::checkGameState()
   {
     if(m_playerManager.currlives() == 0) {
-      m_state = State::LOSE;
-    } else if(m_enemyManager.numAliveAliens() == 0 && m_levelManager.lastLevel()) {
-      m_state = State::WIN_GAME;
+      m_state = State::END;
     } else if(m_enemyManager.numAliveAliens() == 0) {
       m_state = State::WIN_LEVEL;
     }
@@ -175,46 +213,13 @@ namespace Sim {
 
   void SimulationManager::clearLevel()
   {
-    // when a new game level is loaded, you need to clear previous' frame mess
-    // and also reset player's position, aliens are loaded by the level manager
     m_playerManager.resetPos();
     m_missileManager.clearMissiles();
   }
 
-  void SimulationManager::winScreenHandleInput()
-  {
-    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
-      resetGame();
-      m_state = State::PLAY;
-    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
-      m_end = true;
-    }
-  }
-
-  void SimulationManager::loseScreenHandleInput()
-  {
-    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
-      resetGame();
-      m_state = State::PLAY;
-    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
-      m_end = true;
-    }
-  }
-
-  void SimulationManager::startScreenHandleInput()
-  {
-    if(m_inputManager.isKeyPressed(Key::KEY_SPACE) || m_inputManager.isKeyPressed(Key::KEY_ENTER)) {
-      m_state = State::PLAY;
-      m_renderNewLevelLabel = true;
-      m_levelLabelAlpha = 1.0f;
-    } else if(m_inputManager.isKeyPressed(Key::KEY_Q) || m_inputManager.isKeyPressed(Key::KEY_ESCAPE)) {
-      m_end = true;
-    }
-  }
-
   void SimulationManager::resetGame()
   {
-    // NOTE: careful, first you reset enemies, then level (bc lvl loads enemies)
+    // @NOTE: careful, first you reset enemies, then level (bc lvl loads enemies)
     m_enemyManager.reset();
     m_levelManager.reset();
     m_playerManager.reset();
@@ -222,11 +227,10 @@ namespace Sim {
     m_explosionManager.reset();
   }
 
-  void SimulationManager::increasePlayerPoints(const Event& event)
+  void SimulationManager::increasePlayerPoints(const AlienType type)
   {
     unsigned int pts;
-    // bit of a cursed code
-    switch(reinterpret_cast<Alien*>(event.getEntity())->m_type) {
+    switch(type) {
     case AlienType::YELLOW:
       pts = 50;
       break;
@@ -244,18 +248,6 @@ namespace Sim {
       break;
     }
     m_playerManager.increasePoints(pts);
-  }
-
-  void SimulationManager::audioDeviceSelectionHandleInput(std::vector<AudioDevice>& devices)
-  {
-    if(m_inputManager.isKeyPressed(Key::KEY_UP) || m_inputManager.isKeyPressed(Key::KEY_W)) {
-      m_currentAudioSelection = ((m_currentAudioSelection - 1) + (devices.size())) % (devices.size());
-    } else if(m_inputManager.isKeyPressed(Key::KEY_DOWN) || m_inputManager.isKeyPressed(Key::KEY_S)) {
-      m_currentAudioSelection = (m_currentAudioSelection + 1) % (devices.size());
-    } else if(m_inputManager.isKeyPressed(Key::KEY_ENTER) || m_inputManager.isKeyPressed(Key::KEY_SPACE)) {
-      m_resourceManager.initAudio(devices[m_currentAudioSelection]);
-      m_state = State::START;
-    }
   }
 
 };

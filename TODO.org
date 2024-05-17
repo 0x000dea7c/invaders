@@ -32,18 +32,23 @@
 * DONE Save points and table scoreboard when player loses/wins
 * DONE change explosion and win game sound
 * DONE Fix points bug
-* TODO Show and save scoreboard when you win and lose
+* DONE Show and save scoreboard when you win and lose
+  That means you don't have win/lose states, but you do have personal best, which happens when your
+  score is the highest so far, in that case a happy track should play, otherwise the sad track
+* DONE Infinite levels
+* DONE don't use spacebar to replay the game, use only enter
+* DONE Code cleanup, to do this, first you need to read a bit more about game architecture
+* DONE Profile (REALLY!), main problem is the grid
+* DONE Get rid of meters_per_pixel? Don't know how they're being useful
+* DONE Change window to no resizable
 * TODO In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
  - use events for things
-* TODO don't use spacebar to replay the game, use only enter
-* TODO Make up to 100 levels, randomly create aliens for every level
 * TODO Improve aliens' AI, rn it's crap
 * TODO Every now and then draw a UFO that crosses the screen and gives extra points
 * TODO Power-ups?
 * TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks a bit, maybe another explosion?
 * TODO Code it on windows, too, to prove the portability point
-* DONE Code cleanup, to do this, first you need to read a bit more about game architecture
-* DONE Profile (REALLY!), main problem is the grid
-* DONE Get rid of meters_per_pixel? Don't know how they're being useful
-* DONE Change window to no resizable
+* TODO Fix scoreboard bug
+* TODO Try to fix tunneling
+* TODO Fix segfault that happened idk how
 

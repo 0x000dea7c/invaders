@@ -15,7 +15,9 @@ namespace Game {
     BEIGE,
     GREEN,
     PINK,
-    BLUE
+    BLUE,
+
+    COUNT
   };
 
   class Alien final {
@@ -46,9 +48,9 @@ namespace Game {
     void update(const float delta);
     inline auto numAliveAliens() const { return m_aliens.size(); }
     void spawnAlien(const Math::v3& pos, const AlienType type);
-    void destroyAlien(const Ev::Event& event);
     void reset();
   private:
+    void destroyAlien(Alien* a);
     Math::v2 getAlienSize(const AlienType type) const;
     Math::v2 getAlienVel(const AlienType type)  const;
     int getAtlasIdx(const AlienType type)       const;

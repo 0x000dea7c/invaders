@@ -45,11 +45,10 @@ namespace Renderer {
     // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
     void renderMenu();
-    void renderWinScreen(const std::array<Game::ScoreEntry, 5>& scores) const noexcept;
-    void renderLoseScreen();
-    void renderStartScreen();
+    void renderEnd(const std::array<Game::ScoreEntry, 5>& scores, const bool topfive);
+    void renderStart();
     void renderLevelLabel(const unsigned int currentLevel, const float alpha);
-    void renderAudioDeviceSelection(const std::vector<Game::AudioDevice>& devices, unsigned int currentOption);
+    void renderAudioDeviceSelection(const std::vector<Game::AudioDevice>& devices, const unsigned int currentOption);
   private:
     // TODO: these are all references, not fucking pointers
     Res::Shader* m_backgroundShader;

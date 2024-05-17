@@ -17,16 +17,18 @@ namespace Game {
 
   class ExplosionManager final {
   public:
-    ExplosionManager(const Res::ResourceManager& resourceManager);
+    ExplosionManager(const Res::ResourceManager& resourceManager,
+		     Ev::EventManager& eventManager);
     ~ExplosionManager();
     void update(const float delta);
-    void spawnExplosion(const Math::v3& refPos);
-    inline auto numActiveExplosions() const { return m_explosions.size(); }
+    inline auto numActiveExplosions() const noexcept { return m_explosions.size(); }
     void reset();
   private:
+    void spawnExplosion(const Math::v3& refPos);
     std::vector<Explosion> m_explosions;
     std::vector<Renderer::ExplosionInstanceData> m_explosionsInstanceData;
     const Res::ResourceManager& m_resourceManager;
+    Ev::EventManager& m_eventManager;
     int m_explosionWidth;
   };
 

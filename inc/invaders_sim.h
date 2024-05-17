@@ -23,8 +23,7 @@ namespace Sim {
     PLAY,
     MENU,
     WIN_LEVEL,
-    WIN_GAME,
-    LOSE,
+    END,
   };
 
   class SimulationManager final {
@@ -52,12 +51,15 @@ namespace Sim {
   private:
     void checkGameState();
     void clearLevel();
-    void winScreenHandleInput();
-    void loseScreenHandleInput();
-    void startScreenHandleInput();
     void resetGame();
-    void increasePlayerPoints(const Ev::Event& event);
-    void audioDeviceSelectionHandleInput(std::vector<Game::AudioDevice>& devices);
+    void increasePlayerPoints(const Game::AlienType type);
+    void processPlayState(const float delta);
+    void processMenuState();
+    void processEndGameState();
+    void processWinLevelState();
+    void processStartState();
+    void processAudioDeviceSelectionState();
+    std::array<Game::ScoreEntry, 5> m_scores;
     Res::ResourceManager& m_resourceManager;
     Input::InputManager& m_inputManager;
     Game::PlayerManager& m_playerManager;
@@ -78,6 +80,7 @@ namespace Sim {
     bool m_renderNewLevelLabel;
     bool m_playedEffect;
     bool m_playedBgMusic;
+    bool m_topfive;
   };
 
 };

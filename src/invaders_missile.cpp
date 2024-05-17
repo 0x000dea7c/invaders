@@ -16,11 +16,9 @@ namespace Game {
 
   MissileManager::MissileManager(const ResourceManager& resourceManager,
                                  GridManager& gridManager,
-                                 ExplosionManager& explosionManager,
                                  EventManager& eventManager)
     : m_resourceManager{ resourceManager },
       m_gridManager{ gridManager },
-      m_explosionManager{ explosionManager },
       m_eventManager{ eventManager }
   {
     m_playerMissiles.reserve(SIMUL_MISSILES_ALIVE);
@@ -59,12 +57,9 @@ namespace Game {
             .max = v2{ a->m_pos.x + a->m_size.x * 0.5f, a->m_pos.y + a->m_size.y * 0.5f }
           };
           if(Phys::aabb_aabb_test(missileAABB, alienAABB, m_playerMissiles[i].m_vel, 4)) {
-            // the reason why you're not using events all over the place (instead of injecting deps) is that you need to
-            // figure out a way to pass a variable number of arguments and handle them accordingly. For now, evenst are
-            // associated with functions with no args.
-            m_eventManager.post(Event(EventType::AlienDestroyed, a));
+            // m_eventManager.post(Event(EventType::AlienDestroyed, static_cast<EventData>(a)));
+	    m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
-	    m_explosionManager.spawnExplosion(a->m_pos);
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
 	    break; // get out of here manually just in case since a missile should only hit one alien not 2
           }
@@ -133,9 +128,8 @@ namespace Game {
             .max = v2{ p->m_pos.x + p->m_size.x * 0.5f, p->m_pos.y + p->m_size.y * 0.5f }
           };
           if(Phys::aabb_aabb_test(missileAABB, playerAABB, m_alienMissiles[i].m_vel, 4)) {
-            m_eventManager.post(Event(EventType::PlayerDestroyed));
+            m_eventManager.post(Event(EventType::PlayerDestroyed, p));
             m_alienMissiles[i].m_destroyed = true;
-            m_explosionManager.spawnExplosion(p->m_pos);
             clearMissiles();
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_PLAYER_DIE, false);
             return;
