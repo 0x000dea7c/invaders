@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <string.h>
 
 #include <X11/Xutil.h>
 #include <SDL2/SDL.h>
@@ -248,59 +249,70 @@ namespace Game {
     SDL_Quit();
   }
 
-  // the file is always sorted, grab the first five lines
+  // the file is always sorted and always contains max 5 lines
   void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores)
   {
-    // @TODO: can be improved in may ways but yolo
-    std::fstream scoreboard("scoreboard.dat", std::ios::in | std::ios::out | std::ios::binary);
-    if(!scoreboard) {
-      // it could fail for read bc it doesn't exist yet, in that case, try only for writing
-      scoreboard.open("scoreboard.dat", std::ios::out | std::ios::binary);
-      if(!scoreboard) {
-	std::cerr << __FUNCTION__ << ": couldn't open scoreboard file.\n";
-	return;
-      }
-    }
+    // @YOLO: can be improved
     const auto time = std::chrono::system_clock::now(); // boring bit
     const auto timeT = std::chrono::system_clock::to_time_t(time); // boring bit
     const auto localTime = *std::localtime(&timeT);		   // boring bit
-    std::stringstream ss;					   // boring bit
+    std::stringstream ss;					   // cut this out
     ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score; // cut this out
     const auto timeStr = ss.str();				   // cut this out
-    const auto timeStrLen = timeStr.size();			   // cut this out
-    unsigned long i{ 0 };
-    bool fileEmpty{ true };
-    while(scoreboard.peek() != EOF && i < scores.size()) {
-      std::string::size_type timeStrLen2{ 0 };
-      auto scoreEntry = ScoreEntry{};
-      scoreEntry.m_currentScore = false;
-      scoreboard.read(reinterpret_cast<char*>(&timeStrLen2), sizeof(timeStrLen2));
-      scoreEntry.m_timebuff.resize(timeStrLen2);
-      scoreboard.read(&scoreEntry.m_timebuff[0], timeStrLen2);
-      scoreboard.read(reinterpret_cast<char*>(&scoreEntry.m_score), sizeof(scoreEntry.m_score));
-      if(score > scoreEntry.m_score) {
-	scoreboard.seekp(-sizeof(timeStrLen2) + timeStrLen2 + sizeof(scoreEntry.m_score), std::ios::cur);
-	scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
-	scoreboard.write(&timeStr[0], timeStrLen);
-	scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
-	scores[i].m_timebuff = timeStr;
-	scores[i].m_score = score;
-	scores[i].m_currentScore = true;
-      } else {
-	scores[i] = scoreEntry;
-      }
-      fileEmpty = false;
-      ++i;
+    std::ifstream fileread("scoreboard.dat", std::ios::binary);
+    if(!fileread) {
+      // file doesn't exist yet, so it's first time playing, fill SCORES, write and done
+      std::ofstream filewrite("scoreboard.dat", std::ios::binary | std::ios::app);
+      std::copy(timeStr.begin(), timeStr.end(), scores[0].m_datetimebuff.begin());
+      scores[0].m_score = score;
+      scores[0].m_currentScore = true;
+      filewrite.write(scores[0].m_datetimebuff.data(), sizeof(scores[0].m_datetimebuff));
+      filewrite.write(reinterpret_cast<char*>(&scores[0].m_score), sizeof(scores[0].m_score));
+      filewrite << '\n';
+      return;
     }
-    if(fileEmpty) {
-      scoreboard.write(reinterpret_cast<const char*>(&timeStrLen), sizeof(timeStrLen));
-      scoreboard.write(timeStr.data(), timeStrLen);
-      scoreboard.write(reinterpret_cast<const char*>(&score), sizeof(score));
-      scores[0] = ScoreEntry{
-	.m_timebuff = timeStr,
-	.m_score = score,
-	.m_currentScore = true
-      };
+    // file exists, read contents into SCORES
+    unsigned long i{ 0 };
+    while(fileread.peek() != EOF) {
+      fileread.read(scores[i].m_datetimebuff.data(), sizeof(scores[i].m_datetimebuff));
+      fileread.read(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
+      scores[i].m_currentScore = false;
+      if(fileread.get() == '\n') {
+	++i;
+      }
+    }
+    fileread.close();
+    // if the file didn't contain five lines, add new one to SCORES, sort, write and done
+    if(i < scores.size()) {
+      std::ofstream filewrite("scoreboard.dat", std::ios::binary | std::ios::app);
+      std::copy(timeStr.begin(), timeStr.end(), scores[i].m_datetimebuff.begin());
+      scores[i].m_score = score;
+      scores[i].m_currentScore = true;
+      std::sort(scores.begin(), scores.end(), [](const ScoreEntry& a, const ScoreEntry& b) {
+	return a.m_score >= b.m_score;
+      });
+      filewrite.write(scores[i].m_datetimebuff.data(), sizeof(scores[i].m_datetimebuff));
+      filewrite.write(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
+      filewrite << '\n';
+      return;
+    } else {
+      // if the file did contain five lines, create a new copy of SCORES with space for one more
+      // line, sort, write first five lines and done
+      std::array<ScoreEntry, 6> scorescpy;
+      std::copy(scores.begin(), scores.end(), scorescpy.begin());
+      std::copy(timeStr.begin(), timeStr.end(), scorescpy.end()->m_datetimebuff.begin());
+      scorescpy.end()->m_score = score;
+      scorescpy.end()->m_currentScore = true;
+      std::sort(scorescpy.begin(), scorescpy.end(), [](const ScoreEntry& a, const ScoreEntry& b) {
+	return a.m_score >= b.m_score;
+      });
+      std::copy(scorescpy.begin(), scorescpy.end() - 1, scores.begin());
+      std::ofstream filewrite("scoreboard.dat", std::ios::binary);
+      for(const auto& entry : scores) {
+	filewrite.write(entry.m_datetimebuff.data(), sizeof(entry.m_datetimebuff));
+	filewrite.write(reinterpret_cast<const char*>(&entry.m_score), sizeof(entry.m_score));	
+	filewrite << '\n';
+      }
     }
   }
 
@@ -347,7 +359,7 @@ int main()
 {
   // if we leave sync enabled it will slow down iostream a lot, don't need sync
   // between C and C++ streams anyways
-  std::ios::sync_with_stdio(false);
+  std::ios::sync_with_stdio(true);
   // first, init OpenGL's function pointers, this is probably specific for each
   // platform, so that's why it's in here; for another platform, say win32, the
   // idea is to have a win32_invaders.cpp and init OpenGL's function pointers in

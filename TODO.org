@@ -31,17 +31,17 @@
 * DONE Make main music run instantly after audio selection
 * DONE Save points and table scoreboard when player loses/wins
 * DONE change explosion and win game sound
-* TODO Fix points bug
- - always same aliens but different points, how is it possible, baka
+* DONE Fix points bug
+* TODO Show and save scoreboard when you win and lose
 * TODO In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
  - use events for things
 * TODO don't use spacebar to replay the game, use only enter
 * TODO Make up to 100 levels, randomly create aliens for every level
 * TODO Improve aliens' AI, rn it's crap
-* TODO If you feel like it, every now and then draw a UFO that crosses the screen and gives extra points
-* TODO Power-ups? they only make sense if you make the game inf
+* TODO Every now and then draw a UFO that crosses the screen and gives extra points
+* TODO Power-ups?
+* TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks a bit, maybe another explosion?
 * TODO Code it on windows, too, to prove the portability point
-* TODO Improve all visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks a bit
 * DONE Code cleanup, to do this, first you need to read a bit more about game architecture
 * DONE Profile (REALLY!), main problem is the grid
 * DONE Get rid of meters_per_pixel? Don't know how they're being useful

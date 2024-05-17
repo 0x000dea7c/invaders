@@ -63,9 +63,9 @@ namespace Game {
   // it's in here, in case you want to use underlying OS or a lib to improve perf
   class ScoreEntry final {
   public:
-    std::string m_timebuff; // @TODO: this is terribad, using a fixed char array might be way better, but this only runs once yolo
-    unsigned int m_score;
-    bool m_currentScore;    // tells if this entry is the current one
+    std::array<char, 21> m_datetimebuff{ 0 };
+    unsigned int m_score{ 0 };
+    bool m_currentScore{ false };
   };
 
   void saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores);

@@ -137,8 +137,9 @@ namespace Renderer {
     // draw scoreboard here, only top 5 bc not too much screen available
     auto startingHeight = 700.0f;
     for(unsigned long i{ 0 }; i < scores.size(); ++i) {
-      if(!scores[i].m_timebuff.empty()) {
-	const auto line = scores[i].m_timebuff + " - " + std::to_string(scores[i].m_score);
+      if(scores[i].m_datetimebuff[0] != '\0') {
+	// @YOLO: this is bad, but doesn't hurt bc this screen has so little to render
+	const auto line = std::string(scores[i].m_datetimebuff.data()) + " - " + std::to_string(scores[i].m_score);
 	const auto lineWidth = m_textRenderer.getTextWidth(line);
 	m_textRenderer.renderText(line,
 				  (scores[i].m_currentScore) ? kYellowColour : kWhiteColour,
