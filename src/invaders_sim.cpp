@@ -83,8 +83,6 @@ namespace Sim {
       m_state = State::MENU;
       return;
     }
-    // order is important: everything that moves and can collide to something else needs to be
-    // updated before the grid. Explosions are an exception bc there's no need to track them
     m_gridManager.beginFrame();
     m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
     m_enemyManager.update(delta);

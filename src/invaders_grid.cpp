@@ -1,9 +1,15 @@
 #include "invaders_grid.h"
 
+#include <algorithm>
+
 namespace Game {
   using namespace Math;
+  using namespace Ev;
 
-  GridManager::GridManager(const int sceneWidth, const int sceneHeight)
+  GridManager::GridManager(const int sceneWidth,
+			   const int sceneHeight,
+			   EventManager& eventManager)
+    : m_eventManager{ eventManager }
   {
     m_rows = std::ceil(sceneWidth  / CELL_WIDTH);
     m_cols = std::ceil(sceneHeight / CELL_HEIGHT);
@@ -11,6 +17,28 @@ namespace Game {
     for(unsigned long i{ 0 }; i < m_grid.size(); ++i) {
       m_grid[i].resize(8);
     }
+    m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& event) {
+      auto data = event.getData();
+      if(std::holds_alternative<Alien*>(data)) {
+	const auto* a = std::get<Alien*>(data);
+	const auto cellId = getId(a->m_pos);
+	auto it = std::remove_if(m_grid[cellId].begin(), m_grid[cellId].end(), [a](const EntityGridData& arg) {
+	  return a == arg.data;
+	});
+	m_grid[cellId].erase(it);
+      }
+    });
+    m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event& event) {
+      auto data = event.getData();
+      if(std::holds_alternative<Player*>(data)) {
+	const auto* p = std::get<Player*>(data);
+	const auto cellId = getId(p->m_pos);
+	auto it = std::remove_if(m_grid[cellId].begin(), m_grid[cellId].end(), [p](const EntityGridData& arg) {
+	  return p == arg.data;
+	});
+	m_grid[cellId].erase(it);
+      }      
+    });
   }
 
   GridManager::~GridManager()

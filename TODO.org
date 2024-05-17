@@ -42,12 +42,16 @@
 * DONE Get rid of meters_per_pixel? Don't know how they're being useful
 * DONE Change window to no resizable
 * DONE In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
-* TODO Improve aliens' AI, rn it's crap
+* DONE Fix scoreboard bug
+* DONE Fix segfault that happened idk how
+* TODO what are you doing in missiles and alien? remove_if? did you lose consciousness again? control yourself
+
 * TODO Every now and then draw a UFO that crosses the screen and gives extra points
+* TODO Improve aliens' AI, rn it's crap
 * TODO Power-ups?
-* TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks a bit, maybe another explosion?
-* TODO Code it on windows, too, to prove the portability point
-* TODO Fix scoreboard bug
 * TODO Try to fix tunneling
-* TODO Fix segfault that happened idk how
+* TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks, maybe another explosion tex?
+  - animations?
+* TODO Code it on windows, too, to prove the portability point
+
 

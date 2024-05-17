@@ -39,6 +39,18 @@ namespace Game {
       destroyPlayer();
     });
     updatePlayerLivesInstanceData();
+    // the vertex data won't change
+    m_playerInstanceData.m_vertexData =
+      {
+	{
+	  { .x = -1.f, .y = -1.f, .z = 0.f, .w = 0.f }, // bottom left
+	  { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }, // bottom right
+	  { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
+	  { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
+	  { .x =  1.f, .y =  1.f, .z = 1.f, .w = 1.f }, // top right
+	  { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }  // bottom right
+	}
+      };
   }
 
   PlayerManager::~PlayerManager()
@@ -46,9 +58,8 @@ namespace Game {
 
   }
 
-  void PlayerManager::update(const float delta, const int rightLimit, const int topLimit)
+  void PlayerManager::updatePlayerData(const float delta, const int rightLimit, const int topLimit)
   {
-    handleInput();
     if(m_player.m_shooting && m_player.m_currcd > m_player.m_shootcd) {
       m_missileManager.spawnPlayerMissiles(m_player.m_pos, m_player.m_size);
       m_player.m_currcd = 0;
@@ -93,29 +104,31 @@ namespace Game {
       } else if(m_player.m_pos.y - m_player.m_size.y < 0.0f) {
         m_player.m_pos.y = m_player.m_size.y;
       }
-      // transforms
-      m_playerInstanceData.m_vertexData = {{
-        { .x = -1.f, .y = -1.f, .z = 0.f, .w = 0.f }, // bottom left
-        { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }, // bottom right
-        { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
-        { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
-        { .x =  1.f, .y =  1.f, .z = 1.f, .w = 1.f }, // top right
-        { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }  // bottom right
-      }};
-      m_playerInstanceData.m_model = identity();
-      m_playerInstanceData.m_model = scale(m_playerInstanceData.m_model, v3{
+    }
+  }
+
+  void PlayerManager::updatePlayerInstanceData()
+  {
+    m_playerInstanceData.m_model = identity();
+    m_playerInstanceData.m_model = scale(m_playerInstanceData.m_model, v3{
         .x = m_player.m_size.x,
         .y = m_player.m_size.y,
         .z = 1.0f
       });
-      m_playerInstanceData.m_model = translate(m_playerInstanceData.m_model, v3{
+    m_playerInstanceData.m_model = translate(m_playerInstanceData.m_model, v3{
         .x = m_player.m_pos.x,
         .y = m_player.m_pos.y,
         .z = m_player.m_pos.z
       });
-      glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER)->m_VBO);
-      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER)->m_VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);    
+  }
+
+  void PlayerManager::update(const float delta, const int rightLimit, const int topLimit)
+  {
+    handleInput();
+    updatePlayerData(delta, rightLimit, topLimit);
+    updatePlayerInstanceData();
     m_gridManager.update(m_player.m_pos, &m_player, EntityType::PLAYER);
   }
 

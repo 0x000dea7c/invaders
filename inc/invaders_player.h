@@ -55,6 +55,8 @@ namespace Game {
     void increasePoints(const unsigned int pts) noexcept;
     inline auto getPlayerPoints() const noexcept { return m_player.m_points; }
   private:
+    void updatePlayerData(const float delta, const int rightLimit, const int topLimit);
+    void updatePlayerInstanceData();
     void updatePlayerLivesInstanceData();
     Renderer::InstanceData m_playerInstanceData;
     std::vector<Renderer::InstanceData> m_playerLivesInstanceData;

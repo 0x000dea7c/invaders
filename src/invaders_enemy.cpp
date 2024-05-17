@@ -38,14 +38,19 @@ namespace Game {
 
   void EnemyManager::update(const float delta)
   {
+    // if(spawnAlienUFO()) {
+    //   // get starting pos, left or right
+    //   // depending on that, get direction
+    //   // UFOs just travel from left to right or vice versa and once they're out of bounds, they get deleted
+    //   // they can also be deleted if a missile impacts them, ofc
+    // }
     for(unsigned long i{ 0 }; i < m_aliens.size(); ++i) {
       if(m_aliens[i].m_destroyed) {
-        std::swap(m_aliens[i], m_aliens.back());
-        std::swap(m_aliensInstanceData[i], m_aliensInstanceData.back());
-        m_aliens.pop_back();
-        m_aliensInstanceData.pop_back();
-        --i;
-        continue;
+	std::iter_swap(m_aliens.begin() + i, m_aliens.end() - 1);
+	m_aliens.pop_back();
+	std::iter_swap(m_aliensInstanceData.begin() + i, m_aliensInstanceData.end() - 1);
+	m_aliensInstanceData.pop_back();
+	continue;
       }
       // check if it's time to spawn missiles
       if(m_aliens[i].m_currcd > m_aliens[i].m_firecd) {

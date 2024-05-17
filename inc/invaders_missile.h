@@ -34,6 +34,8 @@ namespace Game {
     inline auto numActiveAlienMissiles()  const noexcept { return m_alienMissiles.size(); }
     void clearMissiles();
   private:
+    void updatePlayerMissiles(const float delta, const int topLimit);
+    void updateAlienMissiles(const float delta);
     // it's convenient storing different kind of missiles in separate vectors
     std::vector<Missile> m_playerMissiles;
     std::vector<Renderer::InstanceData> m_playerMissilesInstanceData;

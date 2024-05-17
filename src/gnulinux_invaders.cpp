@@ -454,7 +454,7 @@ int main()
   Res::ResourceManager resourceManager(eventManager);
   Input::InputManager inputManager;
   Game::ExplosionManager explosionManager(resourceManager, eventManager);
-  Game::GridManager gridManager(WINDOW_WIDTH, WINDOW_HEIGHT);
+  Game::GridManager gridManager(WINDOW_WIDTH, WINDOW_HEIGHT, eventManager);
   Game::MissileManager missileManager(resourceManager, gridManager, eventManager);
   Game::PlayerManager playerManager(resourceManager, inputManager, missileManager, gridManager, eventManager);
   Game::EnemyManager enemyManager(resourceManager, missileManager, gridManager, eventManager);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "invaders_math.h"
+#include "event.h"
 
 #include <cmath>
 #include <vector>
@@ -20,7 +21,9 @@ namespace Game {
 
   class GridManager final {
   public:
-    GridManager(const int sceneWidth, const int sceneHeight);
+    GridManager(const int sceneWidth,
+		const int sceneHeight,
+		Ev::EventManager& eventManager);
     ~GridManager();
     void beginFrame();
     void update(const Math::v3& pos, const void* ent, const EntityType type);
@@ -31,6 +34,7 @@ namespace Game {
       return std::floor(pos.x / CELL_WIDTH) + std::floor(pos.y / CELL_HEIGHT) * m_cols;
     }
     std::vector<std::vector<EntityGridData>> m_grid;
+    Ev::EventManager& m_eventManager;
     int m_cols;
     int m_rows;
   };
