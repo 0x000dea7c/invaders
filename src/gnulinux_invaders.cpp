@@ -260,63 +260,39 @@ namespace Game {
     ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score; // cut this out
     const auto timeStr = ss.str();				   // cut this out
     std::ifstream fileread("scoreboard.dat", std::ios::binary);
-    if(!fileread) {
-      // file doesn't exist yet, so it's first time playing, fill SCORES, write and done
-      std::ofstream filewrite("scoreboard.dat", std::ios::binary | std::ios::app);
-      std::copy(timeStr.begin(), timeStr.end(), scores[0].m_datetimebuff.begin());
-      scores[0].m_score = score;
-      scores[0].m_currentScore = true;
-      filewrite.write(scores[0].m_datetimebuff.data(), sizeof(scores[0].m_datetimebuff));
-      filewrite.write(reinterpret_cast<char*>(&scores[0].m_score), sizeof(scores[0].m_score));
-      filewrite << '\n';
-      return true;
-    }
-    // file exists, read contents into SCORES
-    unsigned long i{ 0 };
-    while(fileread.peek() != EOF) {
-      fileread.read(scores[i].m_datetimebuff.data(), sizeof(scores[i].m_datetimebuff));
-      fileread.read(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
-      scores[i].m_currentScore = false;
-      if(fileread.get() == '\n') {
-	++i;
+    if(fileread.is_open()) {
+      // if the file already exists, load scores
+      for(unsigned int i{ 0 }; i < scores.size(); ++i) {
+	fileread.read(reinterpret_cast<char*>(scores[i].m_datetimebuff.data()), sizeof(scores[i].m_datetimebuff));
+	fileread.read(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
+	scores[i].m_currentScore = false;
       }
     }
-    fileread.close();
-    // if the file didn't contain five lines, add new one to SCORES, sort, write and done
-    if(i < scores.size()) {
-      std::ofstream filewrite("scoreboard.dat", std::ios::binary | std::ios::app);
-      std::copy(timeStr.begin(), timeStr.end(), scores[i].m_datetimebuff.begin());
-      scores[i].m_score = score;
-      scores[i].m_currentScore = true;
+    bool topfive{ false };
+    auto it = std::find_if(scores.begin(), scores.end(), [score](const ScoreEntry& a){ return score > a.m_score; });
+    if(it != scores.end()) {
+      topfive = true;
+    }
+    // since the file is sorted at all times, you can just replace the last element and then sort
+    if(topfive) {
+      scores[4].m_score = score;
+      scores[4].m_currentScore = true;
+      std::copy(timeStr.begin(), timeStr.end(), scores[4].m_datetimebuff.begin());
       std::sort(scores.begin(), scores.end(), [](const ScoreEntry& a, const ScoreEntry& b) {
 	return a.m_score >= b.m_score;
       });
-      filewrite.write(scores[i].m_datetimebuff.data(), sizeof(scores[i].m_datetimebuff));
-      filewrite.write(reinterpret_cast<char*>(&scores[i].m_score), sizeof(scores[i].m_score));
-      filewrite << '\n';
-      return true;
-    } else {
-      // if the file did contain five lines, create a new copy of SCORES with space for one more
-      // line, sort, write first five lines and done
-      std::array<ScoreEntry, 6> scorescpy;
-      std::copy(scores.begin(), scores.end(), scorescpy.begin());
-      std::copy(timeStr.begin(), timeStr.end(), scorescpy.end()->m_datetimebuff.begin());
-      scorescpy.end()->m_score = score;
-      scorescpy.end()->m_currentScore = true;
-      std::sort(scorescpy.begin(), scorescpy.end(), [](const ScoreEntry& a, const ScoreEntry& b) {
-	return a.m_score >= b.m_score;
-      });
-      std::copy(scorescpy.begin(), scorescpy.end() - 1, scores.begin());
-      std::ofstream filewrite("scoreboard.dat", std::ios::binary);
-      for(const auto& entry : scores) {
-	filewrite.write(entry.m_datetimebuff.data(), sizeof(entry.m_datetimebuff));
-	filewrite.write(reinterpret_cast<const char*>(&entry.m_score), sizeof(entry.m_score));	
-	filewrite << '\n';
-      }
-      return std::find_if(scores.begin(), scores.end(), [](const ScoreEntry& a) {
-	return a.m_currentScore;
-      });
     }
+    // write back
+    std::ofstream filewrite("scoreboard.dat", std::ios::binary);
+    if(filewrite.is_open()) {
+      for(const auto& e : scores) {
+	filewrite.write(reinterpret_cast<const char*>(e.m_datetimebuff.data()), sizeof(e.m_datetimebuff));
+	filewrite.write(reinterpret_cast<const char*>(&e.m_score), sizeof(e.m_score));
+      }
+    } else {
+      std::clog << __FUNCTION__ << ": couldn't save scoreboard.\n";
+    }
+    return topfive;
   }
 
 };
@@ -362,7 +338,7 @@ int main()
 {
   // if we leave sync enabled it will slow down iostream a lot, don't need sync
   // between C and C++ streams anyways
-  std::ios::sync_with_stdio(true);
+  std::ios::sync_with_stdio(false);
   // first, init OpenGL's function pointers, this is probably specific for each
   // platform, so that's why it's in here; for another platform, say win32, the
   // idea is to have a win32_invaders.cpp and init OpenGL's function pointers in
@@ -475,7 +451,7 @@ int main()
   // init all resource managers game has. If there's any error initialising them,
   // the game will straight up close with a diagnostic msg
   Ev::EventManager eventManager;
-  Res::ResourceManager resourceManager;
+  Res::ResourceManager resourceManager(eventManager);
   Input::InputManager inputManager;
   Game::ExplosionManager explosionManager(resourceManager, eventManager);
   Game::GridManager gridManager(WINDOW_WIDTH, WINDOW_HEIGHT);

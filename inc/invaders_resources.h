@@ -1,8 +1,10 @@
 #pragma once
 
+#include "event.h"
 #include "invaders.h"
 #include "invaders_math.h"
 #include "invaders_opengl.h"
+
 #include <functional>
 #include <unordered_map>
 #include <memory>
@@ -50,11 +52,12 @@ namespace Res {
   // - textures
   // - fonts
   // - shaders
-  // - etc
-  // this class is also omoiiiiiiiiiiiiiiiii
+  // - audio
+  // etc
+  // this class is omoii
   class ResourceManager final {
   public:
-    ResourceManager();
+    ResourceManager(Ev::EventManager& eventManager);
     ~ResourceManager();
     inline auto getTex(const int sid) const noexcept
     {
@@ -115,6 +118,7 @@ namespace Res {
     Shader loadTextShader(const char* vertpath, const char* fragpath, const Math::m4& m);
     Shader loadMenuShader(const char* vertpath, const char* fragpath);
     Shader loadBasicShader(const char* vertpath, const char* fragpath);
+    Ev::EventManager& m_eventManager;
     std::unordered_map<int, std::unique_ptr<Texture2D>> m_textures;
     std::unordered_map<int, std::unique_ptr<Shader>> m_shaders;
     std::unordered_map<int, std::unique_ptr<Game::AudioData>> m_audioTracks;

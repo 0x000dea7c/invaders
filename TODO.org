@@ -41,8 +41,7 @@
 * DONE Profile (REALLY!), main problem is the grid
 * DONE Get rid of meters_per_pixel? Don't know how they're being useful
 * DONE Change window to no resizable
-* TODO In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
- - use events for things
+* DONE In missiles updates, get rid of explosionmanager and make explosionamanager listen for aliendestroyed
 * TODO Improve aliens' AI, rn it's crap
 * TODO Every now and then draw a UFO that crosses the screen and gives extra points
 * TODO Power-ups?

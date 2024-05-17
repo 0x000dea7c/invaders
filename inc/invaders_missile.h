@@ -30,8 +30,8 @@ namespace Game {
     void update(const float delta, const int topLimit);
     void spawnAlienMissile(const Math::v3 refPos);
     void spawnPlayerMissiles(const Math::v3 refPos, const Math::v2 refSize);
-    inline auto numActivePlayerMissiles() const { return m_playerMissiles.size(); }
-    inline auto numActiveAlienMissiles() const { return m_alienMissiles.size(); }
+    inline auto numActivePlayerMissiles() const noexcept { return m_playerMissiles.size(); }
+    inline auto numActiveAlienMissiles()  const noexcept { return m_alienMissiles.size(); }
     void clearMissiles();
   private:
     // it's convenient storing different kind of missiles in separate vectors

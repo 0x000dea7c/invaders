@@ -2,6 +2,7 @@
 #include "common.h"
 #include "invaders.h"
 #include "invaders_math.h"
+
 // NOTE: HEADS UP! need to include renderer to use InstanceData classes, 99.9% it's wrong
 #include "invaders_renderer.h"
 
@@ -84,6 +85,7 @@ namespace Res {
   using namespace Game;
   using namespace Math;
   using namespace Renderer;
+  using namespace Ev;
 
   Texture2D::Texture2D(const int w, const int h, const unsigned int id)
     : m_width{ w }, m_height{ h }, m_id{ id }
@@ -95,7 +97,8 @@ namespace Res {
     : m_id{ id }, m_VAO{ VAO }, m_VBO{ VBO }
   {}
 
-  ResourceManager::ResourceManager()
+  ResourceManager::ResourceManager(EventManager& eventManager)
+    : m_eventManager{ eventManager }
   {
     // -----------------------------------------------
     // textures
@@ -230,10 +233,8 @@ namespace Res {
                         FRAG_SHADER_FILE_MISSILE_PLAYER,
                         m)
     );
-    // NOTE: AAAAA!!!!!!!!!!!!!!!!!!!!!!!! since missile and alien shaders are the same,
-    // you need to use different names for the hash to work, otherwise you'll be overriding
-    // them! You're currently using the vertex shader filename for the player's missiles and
-    // the fragment shader for the aliens missiles.
+    // NOTE: since missile and alien shaders are the same, you need to use different
+    // names for the hash to work, otherwise you'll be overriding them!
     IDs::SID_SHADER_MISSILE_ALIEN = fnv1a(FRAG_SHADER_FILE_MISSILE_ALIEN);
     m_shaders[IDs::SID_SHADER_MISSILE_ALIEN] = std::make_unique<Shader>(
       loadMissileShader(VERT_SHADER_FILE_MISSILE_ALIEN,
@@ -251,12 +252,18 @@ namespace Res {
     IDs::SID_SHADER_MENU = fnv1a(VERT_SHADER_FILE_MENU);
     m_shaders[IDs::SID_SHADER_MENU] = std::make_unique<Shader>(loadMenuShader(VERT_SHADER_FILE_MENU, FRAG_SHADER_FILE_MENU));
     //  -----------------------------------------------
-    // basic shader, this is used for rendering start, win and lose screen
+    // basic shader, this is used for rendering text perhaps w/ a bg image
     //  -----------------------------------------------
     IDs::SID_SHADER_BASIC = fnv1a(VERT_SHADER_FILE_BASIC);
     m_shaders[IDs::SID_SHADER_BASIC] = std::make_unique<Shader>(loadBasicShader(VERT_SHADER_FILE_BASIC, FRAG_SHADER_FILE_BASIC));
     // uniform caching
     m_uniforms.reserve(8);
+    m_eventManager.subscribe(EventType::MenuIncreaseVolume, [this](const Event&){
+      increaseVolume();
+    });
+    m_eventManager.subscribe(EventType::MenuDecreaseVolume, [this](const Event&){
+      decreaseVolume();
+    });
   }
 
   ResourceManager::~ResourceManager()

@@ -58,13 +58,6 @@ namespace Sim {
     m_eventManager.subscribe(EventType::MenuContinue, [this](const Event&){
       m_state = State::PLAY;
     });
-    // here? or in resources??? :thinking:
-    m_eventManager.subscribe(EventType::MenuIncreaseVolume, [this](const Event&){
-      m_resourceManager.increaseVolume();
-    });
-    m_eventManager.subscribe(EventType::MenuDecreaseVolume, [this](const Event&){
-      m_resourceManager.decreaseVolume();
-    });
     m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev){
       auto data = ev.getData();
       if(std::holds_alternative<Alien*>(data)) {
@@ -98,14 +91,14 @@ namespace Sim {
     m_missileManager.update(delta, m_sceneHeight);
     m_explosionManager.update(delta);
     m_renderManager.render(RenderArgs{
-        .aliensToDraw         = m_enemyManager.numAliveAliens(),
-        .playerLivesToDraw    = m_playerManager.currlives(),
-        .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
-        .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
-        .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
-        .playersToDraw        = 1,
-	.playerPoints         = m_playerManager.getPlayerPoints()
-      });
+      .aliensToDraw         = m_enemyManager.numAliveAliens(),
+      .playerLivesToDraw    = m_playerManager.currlives(),
+      .explosionsToDraw     = m_explosionManager.numActiveExplosions(),
+      .playerMissilesToDraw = m_missileManager.numActivePlayerMissiles(),
+      .alienMissilesToDraw  = m_missileManager.numActiveAlienMissiles(),
+      .playersToDraw        = 1,
+      .playerPoints         = m_playerManager.getPlayerPoints()
+    });
     if(m_renderNewLevelLabel) {
       m_renderManager.renderLevelLabel(m_levelManager.currentLevel(), m_levelLabelAlpha);
       m_levelLabelAlpha -= delta;

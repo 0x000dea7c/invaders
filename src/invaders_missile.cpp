@@ -6,8 +6,6 @@
 #include "invaders_enemy.h"
 #include "invaders_player.h"
 
-#include <set>
-
 namespace Game {
   using namespace Math;
   using namespace Renderer;
@@ -57,7 +55,6 @@ namespace Game {
             .max = v2{ a->m_pos.x + a->m_size.x * 0.5f, a->m_pos.y + a->m_size.y * 0.5f }
           };
           if(Phys::aabb_aabb_test(missileAABB, alienAABB, m_playerMissiles[i].m_vel, 4)) {
-            // m_eventManager.post(Event(EventType::AlienDestroyed, static_cast<EventData>(a)));
 	    m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
