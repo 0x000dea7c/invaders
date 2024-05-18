@@ -27,12 +27,11 @@ namespace Game {
     Math::v2 m_dims;
     Math::v2 m_size;
     Math::v2 m_vel;
-    Math::v2 m_idx;
+    Math::v2i m_idx;
     Math::v2i m_dir;
-    float m_minX; // movement range
-    float m_maxX; // "
-    float m_minY; // "
-    float m_maxY; // "
+    float m_minX;
+    float m_maxX;
+    float m_initX;
     float m_initY;
     AlienType m_type;
     int m_firecd;

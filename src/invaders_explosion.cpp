@@ -18,7 +18,7 @@ namespace Game {
     // aliens and player
     m_explosions.reserve(SIMUL_ALIENS_ALIVE + 1);
     m_explosionsInstanceData.reserve(SIMUL_ALIENS_ALIVE + 1);
-    m_explosionWidth = m_resourceManager.getTex(IDs::SID_TEX_EXPLOSION)->m_width;
+    m_explosionWidth = pixelsToWorld(m_resourceManager.getTex(IDs::SID_TEX_EXPLOSION)->m_width * 0.1f);
     m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev) {
       auto data = ev.getData();
       if(std::holds_alternative<Alien*>(data)) {
@@ -50,7 +50,6 @@ namespace Game {
         std::swap(m_explosionsInstanceData[i], m_explosionsInstanceData.back());
         m_explosions.pop_back();
         m_explosionsInstanceData.pop_back();
-        --i;
         continue;
       }
       m_explosionsInstanceData[i].m_colour.w -= 1.0f * delta;
@@ -66,15 +65,15 @@ namespace Game {
       m_explosionsInstanceData[i].m_instanceData.m_model =
         scale(m_explosionsInstanceData[i].m_instanceData.m_model,
               v3{
-                .x = m_explosions[i].m_size.x,
-                .y = m_explosions[i].m_size.y,
+                .x = worldToPixels(m_explosions[i].m_size.x),
+                .y = worldToPixels(m_explosions[i].m_size.y),
                 .z = 1.0f
               });
       m_explosionsInstanceData[i].m_instanceData.m_model =
         translate(m_explosionsInstanceData[i].m_instanceData.m_model,
                   v3{
-                    .x = m_explosions[i].m_pos.x,
-                    .y = m_explosions[i].m_pos.y,
+                    .x = worldToPixels(m_explosions[i].m_pos.x),
+                    .y = worldToPixels(m_explosions[i].m_pos.y),
                     .z = 0.0f
                   });
     }
@@ -87,7 +86,8 @@ namespace Game {
     m_explosions.emplace_back(Explosion
     {
       .m_pos    = refPos,
-      .m_size   = v2{ m_explosionWidth * 0.1f, m_explosionWidth * 0.1f },
+      .m_size   = v2{ static_cast<float>(m_explosionWidth),
+		      static_cast<float>(m_explosionWidth) },
       .m_life   = 1.0f,
     });
     m_explosionsInstanceData.emplace_back(ExplosionInstanceData{});

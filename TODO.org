@@ -46,8 +46,8 @@
 * DONE Fix segfault that happened idk how
 * DONE what are you doing in missiles and alien? remove_if? did you lose consciousness again? control yourself
 * DONE Every now and then draw a UFO that crosses the screen and gives extra points
-* TODO Game units
-* TODO Improve aliens' AI, rn it's crap -> it also has movement bugs!
+* DONE Game units
+* DONE Improve aliens' AI, rn it's crap -> it also has movement bugs!
 * TODO Power-ups?
 * TODO Try to fix tunneling
   you also need to fix weird intersection tests when the ship is at the very bottom
@@ -55,6 +55,7 @@
   - animations?
 * TODO Code it on windows, too, to prove the portability point
 * TODO clean todos and run static analyzer + iwyu
-* TODO do you really need to decrease --i; when you remove missiles and enemies?
+* DONE do you really need to decrease --i; when you remove missiles and enemies?
 * TODO fix bug with scoreboard, all of sudden and rQ appears???
-
+* TODO profile compilation, wtf
+* TODO padding issues everywhere, sure of it! need to fix

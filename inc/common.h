@@ -1,14 +1,12 @@
 #pragma once
 
+#include "params.h"
+
 #include <string>
 
 #define WINDOW_WIDTH          1280
 #define WINDOW_HEIGHT         960
 #define WINDOW_NAME_GNU_LINUX "X11 Invaders!"
-#define MAX_PLAYER_LIVES      3
-#define SIMUL_ALIENS_ALIVE    20
-#define SIMUL_MISSILES_ALIVE  64
-#define WORLD_UNIT_TO_PIXEL   10.0f
 
 inline float worldToPixels(const float worldunits)
 {

@@ -1,0 +1,4 @@
+#pragma once
+
+#define MISSILE_PLAYER_VEL 5.0f
+#define MISSILE_ALIEN_VEL -5.0f

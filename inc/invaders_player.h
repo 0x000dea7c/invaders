@@ -1,18 +1,18 @@
 #pragma once
 
+#include "event.h"
 #include "invaders_input.h"
 #include "invaders_math.h"
 #include "invaders_missile.h"
 #include "invaders_renderer.h"
 #include "invaders_resources.h"
 #include "invaders_grid.h"
-#include "event.h"
 
 #include <vector>
 
 namespace Game {
 
-  // controls player's movement behavior
+  // controls player's movement behaviour
   class MovSpec final {
   public:
     Math::v2 m_dir;

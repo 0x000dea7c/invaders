@@ -1,5 +1,6 @@
 #include "invaders_missile.h"
 #include "common.h"
+#include "params.h"
 #include "invaders_grid.h"
 #include "invaders_opengl.h"
 #include "invaders_physics.h"
@@ -32,7 +33,7 @@ namespace Game {
 
   void MissileManager::updatePlayerMissiles(const float delta, const int topLimit)
   {
-    for(int i{ 0 }; i < m_playerMissiles.size(); ++i) {
+    for(unsigned long i{ 0 }; i < m_playerMissiles.size(); ++i) {
       m_playerMissiles[i].m_pos.y += m_playerMissiles[i].m_vel.y * delta;
       if(m_playerMissiles[i].m_pos.y >= topLimit) {
         m_playerMissiles[i].m_destroyed = true;
@@ -71,15 +72,15 @@ namespace Game {
 	m_playerMissilesInstanceData[i].m_model =
 	  scale(m_playerMissilesInstanceData[i].m_model,
 		v3{
-		  .x = m_playerMissiles[i].m_size.x,
-		  .y = m_playerMissiles[i].m_size.y,
+		  .x = worldToPixels(m_playerMissiles[i].m_size.x),
+		  .y = worldToPixels(m_playerMissiles[i].m_size.y),
 		  .z = 1.f
 		});
 	m_playerMissilesInstanceData[i].m_model =
 	  translate(m_playerMissilesInstanceData[i].m_model,
 		    v3{
-		      .x = m_playerMissiles[i].m_pos.x,
-		      .y = m_playerMissiles[i].m_pos.y,
+		      .x = worldToPixels(m_playerMissiles[i].m_pos.x),
+		      .y = worldToPixels(m_playerMissiles[i].m_pos.y),
 		      .z = 0.f
 		    });
       } else {
@@ -87,7 +88,6 @@ namespace Game {
 	m_playerMissiles.pop_back();
 	std::iter_swap(m_playerMissilesInstanceData.begin() + i, m_playerMissilesInstanceData.end() - 1);
 	m_playerMissilesInstanceData.pop_back();
-	--i;
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_PLAYER)->m_VBO);
@@ -96,7 +96,7 @@ namespace Game {
 
   void MissileManager::updateAlienMissiles(const float delta)
   {
-    for(int i{ 0 }; i < m_alienMissiles.size(); ++i) {
+    for(unsigned long i{ 0 }; i < m_alienMissiles.size(); ++i) {
       m_alienMissiles[i].m_pos.y += m_alienMissiles[i].m_vel.y * delta;
       if(m_alienMissiles[i].m_pos.y < 0.0f) {
         m_alienMissiles[i].m_destroyed = true;
@@ -139,15 +139,15 @@ namespace Game {
 	m_alienMissilesInstanceData[i].m_model =
 	  scale(m_alienMissilesInstanceData[i].m_model,
 		v3{
-		  .x = m_alienMissiles[i].m_size.x,
-		  .y = m_alienMissiles[i].m_size.y,
+		  .x = worldToPixels(m_alienMissiles[i].m_size.x),
+		  .y = worldToPixels(m_alienMissiles[i].m_size.y),
 		  .z = 1.f
 		});
 	m_alienMissilesInstanceData[i].m_model =
 	  translate(m_alienMissilesInstanceData[i].m_model,
 		    v3{
-		      .x = m_alienMissiles[i].m_pos.x,
-		      .y = m_alienMissiles[i].m_pos.y,
+		      .x = worldToPixels(m_alienMissiles[i].m_pos.x),
+		      .y = worldToPixels(m_alienMissiles[i].m_pos.y),
 		      .z = 0.f
 		    });
       } else {
@@ -155,7 +155,6 @@ namespace Game {
 	m_alienMissiles.pop_back();
 	std::iter_swap(m_alienMissilesInstanceData.begin() + i, m_alienMissilesInstanceData.end() - 1);
 	m_alienMissilesInstanceData.pop_back();
-	--i;
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_ALIEN)->m_VBO);
@@ -168,13 +167,14 @@ namespace Game {
     updateAlienMissiles(delta);
   }
 
-  void MissileManager::spawnAlienMissile(const v3 refPos)
+  void MissileManager::spawnAlienMissile(const v3& refPos)
   {
     static const auto missileTex = m_resourceManager.getTex(IDs::SID_TEX_MISSILE_ALIEN);
     m_alienMissiles.emplace_back(Missile{
       .m_pos    = refPos,
-      .m_size   = v2{ missileTex->m_width * 0.3f, missileTex->m_height * 0.3f },
-      .m_vel    = v2{ 0.f, -400.0f }, // TODO: put this under params.h?
+      .m_size   = v2{ pixelsToWorld(missileTex->m_width  * 0.3f),
+		      pixelsToWorld(missileTex->m_height * 0.3f) },
+      .m_vel    = v2{ 0.f, MISSILE_ALIEN_VEL_Y },
       .m_width  = static_cast<float>(missileTex->m_height),
       .m_height = static_cast<float>(missileTex->m_height),
       .m_destroyed = false
@@ -182,17 +182,20 @@ namespace Game {
     m_alienMissilesInstanceData.emplace_back(InstanceData{});
   }
 
-  void MissileManager::spawnPlayerMissiles(const v3 refPos, const v2 refSize)
+  void MissileManager::spawnPlayerMissiles(const v3& refPos, const v2& refSize)
   {
     static const auto missileTex = m_resourceManager.getTex(IDs::SID_TEX_MISSILE_PLAYER);
     // spawn a pair
-    const auto left = v2{ .x = refPos.x + 5.0f, .y = refPos.y + refSize.y };
-    const auto right = v2{ .x = refPos.x + refSize.x - 5.0f, .y = refPos.y + refSize.y };
+    const auto left  = v2{ refPos.x + MISSILE_PLAYER_SPAWN_OFFSET,
+			   refPos.y + refSize.y };
+    const auto right = v2{ refPos.x + refSize.x - MISSILE_PLAYER_SPAWN_OFFSET,
+			   refPos.y + refSize.y };
     m_playerMissiles.emplace_back(Missile
     {
       .m_pos    = v3{ left.x , left.y, 0.0f },
-      .m_size   = v2{ missileTex->m_width * 0.2f, missileTex->m_height * 0.2f },
-      .m_vel    = v2{ 0.0f, 400.0f }, // TODO: put this under params.h?
+      .m_size   = v2{ pixelsToWorld(missileTex->m_width  * 0.2f),
+		      pixelsToWorld(missileTex->m_height * 0.2f) },
+      .m_vel    = v2{ 0.0f, MISSILE_PLAYER_VEL_Y },
       .m_width  = static_cast<float>(missileTex->m_width),
       .m_height = static_cast<float>(missileTex->m_height),
       .m_destroyed = false
@@ -200,8 +203,9 @@ namespace Game {
     m_playerMissiles.emplace_back(Missile
     {
       .m_pos    = v3{ right.x , right.y, 0.0f },
-      .m_size   = v2{ missileTex->m_width * 0.2f, missileTex->m_height * 0.2f },
-      .m_vel    = v2{ 0.0f, 400.0f }, // TODO: put this under params.h?
+      .m_size   = v2{ pixelsToWorld(missileTex->m_width  * 0.2f),
+		      pixelsToWorld(missileTex->m_height * 0.2f) },
+      .m_vel    = v2{ 0.0f, MISSILE_PLAYER_VEL_Y },
       .m_width  = static_cast<float>(missileTex->m_width),
       .m_height = static_cast<float>(missileTex->m_height),
       .m_destroyed = false

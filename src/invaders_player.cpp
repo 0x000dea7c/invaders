@@ -26,31 +26,30 @@ namespace Game {
     m_player.m_pos = v3{ 0.0f, 0.0f, 0.0f };
     m_player.m_vel = v2{ 0.0f, 0.0f };
     const auto* playerTex = m_resourceManager.getTex(IDs::SID_TEX_PLAYER);
-    m_player.m_size = v2{ static_cast<float>(playerTex->m_width)  * 0.4f,
-                          static_cast<float>(playerTex->m_height) * 0.4f };
-    m_player.m_shootcd = 30;
-    m_player.m_currcd = 0;
+    m_player.m_size      = v2{ pixelsToWorld(playerTex->m_width  * 0.3f),
+			       pixelsToWorld(playerTex->m_height * 0.3f) };
+    m_player.m_shootcd   = 30;
+    m_player.m_currcd    = 0;
     m_player.m_currlives = MAX_PLAYER_LIVES;
-    m_player.m_shooting = false;
+    m_player.m_shooting  = false;
     m_player.m_destroyed = false;
-    m_player.m_points = 0;
+    m_player.m_points    = 0;
     m_playerLivesInstanceData.reserve(MAX_PLAYER_LIVES);
     m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event&){
       destroyPlayer();
     });
     updatePlayerLivesInstanceData();
     // the vertex data won't change
-    m_playerInstanceData.m_vertexData =
+    m_playerInstanceData.m_vertexData = {
       {
-	{
-	  { .x = -1.f, .y = -1.f, .z = 0.f, .w = 0.f }, // bottom left
-	  { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }, // bottom right
-	  { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
-	  { .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
-	  { .x =  1.f, .y =  1.f, .z = 1.f, .w = 1.f }, // top right
-	  { .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }  // bottom right
-	}
-      };
+	{ .x = -1.f, .y = -1.f, .z = 0.f, .w = 0.f }, // bottom left
+	{ .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }, // bottom right
+	{ .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
+	{ .x = -1.f, .y =  1.f, .z = 0.f, .w = 1.f }, // top left
+	{ .x =  1.f, .y =  1.f, .z = 1.f, .w = 1.f }, // top right
+	{ .x =  1.f, .y = -1.f, .z = 1.f, .w = 0.f }  // bottom right
+      }
+    };
   }
 
   PlayerManager::~PlayerManager()
@@ -70,8 +69,8 @@ namespace Game {
       // reset player's on the screen
       m_player.m_pos.x = 0.0f;
       m_player.m_pos.y = 0.0f;
-      m_player.m_destroyed = false;
       --m_player.m_currlives;
+      m_player.m_destroyed = false;
       updatePlayerLivesInstanceData();
     } else {
       auto direction = m_player.m_ms.m_dir;
@@ -111,14 +110,14 @@ namespace Game {
   {
     m_playerInstanceData.m_model = identity();
     m_playerInstanceData.m_model = scale(m_playerInstanceData.m_model, v3{
-        .x = m_player.m_size.x,
-        .y = m_player.m_size.y,
+        .x = worldToPixels(m_player.m_size.x),
+        .y = worldToPixels(m_player.m_size.y),
         .z = 1.0f
       });
     m_playerInstanceData.m_model = translate(m_playerInstanceData.m_model, v3{
-        .x = m_player.m_pos.x,
-        .y = m_player.m_pos.y,
-        .z = m_player.m_pos.z
+        .x = worldToPixels(m_player.m_pos.x),
+        .y = worldToPixels(m_player.m_pos.y),
+        .z = worldToPixels(m_player.m_pos.z)
       });
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER)->m_VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);
@@ -160,20 +159,20 @@ namespace Game {
     // init player movement parameters
     m_player.m_ms = MovSpec{
       .m_dir      = v2{ 0.0f, 0.0f },
-      .m_dirScale = 10000.0f,
-      .m_drag     = 1.5f,
+      .m_dirScale = PLAYER_DIRSCALE,
+      .m_drag     = PLAYER_DRAG,
       .m_unit     = true
     };
-    if(m_inputManager.isKeyHeld(Input::Key::KEY_A) || m_inputManager.isKeyHeld(Input::Key::KEY_LEFT)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_LEFT)) {
       m_player.m_ms.m_dir.x = -1.0f;
     }
-    if(m_inputManager.isKeyHeld(Input::Key::KEY_D) || m_inputManager.isKeyHeld(Input::Key::KEY_RIGHT)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_RIGHT)) {
       m_player.m_ms.m_dir.x =  1.0f;
     }
-    if(m_inputManager.isKeyHeld(Input::Key::KEY_W) || m_inputManager.isKeyHeld(Input::Key::KEY_UP)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_UP)) {
       m_player.m_ms.m_dir.y =  1.0f;
     }
-    if(m_inputManager.isKeyHeld(Input::Key::KEY_S) || m_inputManager.isKeyHeld(Input::Key::KEY_DOWN)) {
+    if(m_inputManager.isKeyHeld(Input::Key::KEY_DOWN)) {
       m_player.m_ms.m_dir.y = -1.0f;
     }
     if(m_inputManager.isKeyHeld(Input::Key::KEY_SPACE)) {
@@ -189,8 +188,8 @@ namespace Game {
     resetPos();
     m_player.m_currlives = MAX_PLAYER_LIVES;
     m_player.m_destroyed = false;
-    m_player.m_shooting = false;
-    m_player.m_points = 0;
+    m_player.m_shooting  = false;
+    m_player.m_points    = 0;
   }
 
   void PlayerManager::increasePoints(const unsigned int pts) noexcept

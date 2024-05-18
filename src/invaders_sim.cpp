@@ -52,6 +52,7 @@ namespace Sim {
     m_playedBgMusic{ false },
     m_topfive{ false }
   {
+    std::srand(std::time(0));
     m_eventManager.subscribe(EventType::MenuQuit, [this](const Event&){
       setShouldEnd(true);
     });
@@ -84,9 +85,9 @@ namespace Sim {
       return;
     }
     m_gridManager.beginFrame();
-    m_playerManager.update(delta, m_sceneWidth, m_sceneHeight);
+    m_playerManager.update(delta, GAME_WIDTH_UNITS, GAME_HEIGHT_UNITS);
     m_enemyManager.update(delta);
-    m_missileManager.update(delta, m_sceneHeight);
+    m_missileManager.update(delta, GAME_HEIGHT_UNITS);
     m_explosionManager.update(delta);
     m_renderManager.render(RenderArgs{
       .aliensToDraw         = m_enemyManager.numAliveAliens(),

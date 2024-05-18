@@ -31,7 +31,7 @@ namespace Game {
   private:
     inline auto getId(const Math::v3& pos) const noexcept
     {
-      return std::floor(pos.x / CELL_WIDTH) + std::floor(pos.y / CELL_HEIGHT) * m_cols;
+      return std::floor(pos.x / pixelsToWorld(CELL_WIDTH)) + std::floor(pos.y / pixelsToWorld(CELL_HEIGHT)) * m_cols;
     }
     std::vector<std::vector<EntityGridData>> m_grid;
     Ev::EventManager& m_eventManager;

@@ -1,10 +1,7 @@
 #include "invaders_enemy.h"
 #include "common.h"
+#include "params.h"
 #include "invaders_opengl.h"
-
-#include <cassert>
-
-#define MAX_ALIENS_ALIVE 16
 
 namespace Game {
   using namespace Math;
@@ -41,13 +38,12 @@ namespace Game {
     if(shouldUFOSpawn(30)) {
       spawnUFO();
     }
-    for(int i{ 0 }; i < m_aliens.size(); ++i) {
+    for(unsigned long i{ 0 }; i < m_aliens.size(); ++i) {
       if(m_aliens[i].m_destroyed) {
 	std::iter_swap(m_aliens.begin() + i, m_aliens.end() - 1);
 	m_aliens.pop_back();
 	std::iter_swap(m_aliensInstanceData.begin() + i, m_aliensInstanceData.end() - 1);
 	m_aliensInstanceData.pop_back();
-	--i;
 	continue;
       }
       // this sucks
@@ -56,7 +52,6 @@ namespace Game {
 	m_aliens[i].m_pos.x += m_aliens[i].m_vel.x * delta;
 	if(m_aliens[i].m_pos.x < 0 || m_aliens[i].m_pos.x > WINDOW_WIDTH) {
 	  m_aliens[i].m_destroyed = true;
-	  std::clog << "ufo destroyed!!" << std::endl;
 	}
       } else {
 	// check if it's time to spawn missiles
@@ -67,35 +62,31 @@ namespace Game {
 	  ++m_aliens[i].m_currcd;
 	}
 	// move
-	if(m_aliens[i].m_pos.x <= m_aliens[i].m_minX || m_aliens[i].m_pos.x >= m_aliens[i].m_maxX) {
+	if(m_aliens[i].m_pos.x <= m_aliens[i].m_minX) {
+	  m_aliens[i].m_pos.x = m_aliens[i].m_minX;
+	  m_aliens[i].m_dir.x = -m_aliens[i].m_dir.x;
+	} else if (m_aliens[i].m_pos.x >= m_aliens[i].m_maxX) {
+	  m_aliens[i].m_pos.x = m_aliens[i].m_maxX;
 	  m_aliens[i].m_dir.x = -m_aliens[i].m_dir.x;
 	}
-	if(m_aliens[i].m_pos.y >= m_aliens[i].m_minY || m_aliens[i].m_pos.y <= m_aliens[i].m_maxY) {
-	  assert(false && "limit");
-	  m_aliens[i].m_dir.y = -m_aliens[i].m_dir.y;
-	}
 	// this is why you needed game units!
-	m_aliens[i].m_pos.x += (m_aliens[i].m_vel.x * delta) * m_aliens[i].m_dir.x;
-	m_aliens[i].m_pos.y  = std::sin(m_aliens[i].m_pos.x) + m_aliens[i].m_initY;
-	if(i == 0) {
-	  std::clog << "m_aliens[i].m_pos.y -> " << m_aliens[i].m_pos.y << std::endl;
-	}
+	m_aliens[i].m_pos.x = m_aliens[i].m_pos.x + m_aliens[i].m_vel.x * m_aliens[i].m_dir.x * delta;
+	m_aliens[i].m_pos.y = std::sin(m_aliens[i].m_pos.x * ALIEN_Y_MOV_FREQUENCY) * ALIEN_Y_MOV_AMPLITUDE + m_aliens[i].m_initY;
       }
       // transforms
       if(!m_aliens[i].m_destroyed) {
 	m_aliensInstanceData[i].m_model = identity();
 	m_aliensInstanceData[i].m_model = scale(m_aliensInstanceData[i].m_model, v3{
-	    .x = m_aliens[i].m_size.x,
-	    .y = m_aliens[i].m_size.y,
+	    .x = worldToPixels(m_aliens[i].m_size.x),
+	    .y = worldToPixels(m_aliens[i].m_size.y),
 	    .z = 1.0f
 	  });
 	m_aliensInstanceData[i].m_model = translate(m_aliensInstanceData[i].m_model, v3{
-	    .x = m_aliens[i].m_pos.x,
-	    .y = m_aliens[i].m_pos.y,
+	    .x = worldToPixels(m_aliens[i].m_pos.x),
+	    .y = worldToPixels(m_aliens[i].m_pos.y),
 	    .z = 0.0f
 	  });
-	// TODO: nasty, there's probably a better way but don't know it yet, this is used to pick the right texture
-	// within the atlas
+	// needed to grab the texture from the atlas...
 	m_aliensInstanceData[i].m_vertexData = {{
  	    // bottom left
 	    { .x = -1.f,
@@ -144,14 +135,14 @@ namespace Game {
     m_aliens.emplace_back(Alien{
       .m_pos       = pos,
       .m_dims      = alienSize,
-      .m_size      = v2{ alienSize.x * 0.3f, alienSize.y * 0.3f },
+      .m_size      = { pixelsToWorld(alienSize.x * 0.3f),
+		       pixelsToWorld(alienSize.y * 0.3f) },
       .m_vel       = getAlienVel(type),
-      .m_idx       = v2{ static_cast<float>(getAtlasIdx(type)), 0 },
+      .m_idx       = { getAtlasIdx(type), 0 },
       .m_dir       = { -1, -1 },
-      .m_minX      = pos.x - 300.0f,
-      .m_maxX      = pos.x + 300.0f,
-      .m_minY      = pos.y + 300.0f,
-      .m_maxY      = pos.y - 300.0f,
+      .m_minX      = pos.x - 8.0f,
+      .m_maxX      = pos.x + 8.0f,
+      .m_initX     = pos.x,
       .m_initY     = pos.y,
       .m_type      = type,
       .m_firecd    = getAlienFireCd(type),
@@ -183,14 +174,14 @@ namespace Game {
       return { 125.0f, 70.f };
     } break;
     default: {
-      assert(false && "Invalid alien type!");
+      assert(false && "die biatch");
     } break;
     }
   }
 
   v2 EnemyManager::getAlienVel([[maybe_unused]] const AlienType type) const
   {
-    return { 150.0f, 0.0f };
+    return { ALIEN_VEL_X, 0.0f };
   }
 
   int EnemyManager::getAtlasIdx(const AlienType type) const
@@ -228,19 +219,19 @@ namespace Game {
     // to be "challenging".
     switch(type) {
     case AlienType::YELLOW: {
-      return (rand() % 500) + 100;
+      return (rand() % 2000) + 100;
     } break;
     case AlienType::BEIGE: {
-      return (rand() % 500) + 100;
+      return (rand() % 2000) + 100;
     } break;
     case AlienType::GREEN: {
-      return (rand() % 200) + 50;
+      return (rand() % 1500) + 50;
     } break;
     case AlienType::PINK: {
-      return (rand() % 100) + 50;
+      return (rand() % 1000) + 50;
     } break;
     case AlienType::BLUE: {
-      return (rand() % 100) + 50;
+      return (rand() % 1000) + 50;
     } break;
     case AlienType::UFO: { // UFOs don't shoot
       return 9999;
@@ -276,7 +267,6 @@ namespace Game {
 
   void EnemyManager::spawnUFO()
   {
-    // @TODO: make alien starting position random (left or right)
-    spawnAlien(v3{ 0.0f, WINDOW_HEIGHT - 20.0f, 0.0f }, AlienType::UFO);
+    spawnAlien(v3{ 0.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::UFO);
   }
 };

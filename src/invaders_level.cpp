@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 static constexpr auto kXspacing = 10.0f;
-static constexpr auto kYspacing = 120.0f;
+static constexpr auto kYspacing = 10.0f;
 
 namespace Game {
   using namespace Math;
@@ -14,8 +14,6 @@ namespace Game {
     : m_enemyManager{ enemyManager },
       m_currentLevel{ 0 }
   {
-    // ensure that you get different aliens per level each time you run the game
-    std::srand(std::time(0));
     loadLevel();
   }
 
@@ -33,12 +31,13 @@ namespace Game {
   void LevelManager::loadLevel()
   {
     // generate a "random" level every time
+    // these positions are completely @YOLO
     for(int i{ 0 }; i < 4; ++i) {
       for(int j{ 0 }; j < 4; ++j) {
         const auto alienType = getRandomAlien();
         const auto pos = v3{
-          .x = 450.0f + kXspacing * j * 10.0f,
-          .y = 870.0f - i * kYspacing,
+          .x = 35.0f + kXspacing * j * 2.0f,
+          .y = GAME_HEIGHT_UNITS - 15.0f - i * kYspacing,
           .z = 0.0f
         };
         m_enemyManager.spawnAlien(pos, alienType);

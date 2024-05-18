@@ -191,12 +191,12 @@ namespace Res {
     // define common proj matrix
     //
     const auto m = orthographic({
-      .left   =  0.f,
-      .right  = WINDOW_WIDTH,
-      .bottom =  0.f,
-      .top    = WINDOW_HEIGHT,
-      .zNear  = -1.f,
-      .zFar   =  1.f
+      .left   =  0.0f,
+      .right  =  WINDOW_WIDTH,  // WINDOW_WIDTH
+      .bottom =  0.0f,
+      .top    =  WINDOW_HEIGHT, // WINDOW_HEIGHT
+      .zNear  = -1.0f,
+      .zFar   =  1.0f
     });
     IDs::SID_SHADER_MAIN_BACKGROUND = fnv1a(VERT_SHADER_FILE_MAIN_BACKGROUND);
     m_shaders[IDs::SID_SHADER_MAIN_BACKGROUND] = std::make_unique<Shader>(

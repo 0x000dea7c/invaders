@@ -11,11 +11,11 @@ namespace Game {
 			   EventManager& eventManager)
     : m_eventManager{ eventManager }
   {
-    m_rows = std::ceil(sceneWidth  / CELL_WIDTH);
-    m_cols = std::ceil(sceneHeight / CELL_HEIGHT);
-    m_grid.resize(100);
-    for(unsigned long i{ 0 }; i < m_grid.size(); ++i) {
-      m_grid[i].resize(8);
+    m_rows = std::ceil(sceneWidth  / pixelsToWorld(CELL_WIDTH));
+    m_cols = std::ceil(sceneHeight / pixelsToWorld(CELL_HEIGHT));
+    m_grid.resize(m_rows * m_cols);
+    for(auto& v : m_grid) {
+      v.resize(8);
     }
     m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& event) {
       auto data = event.getData();
