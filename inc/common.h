@@ -4,10 +4,6 @@
 
 #include <string>
 
-#define WINDOW_WIDTH          1280
-#define WINDOW_HEIGHT         960
-#define WINDOW_NAME_GNU_LINUX "X11 Invaders!"
-
 inline float worldToPixels(const float worldunits)
 {
   return worldunits * WORLD_UNIT_TO_PIXEL;
@@ -21,8 +17,8 @@ inline float pixelsToWorld(const float pixels)
 // used for converting strings to ids, wikipedia
 inline int fnv1a(const std::string& text)
 {
-  constexpr int prime = 0x01000193; // FNV-1a 32-bit prime
-  int hash = 0x811c9dc5; // FNV-1a 32-bit offset basis
+  constexpr int prime{ 0x01000193 }; // FNV-1a 32-bit prime
+  unsigned int hash{ 0x811c9dc5 }; // FNV-1a 32-bit offset basis
   for(const auto& c : text) {
     hash ^= (unsigned int)c;
     hash *= prime;

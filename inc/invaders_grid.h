@@ -11,7 +11,7 @@
 
 namespace Game {
 
-  enum class EntityType { ALIEN, PLAYER };
+  enum class EntityType{ ALIEN, PLAYER };
 
   class EntityGridData final {
   public:

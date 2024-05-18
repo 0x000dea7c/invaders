@@ -308,7 +308,6 @@ namespace Game {
 #include "invaders_sim.cpp"
 #include "invaders_renderer.cpp"
 #include "invaders_level.cpp"
-#include "invaders_physics.cpp"
 #include "invaders_text.cpp"
 #include "invaders_menu.cpp"
 

@@ -52,7 +52,7 @@ namespace Game {
             .min = v2{ a->m_pos.x - a->m_size.x * 0.5f, a->m_pos.y - a->m_size.y * 0.5f },
             .max = v2{ a->m_pos.x + a->m_size.x * 0.5f, a->m_pos.y + a->m_size.y * 0.5f }
           };
-          if(Phys::aabb_aabb_test(missileAABB, alienAABB, m_playerMissiles[i].m_vel, 4)) {
+          if(Phys::aabb_aabb_test(missileAABB, alienAABB)) {
 	    m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
@@ -112,10 +112,10 @@ namespace Game {
         for(const auto& e: nearbyEnts) {
           auto* p = (Player*)e.data;
           const auto playerAABB = Phys::AABB{
-            .min = v2{ p->m_pos.x - p->m_size.x * 0.5f, p->m_pos.y - p->m_size.y * 0.5f },
-            .max = v2{ p->m_pos.x + p->m_size.x * 0.5f, p->m_pos.y + p->m_size.y * 0.5f }
+            .min = v2{ p->m_pos.x - p->m_size.x, p->m_pos.y - p->m_size.y },
+            .max = v2{ p->m_pos.x + p->m_size.x, p->m_pos.y + p->m_size.y }
           };
-          if(Phys::aabb_aabb_test(missileAABB, playerAABB, m_alienMissiles[i].m_vel, 4)) {
+          if(Phys::aabb_aabb_test(missileAABB, playerAABB)) {
 	    m_eventManager.post(Event(EventType::PlayerDestroyed, p));
             m_alienMissiles[i].m_destroyed = true;
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_PLAYER_DIE, false);

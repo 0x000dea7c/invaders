@@ -20,11 +20,13 @@ namespace Renderer {
   {
     FT_Library ft;
     if(FT_Init_FreeType(&ft)) {
-      throw std::runtime_error("Couldn't initialize FreeType.");
+      std::cerr << "Couldn't initialize FreeType.\n";
+      std::exit(EXIT_FAILURE);
     }
     FT_Face face;
     if(FT_New_Face(ft, fontPath, 0, &face)) {
-      throw std::runtime_error("Couldn't create new face from path " + std::string(fontPath));
+      std::cerr << "Couldn't create new face from path " << fontPath << '\n';
+      std::exit(EXIT_FAILURE);
     }
     // NOTE when specifying 0, it lets compute the width dynamically based on the height
     FT_Set_Pixel_Sizes(face, 0, fontSize);
