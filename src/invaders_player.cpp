@@ -99,8 +99,8 @@ namespace Game {
       } else if(m_player.m_pos.x - m_player.m_size.x < 0.0f) {
         m_player.m_pos.x = m_player.m_size.x;
       }
-      if(m_player.m_pos.y + m_player.m_size.y > topLimit * 0.3f) {
-        m_player.m_pos.y = topLimit * 0.3f - m_player.m_size.y;
+      if(m_player.m_pos.y + m_player.m_size.y > topLimit) {
+        m_player.m_pos.y = topLimit - m_player.m_size.y;
       } else if(m_player.m_pos.y - m_player.m_size.y < 0.0f) {
         m_player.m_pos.y = m_player.m_size.y;
       }
@@ -121,7 +121,7 @@ namespace Game {
         .z = m_player.m_pos.z
       });
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_PLAYER)->m_VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);    
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(InstanceData), &m_playerInstanceData);
   }
 
   void PlayerManager::update(const float delta, const int rightLimit, const int topLimit)
@@ -196,6 +196,11 @@ namespace Game {
   void PlayerManager::increasePoints(const unsigned int pts) noexcept
   {
     m_player.m_points += pts;
+  }
+
+  void PlayerManager::destroyPlayer() noexcept
+  {
+    m_player.m_destroyed = true;
   }
 
 };

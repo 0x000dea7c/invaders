@@ -32,7 +32,7 @@ namespace Game {
 
   void MissileManager::updatePlayerMissiles(const float delta, const int topLimit)
   {
-    for(unsigned int i{ 0 }; i < m_playerMissiles.size(); ++i) {
+    for(int i{ 0 }; i < m_playerMissiles.size(); ++i) {
       m_playerMissiles[i].m_pos.y += m_playerMissiles[i].m_vel.y * delta;
       if(m_playerMissiles[i].m_pos.y >= topLimit) {
         m_playerMissiles[i].m_destroyed = true;
@@ -55,7 +55,6 @@ namespace Game {
 	    m_eventManager.post(Event(EventType::AlienDestroyed, a));
             m_playerMissiles[i].m_destroyed = true;
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_EXPLOSION, false);
-	    break; // get out of here manually just in case since a missile should only hit one alien not 2
           }
         }
       }
@@ -88,6 +87,7 @@ namespace Game {
 	m_playerMissiles.pop_back();
 	std::iter_swap(m_playerMissilesInstanceData.begin() + i, m_playerMissilesInstanceData.end() - 1);
 	m_playerMissilesInstanceData.pop_back();
+	--i;
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_PLAYER)->m_VBO);
@@ -96,7 +96,7 @@ namespace Game {
 
   void MissileManager::updateAlienMissiles(const float delta)
   {
-    for(unsigned long i{ 0 }; i < m_alienMissiles.size(); ++i) {
+    for(int i{ 0 }; i < m_alienMissiles.size(); ++i) {
       m_alienMissiles[i].m_pos.y += m_alienMissiles[i].m_vel.y * delta;
       if(m_alienMissiles[i].m_pos.y < 0.0f) {
         m_alienMissiles[i].m_destroyed = true;
@@ -116,11 +116,13 @@ namespace Game {
             .max = v2{ p->m_pos.x + p->m_size.x * 0.5f, p->m_pos.y + p->m_size.y * 0.5f }
           };
           if(Phys::aabb_aabb_test(missileAABB, playerAABB, m_alienMissiles[i].m_vel, 4)) {
-            m_eventManager.post(Event(EventType::PlayerDestroyed, p));
+	    m_eventManager.post(Event(EventType::PlayerDestroyed, p));
             m_alienMissiles[i].m_destroyed = true;
-            clearMissiles();
             m_resourceManager.playAudioTrack(IDs::SID_AUDIO_PLAYER_DIE, false);
-	    return; // @FIXME: if you don't return here it segfaults!
+	    // if the player was hit, you will clear the screen, which involves removing all
+	    // missiles from the screen, also you NEED to return from here after calling clearMissiles!
+	    clearMissiles();
+	    return;
           }
         }
       }
@@ -153,6 +155,7 @@ namespace Game {
 	m_alienMissiles.pop_back();
 	std::iter_swap(m_alienMissilesInstanceData.begin() + i, m_alienMissilesInstanceData.end() - 1);
 	m_alienMissilesInstanceData.pop_back();
+	--i;
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER, m_resourceManager.getShader(IDs::SID_SHADER_MISSILE_ALIEN)->m_VBO);

@@ -16,6 +16,7 @@ namespace Game {
     GREEN,
     PINK,
     BLUE,
+    UFO,
 
     COUNT
   };
@@ -27,10 +28,13 @@ namespace Game {
     Math::v2 m_size;
     Math::v2 m_vel;
     Math::v2 m_idx;
+    Math::v2i m_dir;
     float m_minX; // movement range
     float m_maxX; // "
+    float m_minY; // "
+    float m_maxY; // "
+    float m_initY;
     AlienType m_type;
-    int m_dir;
     int m_firecd;
     int m_currcd;
     bool m_destroyed;
@@ -51,10 +55,12 @@ namespace Game {
     void reset();
   private:
     void destroyAlien(Alien* a);
-    Math::v2 getAlienSize(const AlienType type) const;
-    Math::v2 getAlienVel(const AlienType type)  const;
-    int getAtlasIdx(const AlienType type)       const;
-    int getAlienFireCd(const AlienType type)    const;
+    Math::v2 getAlienSize(const AlienType type)    const;
+    Math::v2 getAlienVel(const AlienType type)     const;
+    int getAtlasIdx(const AlienType type)          const;
+    int getAlienFireCd(const AlienType type)       const;
+    bool shouldUFOSpawn(const unsigned int chance) const noexcept;
+    void spawnUFO();
     std::vector<Alien> m_aliens;
     std::vector<Renderer::InstanceData> m_aliensInstanceData;
     const Res::ResourceManager& m_resourceManager;

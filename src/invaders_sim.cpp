@@ -237,6 +237,11 @@ namespace Sim {
     case AlienType::BLUE:
       pts = 200;
       break;
+    case AlienType::UFO:
+      pts = 600;
+      break;
+    default:
+      assert(false && "increasePlayerPoints: wrong alien type");
     }
     m_playerManager.increasePoints(pts);
   }

@@ -37,7 +37,7 @@ namespace Game {
 	  return p == arg.data;
 	});
 	m_grid[cellId].erase(it);
-      }      
+      }
     });
   }
 

@@ -6,8 +6,19 @@
 #define WINDOW_HEIGHT         960
 #define WINDOW_NAME_GNU_LINUX "X11 Invaders!"
 #define MAX_PLAYER_LIVES      3
-#define SIMUL_ALIENS_ALIVE    16
+#define SIMUL_ALIENS_ALIVE    20
 #define SIMUL_MISSILES_ALIVE  64
+#define WORLD_UNIT_TO_PIXEL   10.0f
+
+inline float worldToPixels(const float worldunits)
+{
+  return worldunits * WORLD_UNIT_TO_PIXEL;
+}
+
+inline float pixelsToWorld(const float pixels)
+{
+  return pixels / WORLD_UNIT_TO_PIXEL;
+}
 
 // used for converting strings to ids, wikipedia
 inline int fnv1a(const std::string& text)
