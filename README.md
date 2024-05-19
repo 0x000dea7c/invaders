@@ -23,7 +23,7 @@ Note: apparently too dumb to implement decent intersection tests. This version i
 
 Need to improve on themes like:
 
-- intersection tests
+- intersection tests, now it sorta works, but there's a bit of tunneling
 - world representation in some ds
 - having some game unit for representing distances and such and hopefully avoid having discrepancies w/ screen resizes
 - adapting game's world to screen size dynamically
@@ -81,6 +81,8 @@ tbd
 Most of them come from: https://kenney.nl/ and https://opengameart.org/.
 
 Modified some of them to fit better in-game, but my art sucks.
+
+Background: https://opengameart.org/content/space-background-1
 
 Thank you for your generosity.
 

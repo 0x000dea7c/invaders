@@ -52,13 +52,18 @@
   exceptions were taking a long time
 * DONE Try to fix tunneling
   you also need to fix weird intersection tests when the ship is at the very bottom, somehow now works?
-* TODO Fix audio: sometimes it doesn't play, wonder why
+* DONE do you really need to decrease --i; when you remove missiles and enemies?
+* DONE fix bug with scoreboard, all of sudden and rQ appears??? this doesn't happen always
 
-* TODO Power-ups?
+* DONE Fix audio: sometimes it doesn't play, wonder why
+  allocate more channels, for now it works, if that fails, prioritise songs
+* TODO add new crashed UFO that goes diagonally down and if it touches the player it both die
+* TODO add alien w/ some explosive attached to it that when you destroy it, it clears the whole level
+ it spawn every now and then
 * TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks, maybe another explosion tex?
   - animations?
-* TODO Code it on windows, too, to prove the portability point
+  - new song for when an ufo appears and is destroyed
+  - bg very slowly moves, not many stars, add planets?
 * TODO clean todos and run static analyzer + iwyu
-* DONE do you really need to decrease --i; when you remove missiles and enemies?
-* TODO fix bug with scoreboard, all of sudden and rQ appears??? this doesn't happen always
 * TODO padding issues everywhere, sure of it! need to fix
+* TODO Code it on windows, too, to prove the portability point

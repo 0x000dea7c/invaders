@@ -9,7 +9,7 @@
 // textures
 #define TEX_FILE_PLAYER          "./res/textures/player.png"
 #define TEX_FILE_ALIEN_ATLAS     "./res/textures/aliens.png"
-#define TEX_FILE_MAIN_BACKGROUND "./res/textures/space.jpg"
+#define TEX_FILE_MAIN_BACKGROUND "./res/textures/space.png"
 #define TEX_FILE_MISSILE_PLAYER  "./res/textures/missile_player.png"
 #define TEX_FILE_MISSILE_ALIEN   "./res/textures/missile_alien.png"
 #define TEX_FILE_EXPLOSION       "./res/textures/explosion.png"
@@ -127,7 +127,7 @@ namespace Res {
     // background
     t = loadTexFromFile(LoadTexFromFileArgs{
       .m_filepath = TEX_FILE_MAIN_BACKGROUND,
-      .m_alpha    = false,
+      .m_alpha    = true,
       .m_flip     = false,
       .m_wrapS    = GL_REPEAT,
       .m_wrapT    = GL_REPEAT

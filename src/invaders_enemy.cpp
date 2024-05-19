@@ -53,6 +53,8 @@ namespace Game {
 	if(m_aliens[i].m_pos.x < 0 || m_aliens[i].m_pos.x > WINDOW_WIDTH) {
 	  m_aliens[i].m_destroyed = true;
 	}
+      } else if(m_aliens[i].type == AlienType::ROSWELL) {
+	// move diagonally downwards
       } else {
 	// check if it's time to spawn missiles
 	if(m_aliens[i].m_currcd > m_aliens[i].m_firecd) {

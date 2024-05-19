@@ -33,7 +33,7 @@ namespace Game {
     m_player.m_currlives = MAX_PLAYER_LIVES;
     m_player.m_shooting  = false;
     m_player.m_destroyed = false;
-    m_player.m_points    = 0;
+    m_player.m_points    = 10000;
     m_playerLivesInstanceData.reserve(MAX_PLAYER_LIVES);
     m_eventManager.subscribe(EventType::PlayerDestroyed, [this](const Event&){
       destroyPlayer();
@@ -134,7 +134,7 @@ namespace Game {
   void PlayerManager::updatePlayerLivesInstanceData()
   {
     m_playerLivesInstanceData.clear();
-    for(auto i = 0; i < m_player.m_currlives; ++i) {
+    for(unsigned int i{ 0 }; i < m_player.m_currlives; ++i) {
       auto model = identity();
       model = scale(model, v3{ 30.f, 30.f, 0.f });
       model = translate(model, v3{ i * 70.f + 40.f, 50.f, 0.f });

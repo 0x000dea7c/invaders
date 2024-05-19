@@ -29,7 +29,7 @@ namespace Game {
     Math::v2 m_size;
     int m_shootcd;
     int m_currcd;
-    int m_currlives;
+    unsigned int m_currlives;
     unsigned int m_points;
     bool m_shooting;
     bool m_destroyed;

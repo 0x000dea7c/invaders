@@ -27,7 +27,7 @@ namespace Renderer {
   class RenderArgs final {
   public:
     unsigned long aliensToDraw;
-    int playerLivesToDraw;
+    unsigned int playerLivesToDraw;
     unsigned long explosionsToDraw;
     unsigned long playerMissilesToDraw;
     unsigned long alienMissilesToDraw;
@@ -35,14 +35,12 @@ namespace Renderer {
     unsigned int playerPoints;
   };
 
-  // renders all given data, no ifs, no updates, just render. This class is omoiiiiiiiiiiiiii
   class RendererManager final {
   public:
     RendererManager(Res::ResourceManager& resourceManager,
                     TextRenderer& textRenderer,
                     const Game::MenuManager& menuManager);
     ~RendererManager();
-    // no idea what's the good approach here, but for now it's basic
     void render(const RenderArgs& args);
     void renderMenu();
     void renderEnd(const std::array<Game::ScoreEntry, 5>& scores, const bool topfive);

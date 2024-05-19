@@ -183,6 +183,7 @@ namespace Game {
       std::cerr << __FUNCTION__  << ": couldn't open audio device: " << Mix_GetError() << '\n';
       return false;
     }
+    Mix_AllocateChannels(32);
     return true;
   }
 
@@ -207,7 +208,9 @@ namespace Game {
       // you can play as many effects as you want
       // -1: play on the first free channel you find
       //  0; -1: play once and stop; play in loop
-      Mix_PlayChannel(-1, reinterpret_cast<Mix_Chunk*>(data->m_data), (loop) ? -1 : 0);
+      if(Mix_PlayChannel(-1, reinterpret_cast<Mix_Chunk*>(data->m_data), (loop) ? -1 : 0) == -1) {
+	assert(false && "audio couldn't be played!!!!!!!!!!!!!!!!!!");
+      }
       break;
     }
   }
@@ -235,7 +238,7 @@ namespace Game {
   {
     volume = std::max(volume - 13.3f, 0.0f);
     Mix_MasterVolume(static_cast<int>(volume));
-    Mix_VolumeMusic(static_cast<int>(volume));   
+    Mix_VolumeMusic(static_cast<int>(volume));
   }
 
   float getNormalizedVolumeValue()
@@ -255,10 +258,10 @@ namespace Game {
     // @YOLO: can definitely be improved in many ways
     const auto time = std::chrono::system_clock::now(); // boring bit
     const auto timeT = std::chrono::system_clock::to_time_t(time); // boring bit
-    const auto localTime = *std::localtime(&timeT);		   // boring bit
-    std::stringstream ss;					   // cut this out
-    ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S") << score; // cut this out
-    const auto timeStr = ss.str();				   // cut this out
+    const auto localTime = *std::localtime(&timeT); // boring bit
+    std::stringstream ss;	// cut this out
+    ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S"); // cut this out
+    const auto timeStr = ss.str(); // cut this out
     std::ifstream fileread("scoreboard.dat", std::ios::binary);
     if(fileread.is_open()) {
       // if the file already exists, load scores
@@ -316,20 +319,20 @@ namespace Game {
 static Input::Key map_x11_key_to_game(const KeySym& key)
 {
   switch(key) {
-    case XK_a:      return Input::Key::KEY_A;
-    case XK_d:      return Input::Key::KEY_D;
-    case XK_q:      return Input::Key::KEY_Q;
-    case XK_Escape: return Input::Key::KEY_ESCAPE;
-    case XK_space:  return Input::Key::KEY_SPACE;
-    case XK_Left:   return Input::Key::KEY_LEFT;
-    case XK_Right:  return Input::Key::KEY_RIGHT;
-    case XK_Return: return Input::Key::KEY_ENTER;
-    case XK_Up:     return Input::Key::KEY_UP;
-    case XK_Down:   return Input::Key::KEY_DOWN;
-    case XK_w:      return Input::Key::KEY_W;
-    case XK_s:      return Input::Key::KEY_S;
-    case XK_p:      return Input::Key::KEY_P;
-    default:        return Input::Key::KEY_UNKNOWN;
+  case XK_a:      return Input::Key::KEY_A;
+  case XK_d:      return Input::Key::KEY_D;
+  case XK_q:      return Input::Key::KEY_Q;
+  case XK_Escape: return Input::Key::KEY_ESCAPE;
+  case XK_space:  return Input::Key::KEY_SPACE;
+  case XK_Left:   return Input::Key::KEY_LEFT;
+  case XK_Right:  return Input::Key::KEY_RIGHT;
+  case XK_Return: return Input::Key::KEY_ENTER;
+  case XK_Up:     return Input::Key::KEY_UP;
+  case XK_Down:   return Input::Key::KEY_DOWN;
+  case XK_w:      return Input::Key::KEY_W;
+  case XK_s:      return Input::Key::KEY_S;
+  case XK_p:      return Input::Key::KEY_P;
+  default:        return Input::Key::KEY_UNKNOWN;
   }
 }
 
@@ -389,12 +392,12 @@ int main()
       glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
       glXGetFBConfigAttrib(display, fbc[i], GLX_SAMPLES       , &samples  );
       if(best_fbc < 0 || (samp_buf && samples > best_num_samp)) {
-          best_fbc = i;
-          best_num_samp = samples;
+	best_fbc = i;
+	best_num_samp = samples;
       }
       if(worst_fbc < 0 || !samp_buf || samples < worst_num_samp) {
-          worst_fbc = i;
-          worst_num_samp = samples;
+	worst_fbc = i;
+	worst_num_samp = samples;
       }
     }
     XFree(vi);
@@ -432,12 +435,12 @@ int main()
   // pretty important, setup opengl context for renderdoc
   glXCreateContextAttribsARBProc glXCreateContextAttribsARB = 0;
   glXCreateContextAttribsARB =
-      (glXCreateContextAttribsARBProc) glXGetProcAddressARB((const GLubyte *) "glXCreateContextAttribsARB");
+    (glXCreateContextAttribsARBProc) glXGetProcAddressARB((const GLubyte *) "glXCreateContextAttribsARB");
   int contextAttribs[] = {
-      GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-      GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-      GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-      None
+    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+    GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+    GLX_CONTEXT_FLAGS_ARB        , GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+    None
   };
   // !!!renderdoc!!!
   GLXContext glContext = glXCreateContextAttribsARB(display, bestFbc, 0, True, contextAttribs);

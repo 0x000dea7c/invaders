@@ -65,7 +65,7 @@ namespace Game {
 
   class ScoreEntry final {
   public:
-    std::array<char, 21> m_datetimebuff{ 0 };
+    std::array<char, 20> m_datetimebuff{ 0 };
     unsigned int m_score{ 0 };
     bool m_currentScore{ false };
   };

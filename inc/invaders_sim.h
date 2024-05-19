@@ -14,8 +14,6 @@
 #include "invaders_resources.h"
 
 namespace Sim {
-  // NOTE: since the game doesn't allow window resizing (bc don't know how to handle
-  // it properly yet) all game units will be pixels.
 
   enum class State {
     AUDIO_DEV_SELECTION, // this most likely doesn't go in here

@@ -17,7 +17,7 @@ namespace Game {
     PINK,
     BLUE,
     UFO,
-
+    ROSWELL,
     COUNT
   };
 

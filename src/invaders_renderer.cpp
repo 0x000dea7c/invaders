@@ -57,7 +57,7 @@ namespace Renderer {
     glActiveTexture(GL_TEXTURE0);
     // background
     m_resourceManager.useShaderProgram(m_backgroundShader->m_id);
-    m_resourceManager.setUniformFloat(m_backgroundShader->m_id, "time", Game::time() * 1.0f);
+    m_resourceManager.setUniformFloat(m_backgroundShader->m_id, "time", Game::time() * 0.1f);
     glBindVertexArray(m_backgroundShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_backgroundTex->m_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);
