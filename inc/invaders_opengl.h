@@ -3,6 +3,10 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
+#ifndef PFNGLPOLYGONMODEPROC
+typedef void (APIENTRY *PFNGLPOLYGONMODEPROC)(GLenum face, GLenum mode);
+#endif
+
 extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLUNIFORM1IPROC glUniform1i;
 extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
@@ -36,6 +40,9 @@ extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 extern PFNGLUNIFORM1FPROC glUniform1f;
 extern PFNGLUNIFORM3FPROC glUniform3f;
 extern PFNGLUNIFORM4FPROC glUniform4f;
+extern PFNGLPOLYGONMODEPROC myGlPolygonMode;
+
+#define glPolygonMode myGlPolygonMode
 
 inline void* getGLProcAddress(const char* name)
 {

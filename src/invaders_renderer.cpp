@@ -41,6 +41,7 @@ namespace Renderer {
     m_invadersTexture     = m_resourceManager.getTex(IDs::SID_TEX_INVADERS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   }
 
   RendererManager::~RendererManager()
@@ -166,12 +167,6 @@ namespace Renderer {
     glBindVertexArray(m_basicShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    auto msg = "Hi, welcome! Press SPACE/ENTER to play!"s;
-    auto width = m_textRenderer.getTextWidth(msg);
-    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 600.0f, 1.0f);
-    msg = "You can also press Q/ESC to quit";
-    width = m_textRenderer.getTextWidth(msg);
-    m_textRenderer.renderText(msg, kWhiteColour, WINDOW_CENTER - (width * 0.5f), 500.0f, 1.0f);
   }
 
   void RendererManager::renderLevelLabel(const unsigned int currentLevel, const float alpha)

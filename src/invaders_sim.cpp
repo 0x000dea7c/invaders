@@ -241,6 +241,9 @@ namespace Sim {
     case AlienType::UFO:
       pts = 600;
       break;
+    case AlienType::ROSWELL:
+      pts = 800;
+      break;
     default:
       assert(false && "increasePlayerPoints: wrong alien type");
     }

@@ -23,15 +23,15 @@ Note: apparently too dumb to implement decent intersection tests. This version i
 
 Need to improve on themes like:
 
-- intersection tests, now it sorta works, but there's a bit of tunneling
+- intersection tests, now it sorta works, but theres' tunneling
 - world representation in some ds
-- having some game unit for representing distances and such and hopefully avoid having discrepancies w/ screen resizes
 - adapting game's world to screen size dynamically
 - code organisation
 - in-game editor for manipulating objects
 - overall optimisation
 - animations
 - inter text
+- entities attrs defined in text files so you don't need to recompile the game (although it takes 3s to compile 10k lines atm, could be reduced)
 
 # Compilation
 
@@ -88,6 +88,7 @@ Thank you for your generosity.
 
 ## Music and effects
 
+- https://opengameart.org/content/big-explosion
 - https://mixkit.co/free-sound-effects/game/
 - https://kronbits.itch.io/freesfx
 - https://lunalucid.itch.io/free-creative-commons-bgm-collection?download.

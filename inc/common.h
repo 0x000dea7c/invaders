@@ -54,4 +54,7 @@ namespace IDs {
   extern int SID_AUDIO_WIN_GAME;
   extern int SID_AUDIO_LOSE_GAME;
   extern int SID_AUDIO_PLAYER_DIE;
+  extern int SID_AUDIO_ROSWELL_IMPACT;
+  extern int SID_AUDIO_UFO_SPAWNED;
+  extern int SID_AUDIO_ROSWELL_SPAWNED;
 };

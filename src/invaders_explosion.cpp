@@ -16,8 +16,8 @@ namespace Game {
       m_eventManager{ eventManager }
   {
     // aliens and player
-    m_explosions.reserve(SIMUL_ALIENS_ALIVE + 1);
-    m_explosionsInstanceData.reserve(SIMUL_ALIENS_ALIVE + 1);
+    m_explosions.reserve(MAX_ALIENS_ALIVE + 1);
+    m_explosionsInstanceData.reserve(MAX_ALIENS_ALIVE + 1);
     m_explosionWidth = pixelsToWorld(m_resourceManager.getTex(IDs::SID_TEX_EXPLOSION)->m_width * 0.1f);
     m_eventManager.subscribe(EventType::AlienDestroyed, [this](const Event& ev) {
       auto data = ev.getData();

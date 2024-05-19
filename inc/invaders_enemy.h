@@ -4,6 +4,7 @@
 #include "invaders_missile.h"
 #include "invaders_renderer.h"
 #include "invaders_resources.h"
+#include "invaders_player.h"
 #include "event.h"
 
 #include <vector>
@@ -16,9 +17,9 @@ namespace Game {
     GREEN,
     PINK,
     BLUE,
+    COUNT,
     UFO,
     ROSWELL,
-    COUNT
   };
 
   class Alien final {
@@ -58,8 +59,9 @@ namespace Game {
     Math::v2 getAlienVel(const AlienType type)     const;
     int getAtlasIdx(const AlienType type)          const;
     int getAlienFireCd(const AlienType type)       const;
-    bool shouldUFOSpawn(const unsigned int chance) const noexcept;
+    bool shouldSpawn(const unsigned int chance) const noexcept;
     void spawnUFO();
+    void spawnRoswell();
     std::vector<Alien> m_aliens;
     std::vector<Renderer::InstanceData> m_aliensInstanceData;
     const Res::ResourceManager& m_resourceManager;

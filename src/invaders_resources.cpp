@@ -37,12 +37,15 @@
 #define VERT_SHADER_FILE_BASIC           "./res/shaders/basic.vert"
 #define FRAG_SHADER_FILE_BASIC           "./res/shaders/basic.frag"
 // Audio
-#define AUDIO_FILE_BG_MUSIC   "./res/audio/music_zapsplat_game_music_action_retro_8_bit_repeating_016.ogg"
-#define AUDIO_FILE_EXPLOSION  "./res/audio/mixkit-war-explosions-2773.ogg"
-#define AUDIO_FILE_LOSE_GAME  "./res/audio/RetroNegativeMelody02.ogg"
-#define AUDIO_FILE_WIN_GAME   "./res/audio/mixkit-game-level-completed-2059.ogg"
-#define AUDIO_FILE_PLAYER_DIE "./res/audio/RetronegativeShort23.ogg"
-#define AUDIO_FILE_WIN_LEVEL  "./res/audio/RetroBlopStereoUP04.ogg"
+#define AUDIO_FILE_BG_MUSIC    "./res/audio/music_zapsplat_game_music_action_retro_8_bit_repeating_016.ogg"
+#define AUDIO_FILE_EXPLOSION   "./res/audio/mixkit-war-explosions-2773.ogg"
+#define AUDIO_FILE_LOSE_GAME   "./res/audio/RetroNegativeMelody02.ogg"
+#define AUDIO_FILE_WIN_GAME    "./res/audio/mixkit-game-level-completed-2059.ogg"
+#define AUDIO_FILE_PLAYER_DIE  "./res/audio/RetronegativeShort23.ogg"
+#define AUDIO_FILE_WIN_LEVEL   "./res/audio/RetroBlopStereoUP04.ogg"
+#define AUDIO_FILE_ROSWELL_IMPACT "./res/audio/DeathFlash.ogg"
+#define AUDIO_FILE_UFO_SPAWNED "./res/audio/Retro-PowerUP-StereoUP-05.ogg"
+#define AUDIO_FILE_ROSWELL_SPAWNED "./res/audio/Retro-Musicaly-03-nananana.ogg"
 
 #include <iostream>
 #include <fstream>
@@ -79,6 +82,9 @@ namespace IDs {
   int SID_AUDIO_WIN_GAME;
   int SID_AUDIO_PLAYER_DIE;
   int SID_AUDIO_WIN_LEVEL;
+  int SID_AUDIO_ROSWELL_IMPACT;
+  int SID_AUDIO_UFO_SPAWNED;
+  int SID_AUDIO_ROSWELL_SPAWNED;
 };
 
 namespace Res {
@@ -421,7 +427,7 @@ namespace Res {
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * SIMUL_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * MAX_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
     // model matrix
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(0));
@@ -578,7 +584,7 @@ namespace Res {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(ExplosionInstanceData) * SIMUL_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(ExplosionInstanceData) * MAX_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
     // model matrix
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(0));
@@ -766,12 +772,15 @@ namespace Res {
 
   void ResourceManager::initAudio(AudioDevice audioDevice)
   {
-    IDs::SID_AUDIO_BG_MUSIC   = fnv1a(AUDIO_FILE_BG_MUSIC);
-    IDs::SID_AUDIO_EXPLOSION  = fnv1a(AUDIO_FILE_EXPLOSION);
-    IDs::SID_AUDIO_LOSE_GAME  = fnv1a(AUDIO_FILE_LOSE_GAME);
-    IDs::SID_AUDIO_WIN_GAME   = fnv1a(AUDIO_FILE_WIN_GAME);
-    IDs::SID_AUDIO_PLAYER_DIE = fnv1a(AUDIO_FILE_PLAYER_DIE);
-    IDs::SID_AUDIO_WIN_LEVEL  = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    IDs::SID_AUDIO_BG_MUSIC    = fnv1a(AUDIO_FILE_BG_MUSIC);
+    IDs::SID_AUDIO_EXPLOSION   = fnv1a(AUDIO_FILE_EXPLOSION);
+    IDs::SID_AUDIO_LOSE_GAME   = fnv1a(AUDIO_FILE_LOSE_GAME);
+    IDs::SID_AUDIO_WIN_GAME    = fnv1a(AUDIO_FILE_WIN_GAME);
+    IDs::SID_AUDIO_PLAYER_DIE  = fnv1a(AUDIO_FILE_PLAYER_DIE);
+    IDs::SID_AUDIO_WIN_LEVEL   = fnv1a(AUDIO_FILE_WIN_LEVEL);
+    IDs::SID_AUDIO_ROSWELL_IMPACT = fnv1a(AUDIO_FILE_ROSWELL_IMPACT);
+    IDs::SID_AUDIO_UFO_SPAWNED = fnv1a(AUDIO_FILE_UFO_SPAWNED);
+    IDs::SID_AUDIO_ROSWELL_SPAWNED = fnv1a(AUDIO_FILE_ROSWELL_SPAWNED);
     Game::initAudioSystem(audioDevice);
     m_audioTracks[IDs::SID_AUDIO_BG_MUSIC]   = Game::openAudioFile(AUDIO_FILE_BG_MUSIC,   AudioType::MUSIC);
     m_audioTracks[IDs::SID_AUDIO_EXPLOSION]  = Game::openAudioFile(AUDIO_FILE_EXPLOSION,  AudioType::EFFECT);
@@ -779,5 +788,8 @@ namespace Res {
     m_audioTracks[IDs::SID_AUDIO_WIN_GAME]   = Game::openAudioFile(AUDIO_FILE_WIN_GAME,   AudioType::EFFECT);
     m_audioTracks[IDs::SID_AUDIO_PLAYER_DIE] = Game::openAudioFile(AUDIO_FILE_PLAYER_DIE, AudioType::EFFECT);
     m_audioTracks[IDs::SID_AUDIO_WIN_LEVEL]  = Game::openAudioFile(AUDIO_FILE_WIN_LEVEL,  AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_ROSWELL_IMPACT] = Game::openAudioFile(AUDIO_FILE_ROSWELL_IMPACT, AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_UFO_SPAWNED] = Game::openAudioFile(AUDIO_FILE_UFO_SPAWNED, AudioType::EFFECT);
+    m_audioTracks[IDs::SID_AUDIO_ROSWELL_SPAWNED] = Game::openAudioFile(AUDIO_FILE_ROSWELL_SPAWNED, AudioType::EFFECT);
   }
 };

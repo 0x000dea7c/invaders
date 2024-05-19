@@ -54,16 +54,13 @@
   you also need to fix weird intersection tests when the ship is at the very bottom, somehow now works?
 * DONE do you really need to decrease --i; when you remove missiles and enemies?
 * DONE fix bug with scoreboard, all of sudden and rQ appears??? this doesn't happen always
-
 * DONE Fix audio: sometimes it doesn't play, wonder why
   allocate more channels, for now it works, if that fails, prioritise songs
-* TODO add new crashed UFO that goes diagonally down and if it touches the player it both die
-* TODO add alien w/ some explosive attached to it that when you destroy it, it clears the whole level
- it spawn every now and then
-* TODO Improve visuals!!!!!!!!!!!!!!!!! (idk not creative), background sucks, maybe another explosion tex?
-  - animations?
-  - new song for when an ufo appears and is destroyed
-  - bg very slowly moves, not many stars, add planets?
-* TODO clean todos and run static analyzer + iwyu
-* TODO padding issues everywhere, sure of it! need to fix
+* DONE add new crashed UFO that goes diagonally down and if it touches the player it both die
+* DONE play audio when ufo and roswell appears
+* TODO rotate roswell to make it look crashed?
+* DONE Change initial game screen image
+* TODO maybe another explosion tex?
+* TODO clean some todos and run static analyzer + iwyu
+* TODO padding issues everywhere, sure of it! need to fix, but how? why is that even a problem? investigate.-....
 * TODO Code it on windows, too, to prove the portability point

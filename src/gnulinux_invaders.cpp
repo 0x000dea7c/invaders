@@ -69,6 +69,7 @@ PFNGLDELETEPROGRAMPROC glDeleteProgram;
 PFNGLUNIFORM1FPROC glUniform1f;
 PFNGLUNIFORM3FPROC glUniform3f;
 PFNGLUNIFORM4FPROC glUniform4f;
+PFNGLPOLYGONMODEPROC myGlPolygonMode;
 
 namespace Game {
   void initOpenGLfptrs()
@@ -106,6 +107,7 @@ namespace Game {
     glUniform1f = (PFNGLUNIFORM1FPROC)getGLProcAddress("glUniform1f");
     glUniform3f = (PFNGLUNIFORM3FPROC)getGLProcAddress("glUniform3f");
     glUniform4f = (PFNGLUNIFORM4FPROC)getGLProcAddress("glUniform4f");
+    myGlPolygonMode = (PFNGLPOLYGONMODEPROC)getGLProcAddress("glPolygonMode");
   }
 
   TexInfo loadTexFromFile(const LoadTexFromFileArgs& args)
@@ -421,9 +423,7 @@ int main()
                                 InputOutput, visualInfo->visual, CWColormap | CWEventMask, &setWindowAttrs);
   XStoreName(display, window, WINDOW_NAME_GNU_LINUX);
   XMapWindow(display, window);
-  // disable resizing because don't know how to handle game units correctly yet, which
-  // means everything will use pixels. That being the case, if resizing is enabled, it
-  // could mess things up
+  // disable resizing
   XSizeHints hints;
   hints.flags = PMinSize | PMaxSize;
   hints.min_width = hints.max_width = WINDOW_WIDTH;
