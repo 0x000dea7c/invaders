@@ -8,7 +8,7 @@
 # things differently
 #
 all:
-	g++ -fno-builtin -O2 -fno-exceptions -fno-rtti -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -lSDL2 -lSDL2_mixer -o invaders
+	g++ -DGNULINUX -fno-builtin -O2 -fno-exceptions -fno-rtti -Wall -Wextra -Iinc -I/usr/include/freetype2 src/gnulinux_invaders.cpp -lX11 -lGL -lfreetype -lSDL2 -lSDL2_mixer -o invaders
 
 clean:
 	rm invaders

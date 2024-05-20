@@ -32,6 +32,33 @@ Need to improve on themes like:
 - entities attrs defined in text files so you don't need to recompile the game (although it takes 3s to compile 10k lines atm, could be reduced)
 
 Note 2: of course this is bloated because few months ago was writing hello world programs in C++
+Note 3: won't be updating this code anymore, the plan is to continue with 3D and keep improving.
+Note 4: please don't take this codebase as a reference because it's not the best (to say the least).
+
+# Instructions
+
+The game doesn't have an end. It's about how many points you can get before you die 3 times.
+
+When you die, your scoreboard gets saved in a file called "scoreboard.dat", which holds the best 5 scores you got overall.
+
+You can move with arrow keys and shoot with spacebar (you can hold it and fire forever).
+
+There are different types of aliens, each one gives different amount of points:
+
+- Yellow: 50
+- Beige: 100
+- Green: 100
+- Pink: 200
+- Blue: 200
+- UFO: 600
+- Crashed UFO (called ROSWELL in code): 800
+
+You can look them up at invaders_sim.cpp -> SimulationManager::increasePlayerPoints.
+
+Some aliens fire more frequently than others.
+UFO doesn't fire at all, just crosses the screen.
+Crashed UFO doesn't fire but if it touches you it explodes and kills you.
+Levels are randomly generated every time they're loaded.
 
 # Compilation
 
@@ -58,6 +85,8 @@ Run: `make run`
 Open Visual Studio and play the run button, I guess.
 
 # Remove executable
+
+## GNU/Linux
 
 Run: `make clean`
 
@@ -118,9 +147,12 @@ Thank you for your generosity.
 
 ## Compiling and running natively on GNU/Linux
 
+The game runs also at 120fps like in Windows but in the recording it feels a bit laggy because the computer that I run GNU/Linux on doesn't have a videocard and OBS consumes too much CPU because of it.
 
+Don't know why it took to compile so much the time the video was recorded but it was around ~2s before, dunno.
+
+https://youtu.be/ZhnPpV8Elp8
 
 ## Compiling and running natively on Windows
-
 
 https://www.youtube.com/watch?v=uxmYomtnjzk
