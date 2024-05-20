@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef GNULINUX
+
 #include <GL/gl.h>
 #include <GL/glx.h>
 
@@ -48,3 +50,5 @@ inline void* getGLProcAddress(const char* name)
 {
   return reinterpret_cast<void*>(glXGetProcAddress((const GLubyte*)name));
 }
+
+#endif

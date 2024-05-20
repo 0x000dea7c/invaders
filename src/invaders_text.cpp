@@ -87,7 +87,7 @@ namespace Renderer {
     m_resourceManager.setUniformVec4(m_textShader->m_id, "textColour", colour);
     glBindVertexArray(m_textShader->m_VAO);
     for(auto c = text.cbegin(); c != text.cend(); ++c) {
-      const auto ch = m_characters.at(*c);
+      const Character& ch = m_characters.at(*c);
       const auto w  = static_cast<float>(ch.m_sizeX) * scale;
       const auto h  = static_cast<float>(ch.m_sizeY) * scale;
       auto xPos     = x + ch.m_bearingX * scale;

@@ -1,3 +1,8 @@
+win32_invaders/freetype-2.13.2
+win32_invaders/SDL2_mixer-2.8.0
+win32_invaders/SDL2-2.30.3
+win32_invaders/x64
+win32_invaders/.vs
 TAGS
 invaders
 .gdb_history
@@ -6,3 +11,4 @@ perf.data.old
 .cache
 compile_commands.json
 *~
+scoreboard.dat

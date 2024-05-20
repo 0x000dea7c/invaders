@@ -17,7 +17,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <iostream>
-#include <thread>
 #include <fstream>
 #include <iomanip>
 #include <sstream>

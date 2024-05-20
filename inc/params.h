@@ -1,6 +1,7 @@
 #pragma once
 
 #define WINDOW_NAME_GNU_LINUX "X11 Invaders!"
+#define WINDOW_NAME_WIN32 "Windows Invaders!"
 
 constexpr unsigned int WINDOW_WIDTH{ 1280 };
 constexpr unsigned int WINDOW_HEIGHT{ 960 };

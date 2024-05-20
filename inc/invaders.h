@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <array>
+#include <vector>
 
 namespace Game {
   //

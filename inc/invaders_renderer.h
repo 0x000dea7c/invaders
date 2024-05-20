@@ -26,11 +26,11 @@ namespace Renderer {
 
   class RenderArgs final {
   public:
-    unsigned long aliensToDraw;
+    unsigned long long aliensToDraw;
     unsigned int playerLivesToDraw;
-    unsigned long explosionsToDraw;
-    unsigned long playerMissilesToDraw;
-    unsigned long alienMissilesToDraw;
+    unsigned long long explosionsToDraw;
+    unsigned long long playerMissilesToDraw;
+    unsigned long long alienMissilesToDraw;
     unsigned long playersToDraw;
     unsigned int playerPoints;
   };

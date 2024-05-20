@@ -43,7 +43,11 @@ Run: `make`
 
 ## Windows
 
-tbd
+You need Visual Studio Code and "run" (or whatever is called) the solution win32_invaders.sln under win32_invaders.
+
+Process is a bit complex because you need to setup Visual Studio to grab SDL2, SDL2_mixer, Freetype and OpenGL deps (linker, include, sources), but if you're using Visual Studio, you probably know how to do it.
+
+Also, you need to add as include directories the dir ./invaders/inc and as source directories ./invaders/src.
 
 # Play
 
@@ -53,7 +57,7 @@ Run: `make run`
 
 ## Windows
 
-tbd
+Open Visual Studio and play the run button, I guess.
 
 # Remove executable
 
@@ -61,7 +65,7 @@ Run: `make clean`
 
 ## Windows
 
-tbd
+Remove the directory win32_invaders/x64 that Visual Studio creates when the game is compiled.
 
 # External dependencies
 
@@ -70,13 +74,24 @@ tbd
 The idea was to not use any, but don't have much time left (life stuff) for audio, text and image processing.
 
 - X11 included in most gnulinux distros
-- SDL_mixer & SDL: need to install this separately
+- SDL2_mixer & SDL2: need to install this separately
 - Freetype (freetype2): probably need to install this separately
 - libvorbis: probably need to install this separately
 
 ## WINDOWS
 
-tbd
+You need:
+
+- Visual Studio.
+- SDL2 & SDL2_mixer: if you're on Windows you probably know how to integrate them with Visual Studio.
+- Freetype: same thing as previous point.
+- glad: it's already included in the win32_invaders directory.
+
+NOTE: won't be uploading SDL2, SDL2_mixer libs and source files in the repo because then size will grow considerably. You're on your own here.
+
+Couldn't be bothered with win32 API for creating the Window at the end because had a hard time finding a good tutorial and my time is running out.
+
+Same thing with DSound.
 
 # Art
 
@@ -100,3 +115,12 @@ Thank you for your generosity.
 - etc
 
 Thank you for your generosity.
+
+# Demo
+
+## Compiling and running natively on GNU/Linux
+
+
+
+## Compiling and running natively on Windows
+

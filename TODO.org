@@ -66,4 +66,5 @@
   yeah can't even install iwyu...
 * DONE padding issues everywhere, sure of it! need to fix, but how? why is that even a problem? investigate...
   read about optimisation and how opengl reads data, etc etc, next game
-* TODO Code it on windows, too, to prove the portability point
+* DONE Code it on windows, too, to prove the portability point
+* TODO Modify makefile to add GNULINUX for opengl window ptrs
