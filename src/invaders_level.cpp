@@ -40,7 +40,7 @@ namespace Game {
           .y = GAME_HEIGHT_UNITS - 15.0f - i * kYspacing,
           .z = 0.0f
         };
-        m_enemyManager.spawnAlien(pos, alienType);
+        m_enemyManager.spawnAlien(pos, alienType, v2i{ -1, -1 });
       }
     }
   }

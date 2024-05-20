@@ -28,8 +28,8 @@ namespace Game {
     Math::v2 m_dims;            // needed for atlas query
     Math::v2 m_size;
     Math::v2 m_vel;
-    Math::v2i m_idx;
-    Math::v2i m_dir;
+    Math::v2i m_idx;            // needed for atlas query
+    Math::v2i m_dir;            // movement
     float m_minX;
     float m_maxX;
     float m_initX;
@@ -51,8 +51,8 @@ namespace Game {
     void close();
     void update(const float delta);
     inline auto numAliveAliens() const { return m_aliens.size(); }
-    void spawnAlien(const Math::v3& pos, const AlienType type);
     void reset();
+    void spawnAlien(const Math::v3& pos, const AlienType type, const Math::v2i& dir);
   private:
     void destroyAlien(Alien* a);
     Math::v2 getAlienSize(const AlienType type)    const;

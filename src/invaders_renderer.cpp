@@ -162,8 +162,13 @@ namespace Renderer {
 
   void RendererManager::renderStart()
   {
+    static float alpha = 0.0f;
     glActiveTexture(GL_TEXTURE0);
     m_resourceManager.useShaderProgram(m_basicShader->m_id);
+    if(alpha < 1.0f) {
+      alpha += 0.01f;
+    }
+    m_resourceManager.setUniformFloat(m_basicShader->m_id, "alpha", alpha);
     glBindVertexArray(m_basicShader->m_VAO);
     glBindTexture(GL_TEXTURE_2D, m_invadersTexture->m_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);

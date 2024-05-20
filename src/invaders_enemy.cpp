@@ -121,9 +121,6 @@ namespace Game {
 	    .y = worldToPixels(m_aliens[i].m_pos.y),
 	    .z = 0.0f
 	  });
-        if(m_aliens[i].m_type == AlienType::ROSWELL) {
-          m_aliensInstaceData[i].m_model = rotate(m_aliensInstaceData[i].m_model, 90.0f, v3i{0, 1, 0});
-        }
 	// needed to grab the texture from the atlas...
 	m_aliensInstanceData[i].m_vertexData = {{
  	    // bottom left
@@ -167,7 +164,7 @@ namespace Game {
                     m_aliensInstanceData.data());
   }
 
-  void EnemyManager::spawnAlien(const v3& pos, const AlienType type)
+  void EnemyManager::spawnAlien(const v3& pos, const AlienType type, const v2i& dir)
   {
     const auto alienSize = getAlienSize(type);
     m_aliens.emplace_back(Alien{
@@ -177,7 +174,7 @@ namespace Game {
 		       pixelsToWorld(alienSize.y * 0.3f) },
       .m_vel       = getAlienVel(type),
       .m_idx       = { getAtlasIdx(type), 0 },
-      .m_dir       = { -1, -1 },
+      .m_dir       = dir,
       .m_minX      = pos.x - 15.0f,
       .m_maxX      = pos.x + 15.0f,
       .m_initX     = pos.x,
@@ -321,11 +318,17 @@ namespace Game {
 
   void EnemyManager::spawnUFO()
   {
-    spawnAlien(v3{ 0.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::UFO);
+    spawnAlien(v3{ 0.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::UFO, v2i{ -1, -1 });
   }
 
   void EnemyManager::spawnRoswell()
   {
-    spawnAlien(v3{ GAME_WIDTH_UNITS - 5.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::ROSWELL);
+    static bool left{ false };
+    if(left){
+      spawnAlien(v3{ 0.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::ROSWELL, v2i{ 1, -1 });
+    } else {
+      spawnAlien(v3{ GAME_WIDTH_UNITS - 5.0f, GAME_HEIGHT_UNITS - 5.0f, 0.0f }, AlienType::ROSWELL, v2i{ -1, -1 });
+    }
+    left = !left;
   }
 };

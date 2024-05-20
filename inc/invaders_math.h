@@ -271,36 +271,4 @@ namespace Math {
     return v * v;
   }
 
-  void rotate(m4& m, const float angleDegrees, const v3i& rotation)
-  {
-    // convert to radians first
-    const auto radians = angleDegrees * (3.14159265358979323846f / 180.0f);
-    if(rotation.x == 1) {
-      m4 r{
-        1.0f, 0.0f,               0.0f,               0.0f,
-        0.0f, std::cos(radians), -std::sin(radians),  0.0f,
-        0.0f, std::sin(radians),  std::cos(radians),  0.0f,
-        0.0f, 0.0f,               0.0f,               1.0f
-      };
-      m *= r;
-    }
-    if(rotation.y == 1) {
-      m4 r{
-        std::cos(radians),  0.0f, std::sin(radians), 0.0f,
-        0.0f,               1.0f, 0.0f,              0.0f,
-        -std::sin(radians), 0.0f, std::cos(radians), 0.0f,
-        0.0f,               0.0f, 0.0f,              1.0f
-      };
-      m *= r;
-    }
-    if(rotation.z == 1) {
-      m4 r{
-        std::cos(radians), -std::sin(radians), 0.0f, 0.0f,
-        std::sin(radians),  std::cos(radians), 0.0f, 0.0f,
-        0.0f,               0.0f,              1.0f, 0.0f,
-        0.0f,               0.0f,              0.0f, 1.0f
-      };
-      m *= r;
-    }
-  }
 };
