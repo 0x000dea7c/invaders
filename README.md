@@ -31,8 +31,10 @@ Need to improve on themes like:
 - inter text
 - entities attrs defined in text files so you don't need to recompile the game (although it takes 3s to compile 10k lines atm, could be reduced)
 
-Note 2: of course this is bloated because few months ago was writing hello world programs in C++
+Note 2: of course this is bloated because few months ago was writing hello world programs in C++.
+
 Note 3: won't be updating this code anymore, the plan is to continue with 3D and keep improving.
+
 Note 4: please don't take this codebase as a reference because it's not the best (to say the least).
 
 # Instructions
