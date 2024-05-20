@@ -121,6 +121,9 @@ namespace Game {
 	    .y = worldToPixels(m_aliens[i].m_pos.y),
 	    .z = 0.0f
 	  });
+        if(m_aliens[i].m_type == AlienType::ROSWELL) {
+          m_aliensInstaceData[i].m_model = rotate(m_aliensInstaceData[i].m_model, 90.0f, v3i{0, 1, 0});
+        }
 	// needed to grab the texture from the atlas...
 	m_aliensInstanceData[i].m_vertexData = {{
  	    // bottom left
