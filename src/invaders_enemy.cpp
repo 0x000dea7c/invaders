@@ -68,7 +68,7 @@ namespace Game {
         } else {
           const auto nearbyEnts = m_gridManager.getNearby(m_aliens[i].m_pos, EntityType::PLAYER);
           for(const auto& ent : nearbyEnts) {
-            Player* p = (Player*)ent.data;
+            Player* p = reinterpret_cast<Player*>(ent.data);
             const auto alienAABB = Phys::AABB{
               .min = v2{ m_aliens[i].m_pos.x - m_aliens[i].m_size.x * 0.5f,
                          m_aliens[i].m_pos.y - m_aliens[i].m_size.y * 0.5f },

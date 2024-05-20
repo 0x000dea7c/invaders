@@ -62,6 +62,7 @@ namespace Game {
   void decreaseVolume();
   float getNormalizedVolumeValue();
   void closeAudioSystem();
+  void closeAudioFile(AudioData* data);
 
   class ScoreEntry final {
   public:

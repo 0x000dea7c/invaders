@@ -1,4 +1,8 @@
 #include "common.h"
+#include "event.h"
+#include "invaders.h"
+#include "invaders_opengl.h"
+#include "invaders_timer.h"
 #include "invaders_grid.h"
 #include "invaders_input.h"
 #include "invaders_level.h"
@@ -6,6 +10,10 @@
 #include "invaders_missile.h"
 #include "invaders_player.h"
 #include "invaders_text.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <iostream>
 #include <cstdlib>
 #include <iostream>
@@ -15,18 +23,16 @@
 #include <sstream>
 #include <string.h>
 
+#include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/keysym.h>
+
+#include <GL/glx.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-#include "invaders.h"
-#include "invaders_opengl.h"
-#include "invaders_timer.h"
-#include "event.h"
 
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
@@ -97,9 +103,9 @@ namespace Game {
     glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)getGLProcAddress("glGetProgramInfoLog");
     glUseProgram = (PFNGLUSEPROGRAMPROC)getGLProcAddress("glUseProgram");
     glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)getGLProcAddress("glGenerateMipmap");
-    glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC) glXGetProcAddress((const GLubyte*)"glXSwapIntervalEXT");
-    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) glXGetProcAddress((const GLubyte*)"glDeleteVertexArrays");
-    glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) glXGetProcAddress((const GLubyte*)"glUniformMatrix4fv");
+    glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC) glXGetProcAddress(reinterpret_cast<const GLubyte*>("glXSwapIntervalEXT"));
+    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC) glXGetProcAddress(reinterpret_cast<const GLubyte*>("glDeleteVertexArrays"));
+    glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) glXGetProcAddress(reinterpret_cast<const GLubyte*>("glUniformMatrix4fv"));
     glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)getGLProcAddress("glDrawArraysInstanced");
     glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)getGLProcAddress("glVertexAttribDivisor");
     glBufferSubData = (PFNGLBUFFERSUBDATAPROC)getGLProcAddress("glBufferSubData");
@@ -254,12 +260,21 @@ namespace Game {
     SDL_Quit();
   }
 
+  void closeAudioFile(AudioData* data)
+  {
+    if(data->m_type == AudioType::MUSIC) {
+      Mix_FreeMusic(reinterpret_cast<Mix_Music*>(data->m_data));
+    } else {
+      Mix_FreeChunk(reinterpret_cast<Mix_Chunk*>(data->m_data));
+    }
+  }
+
   // the file is always sorted and always contains max 5 lines
   bool saveAndGetScores(const unsigned int score, std::array<ScoreEntry, 5>& scores)
   {
     // @YOLO: can definitely be improved in many ways
-    const auto time = std::chrono::system_clock::now(); // boring bit
-    const auto timeT = std::chrono::system_clock::to_time_t(time); // boring bit
+    const auto t = std::chrono::system_clock::now(); // boring bit
+    const auto timeT = std::chrono::system_clock::to_time_t(t); // boring bit
     const auto localTime = *std::localtime(&timeT); // boring bit
     std::stringstream ss;	// cut this out
     ss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S"); // cut this out
@@ -353,7 +368,7 @@ int main()
   // have more deps just to do that (alsa or pulseaudio), not worth imho
   if(SDL_Init(SDL_INIT_AUDIO) < 0) {
     std::cerr << __FUNCTION__ << ": couldn't initialise SDL: " << SDL_GetError() << '\n';
-    return false;
+    return EXIT_FAILURE;
   }
   // ---------------------------------------------
   // X11 specific code for init a window with OpenGL.
@@ -421,6 +436,7 @@ int main()
   Window window = XCreateWindow(display, root, 0, 0,
                                 WINDOW_WIDTH, WINDOW_HEIGHT, 0, visualInfo->depth,
                                 InputOutput, visualInfo->visual, CWColormap | CWEventMask, &setWindowAttrs);
+  XFree(visualInfo);
   XStoreName(display, window, WINDOW_NAME_GNU_LINUX);
   XMapWindow(display, window);
   // disable resizing

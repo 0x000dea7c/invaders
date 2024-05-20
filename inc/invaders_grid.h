@@ -15,7 +15,7 @@ namespace Game {
 
   class EntityGridData final {
   public:
-    const void* data;
+    void* data;
     EntityType type;
   };
 
@@ -26,7 +26,7 @@ namespace Game {
 		Ev::EventManager& eventManager);
     ~GridManager();
     void beginFrame();
-    void update(const Math::v3& pos, const void* ent, const EntityType type);
+    void update(const Math::v3& pos, void* ent, const EntityType type);
     std::vector<EntityGridData> getNearby(const Math::v3& pos, const EntityType wanted);
   private:
     inline auto getId(const Math::v3& pos) const noexcept

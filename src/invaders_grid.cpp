@@ -54,7 +54,7 @@ namespace Game {
     }
   }
 
-  void GridManager::update(const v3& pos, const void* ent, const EntityType type)
+  void GridManager::update(const v3& pos, void* ent, const EntityType type)
   {
     const auto id = getId(pos);
     m_grid[id].emplace_back(EntityGridData{ ent, type });

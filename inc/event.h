@@ -54,7 +54,7 @@ namespace Ev {
     inline void post(const Event event)
     {
       auto& listeners = m_listeners[event.getType()];
-      for(auto& f : listeners) {
+      for(const auto& f : listeners) {
         f(event);
       }
     }

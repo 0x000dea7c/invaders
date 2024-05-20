@@ -57,7 +57,7 @@ namespace Res {
   // this class is omoii
   class ResourceManager final {
   public:
-    ResourceManager(Ev::EventManager& eventManager);
+    explicit ResourceManager(Ev::EventManager& eventManager);
     ~ResourceManager();
     inline auto getTex(const int sid) const noexcept
     {

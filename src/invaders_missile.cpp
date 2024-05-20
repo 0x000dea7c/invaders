@@ -47,7 +47,7 @@ namespace Game {
         };
         const auto nearbyEnts = m_gridManager.getNearby(m_playerMissiles[i].m_pos, EntityType::ALIEN);
         for(const auto& e: nearbyEnts) {
-          auto* a = (Alien*)e.data;
+          auto* a = reinterpret_cast<Alien*>(e.data);
           const auto alienAABB = Phys::AABB{
             .min = v2{ a->m_pos.x - a->m_size.x * 0.5f, a->m_pos.y - a->m_size.y * 0.5f },
             .max = v2{ a->m_pos.x + a->m_size.x * 0.5f, a->m_pos.y + a->m_size.y * 0.5f }
@@ -110,7 +110,7 @@ namespace Game {
         };
         const auto nearbyEnts = m_gridManager.getNearby(m_alienMissiles[i].m_pos, EntityType::PLAYER);
         for(const auto& e: nearbyEnts) {
-          auto* p = (Player*)e.data;
+          auto* p = reinterpret_cast<Player*>(e.data);
           const auto playerAABB = Phys::AABB{
             .min = v2{ p->m_pos.x - p->m_size.x, p->m_pos.y - p->m_size.y },
             .max = v2{ p->m_pos.x + p->m_size.x, p->m_pos.y + p->m_size.y }

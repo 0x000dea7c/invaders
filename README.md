@@ -69,8 +69,10 @@ tbd
 
 The idea was to not use any, but don't have much time left (life stuff) for audio, text and image processing.
 
-- SDL_mixer & SDL: you need to install this separately
-- Freetype (freetype2): you probably need to install this separately, too
+- X11 included in most gnulinux distros
+- SDL_mixer & SDL: need to install this separately
+- Freetype (freetype2): probably need to install this separately
+- libvorbis: probably need to install this separately
 
 ## WINDOWS
 

@@ -6,7 +6,7 @@ namespace Game {
 
   class LevelManager final {
   public:
-    LevelManager(EnemyManager& enemyManager);
+    explicit LevelManager(EnemyManager& enemyManager);
     ~LevelManager();
     void changeLevel();
     void reset();

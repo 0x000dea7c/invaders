@@ -61,7 +61,7 @@
 * DONE rotate roswell to make it look crashed? need to figure how rotation works (w/ quaternions and stuff, later game)
 * DONE now that you're doing rotations... can't you use matrices to hold the position? no, you want them separated
 * DONE Change initial game screen image -> added "transition" effect
-* TODO make roswell appear from both tl and tr
+* DONE make roswell appear from both tl and tr
 * TODO clean some todos and run static analyzer + iwyu
 * TODO padding issues everywhere, sure of it! need to fix, but how? why is that even a problem? investigate...
   read about optimisation and how opengl reads data, etc etc, next game

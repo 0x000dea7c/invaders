@@ -280,6 +280,9 @@ namespace Res {
     for(auto& s : m_shaders) {
       glDeleteProgram(s.second->m_id);
     }
+    for(auto& s : m_audioTracks) {
+      closeAudioFile(s.second.get());
+    }
     closeAudioSystem();
   }
 
@@ -406,7 +409,7 @@ namespace Res {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(0));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     useShaderProgram(id);
@@ -430,35 +433,35 @@ namespace Res {
     glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * MAX_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
     // model matrix
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(0));
     glVertexAttribDivisor(0, 1);  // one value per instance
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4)));
     glVertexAttribDivisor(1, 1);  // one value per instance
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 2));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 2));
     glVertexAttribDivisor(2, 1);  // one value per instance
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 3));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 3));
     glVertexAttribDivisor(3, 1);  // one value per instance
     // texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4)));
     glVertexAttribDivisor(4, 1);
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4)));
     glVertexAttribDivisor(5, 1);
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 2));
     glVertexAttribDivisor(6, 1);
     glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 3));
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 3));
     glVertexAttribDivisor(7, 1);
     glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 4));
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 4));
     glVertexAttribDivisor(8, 1);
     glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 5));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 5));
     glVertexAttribDivisor(9, 1);
     useShaderProgram(id);
     setUniformInt(id, "image", 0);
@@ -481,35 +484,35 @@ namespace Res {
     glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * 3, nullptr, GL_STATIC_DRAW);
     // model
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(0));
     glVertexAttribDivisor(0, 1);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4)));
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 2));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 2));
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 3));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 3));
     glVertexAttribDivisor(3, 1);
     // quad pos and texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4)));
     glVertexAttribDivisor(4, 1);
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4)));
     glVertexAttribDivisor(5, 1);
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 2));
     glVertexAttribDivisor(6, 1);
     glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 3));
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 3));
     glVertexAttribDivisor(7, 1);
     glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 4));
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 4));
     glVertexAttribDivisor(8, 1);
     glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 5));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 5));
     glVertexAttribDivisor(9, 1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -534,35 +537,35 @@ namespace Res {
     glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData), nullptr, GL_STATIC_DRAW);
     // model
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(0));
     glVertexAttribDivisor(0, 1);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4)));
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 2));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 2));
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 3));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 3));
     glVertexAttribDivisor(3, 1);
     // quad pos and texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4)));
     glVertexAttribDivisor(4, 1);
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4)));
     glVertexAttribDivisor(5, 1);
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 2));
     glVertexAttribDivisor(6, 1);
     glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 3));
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 3));
     glVertexAttribDivisor(7, 1);
     glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 4));
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 4));
     glVertexAttribDivisor(8, 1);
     glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 5));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 5));
     glVertexAttribDivisor(9, 1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -587,39 +590,39 @@ namespace Res {
     glBufferData(GL_ARRAY_BUFFER, sizeof(ExplosionInstanceData) * MAX_ALIENS_ALIVE, nullptr, GL_DYNAMIC_DRAW);
     // model matrix
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(0));
     glVertexAttribDivisor(0, 1);  // one value per instance
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(v4)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(v4)));
     glVertexAttribDivisor(1, 1);  // one value per instance
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(v4) * 2));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(v4) * 2));
     glVertexAttribDivisor(2, 1);  // one value per instance
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(v4) * 3));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(v4) * 3));
     glVertexAttribDivisor(3, 1);  // one value per instance
     // quad pos and texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4)));
     glVertexAttribDivisor(4, 1);
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4)));
     glVertexAttribDivisor(5, 1);
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 2));
     glVertexAttribDivisor(6, 1);
     glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4) * 3));
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 3));
     glVertexAttribDivisor(7, 1);
     glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4) * 4));
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 4));
     glVertexAttribDivisor(8, 1);
     glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4) * 5));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 5));
     glVertexAttribDivisor(9, 1);
     // colour
     glEnableVertexAttribArray(10);
-    glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), (void*)(sizeof(m4) + sizeof(v4) * 6));
+    glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, sizeof(ExplosionInstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 6));
     glVertexAttribDivisor(10, 1);
     useShaderProgram(id);
     setUniformInt(id, "image", 0);
@@ -642,35 +645,35 @@ namespace Res {
     glBufferData(GL_ARRAY_BUFFER, sizeof(InstanceData) * SIMUL_MISSILES_ALIVE, nullptr, GL_DYNAMIC_DRAW);
     // model matrix
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(0));
     glVertexAttribDivisor(0, 1);  // one value per instance
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4)));
     glVertexAttribDivisor(1, 1);  // one value per instance
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 2));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 2));
     glVertexAttribDivisor(2, 1);  // one value per instance
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(v4) * 3));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(v4) * 3));
     glVertexAttribDivisor(3, 1);  // one value per instance
     // texture coords
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4)));
     glVertexAttribDivisor(4, 1);
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4)));
     glVertexAttribDivisor(5, 1);
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 2));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 2));
     glVertexAttribDivisor(6, 1);
     glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 3));
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 3));
     glVertexAttribDivisor(7, 1);
     glEnableVertexAttribArray(8);
-    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 4));
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 4));
     glVertexAttribDivisor(8, 1);
     glEnableVertexAttribArray(9);
-    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), (void*)(sizeof(m4) + sizeof(v4) * 5));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData), reinterpret_cast<void*>(sizeof(m4) + sizeof(v4) * 5));
     glVertexAttribDivisor(9, 1);
     useShaderProgram(id);
     setUniformInt(id, "image", 0);
@@ -716,7 +719,7 @@ namespace Res {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
     return Shader(id, VAO, VBO);
   }
 
@@ -739,7 +742,7 @@ namespace Res {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(0));
     useShaderProgram(id);
     setUniformInt(id, "image", 0);
     return Shader(id, VAO, VBO);

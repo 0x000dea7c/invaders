@@ -46,5 +46,5 @@ extern PFNGLPOLYGONMODEPROC myGlPolygonMode;
 
 inline void* getGLProcAddress(const char* name)
 {
-    return (void*)glXGetProcAddress((const GLubyte*)name);
+  return reinterpret_cast<void*>(glXGetProcAddress((const GLubyte*)name));
 }

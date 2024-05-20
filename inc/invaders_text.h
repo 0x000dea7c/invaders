@@ -4,6 +4,7 @@
 #include "invaders_resources.h"
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 
 namespace Renderer {
 
