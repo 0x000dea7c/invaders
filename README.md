@@ -2,8 +2,6 @@
 
 Second game in C++ and OpenGL with not too many dependencies
 
-WIP - WORK IN PROGRESS
-
 Wanted to create a game that:
 
 - compiled very easily (no need for convoluted build systems)
@@ -124,3 +122,5 @@ Thank you for your generosity.
 
 ## Compiling and running natively on Windows
 
+
+https://www.youtube.com/watch?v=uxmYomtnjzk
