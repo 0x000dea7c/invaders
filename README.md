@@ -33,6 +33,8 @@ Need to improve on themes like:
 - inter text
 - entities attrs defined in text files so you don't need to recompile the game (although it takes 3s to compile 10k lines atm, could be reduced)
 
+Note 2: of course this is bloated because few months ago was writing hello world programs in C++
+
 # Compilation
 
 ## GNU/Linux
@@ -88,10 +90,11 @@ Thank you for your generosity.
 
 ## Music and effects
 
+- https://opengameart.org/content/space-background
 - https://opengameart.org/content/big-explosion
 - https://mixkit.co/free-sound-effects/game/
 - https://kronbits.itch.io/freesfx
-- https://lunalucid.itch.io/free-creative-commons-bgm-collection?download.
 - https://www.zapsplat.com/sound-effect-category/game-music-and-loops/
+- etc
 
 Thank you for your generosity.

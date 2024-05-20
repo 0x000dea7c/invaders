@@ -25,7 +25,7 @@ namespace Game {
   class Alien final {
   public:
     Math::v3 m_pos;
-    Math::v2 m_dims;
+    Math::v2 m_dims;            // needed for atlas query
     Math::v2 m_size;
     Math::v2 m_vel;
     Math::v2i m_idx;

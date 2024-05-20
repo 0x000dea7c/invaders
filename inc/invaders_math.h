@@ -12,6 +12,13 @@ namespace Math {
     int y{ 0 };
   };
 
+  class v3i final {
+  public:
+    int x{ 0 };
+    int y{ 0 };
+    int z{ 0 };
+  };
+
   class v2 final {
   public:
     float x{ 0.f };
@@ -61,6 +68,64 @@ namespace Math {
     {
       if(this != &a) {
         std::copy(a.elements, a.elements + 16, elements);
+      }
+      return *this;
+    }
+    // ugly c++ stuff
+    friend m4 operator*(const m4& a, const m4& b);
+    m4& operator*=(const m4& a) {
+      *this = *this * a;
+      return *this;
+    }
+  };
+
+  m4 operator*(const m4& a, const m4& b)
+  {
+    m4 res{
+      0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f
+    };
+    for(int i = 0; i < 4; ++i) {
+      for(int j = 0; j < 4; ++j) {
+        auto sum = 0.0f;
+        for(int k = 0; k < 4; ++k) {
+          sum += a(i, k) * b(k, j);
+        }
+        res(i, j) = sum;
+      }
+    }
+    return res;
+  }
+
+  class m2 final {
+  public:
+    float elements[4];
+    m2(std::initializer_list<float> a)
+    {
+      std::copy(a.begin(), a.end(), elements);
+    }
+    m2(m2& a)
+    {
+      std::copy(a.elements, a.elements + 2, elements);
+    }
+    m2(const m2& a)
+    {
+      std::copy(a.elements, a.elements + 2, elements);
+    }
+    float& operator()(int row, int col)
+    {
+      return elements[col * 2 + row];
+    }
+    const float& operator()(int row, int col) const
+    {
+      return elements[col * 2 + row];
+    }
+    m2& operator=(const m2& a)
+    {
+      if(this != &a) {
+        std::copy(a.elements, a.elements + 4, elements);
       }
       return *this;
     }
@@ -204,5 +269,38 @@ namespace Math {
   inline float square(const float v)
   {
     return v * v;
+  }
+
+  void rotate(m4& m, const float angleDegrees, const v3i& rotation)
+  {
+    // convert to radians first
+    const auto radians = angleDegrees * (3.14159265358979323846f / 180.0f);
+    if(rotation.x == 1) {
+      m4 r{
+        1.0f, 0.0f,               0.0f,               0.0f,
+        0.0f, std::cos(radians), -std::sin(radians),  0.0f,
+        0.0f, std::sin(radians),  std::cos(radians),  0.0f,
+        0.0f, 0.0f,               0.0f,               1.0f
+      };
+      m *= r;
+    }
+    if(rotation.y == 1) {
+      m4 r{
+        std::cos(radians),  0.0f, std::sin(radians), 0.0f,
+        0.0f,               1.0f, 0.0f,              0.0f,
+        -std::sin(radians), 0.0f, std::cos(radians), 0.0f,
+        0.0f,               0.0f, 0.0f,              1.0f
+      };
+      m *= r;
+    }
+    if(rotation.z == 1) {
+      m4 r{
+        std::cos(radians), -std::sin(radians), 0.0f, 0.0f,
+        std::sin(radians),  std::cos(radians), 0.0f, 0.0f,
+        0.0f,               0.0f,              1.0f, 0.0f,
+        0.0f,               0.0f,              0.0f, 1.0f
+      };
+      m *= r;
+    }
   }
 };

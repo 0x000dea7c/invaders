@@ -59,6 +59,7 @@
 * DONE add new crashed UFO that goes diagonally down and if it touches the player it both die
 * DONE play audio when ufo and roswell appears
 * TODO rotate roswell to make it look crashed?
+* TODO now that you're doing rotations... can't you use matrices to hold the position?
 * DONE Change initial game screen image
 * TODO maybe another explosion tex?
 * TODO clean some todos and run static analyzer + iwyu
