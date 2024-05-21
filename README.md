@@ -62,6 +62,8 @@ UFO doesn't fire at all, just crosses the screen.
 Crashed UFO doesn't fire but if it touches you it explodes and kills you.
 Levels are randomly generated every time they're loaded.
 
+You can reset the scoreboard by deleting the scoreboard.dat file.
+
 # Compilation
 
 ## GNU/Linux
