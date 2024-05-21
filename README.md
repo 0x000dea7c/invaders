@@ -41,7 +41,7 @@ Note 4: please don't take this codebase as a reference because it's not the best
 
 The game doesn't have an end. It's about how many points you can get before you die 3 times.
 
-When you die, your scoreboard gets saved in a file called "scoreboard.dat", which holds the best 5 scores you got overall.
+When you die, your scoreboard gets saved in a file called "scoreboard.dat", which holds the best 5 scores you got so far.
 
 You can move with arrow keys and shoot with spacebar (you can hold it and fire forever).
 
@@ -58,8 +58,11 @@ There are different types of aliens, each one gives different amount of points:
 You can look them up at invaders_sim.cpp -> SimulationManager::increasePlayerPoints.
 
 Some aliens fire more frequently than others.
+
 UFO doesn't fire at all, just crosses the screen.
+
 Crashed UFO doesn't fire but if it touches you it explodes and kills you.
+
 Levels are randomly generated every time they're loaded.
 
 You can reset the scoreboard by deleting the scoreboard.dat file.
@@ -151,7 +154,7 @@ Thank you for your generosity.
 
 ## Compiling and running natively on GNU/Linux
 
-The game runs also at 120fps like in Windows but in the recording it feels a bit laggy because the computer that I run GNU/Linux on doesn't have a videocard and OBS consumes too much CPU because of it.
+The game runs also at 120fps like in Windows but in the recording it feels a bit laggy because the computer that I run GNU/Linux on doesn't have a separated video card and OBS consumes too much CPU because of it.
 
 Don't know why it took to compile so much the time the video was recorded but it was around ~2s before, dunno.
 
