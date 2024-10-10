@@ -149,17 +149,3 @@ Thank you for your generosity.
 - etc
 
 Thank you for your generosity.
-
-# Demo
-
-## Compiling and running natively on GNU/Linux
-
-The game runs also at 120fps like in Windows but in the recording it feels a bit laggy because the computer that I run GNU/Linux on doesn't have a separated video card and OBS consumes too much CPU because of it.
-
-Don't know why it took to compile so much the time the video was recorded but it was around ~2s before, dunno.
-
-https://youtu.be/ZhnPpV8Elp8
-
-## Compiling and running natively on Windows
-
-https://www.youtube.com/watch?v=uxmYomtnjzk
